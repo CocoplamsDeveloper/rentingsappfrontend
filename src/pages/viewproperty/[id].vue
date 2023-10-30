@@ -8,6 +8,7 @@
 -->
 
 <script setup>
+import { refreshUserLogin } from '@/common/reusing_functions'
 import PropertyBioPanel from '@/views/apps/property/view/PropertyBioPanel.vue'
 import PropertyTabAccount from '@/views/apps/property/view/PropertyTabAccount.vue'
 import PropertyTabBillingsPlans from '@/views/apps/property/view/PropertyTabBillingsPlans.vue'
@@ -49,6 +50,12 @@ const tabs = [
 ]
 
 const fetchProperty = item => {
+
+  if(!sessionStorage.getItem("accessToken")){
+    router.push('/login')
+
+    return 
+  }
   axios.get("http://localhost:8000/prop-app/property/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
@@ -58,6 +65,9 @@ const fetchProperty = item => {
     console.log(response)
     propertyData.value = response.data.property_data[0]
   }).catch( error => {
+    if(error.response.status === 401){
+      refreshUserLogin()
+    }
     console.log(error)
   })
 }

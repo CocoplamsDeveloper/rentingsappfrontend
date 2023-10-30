@@ -4,6 +4,8 @@
 <script setup>
 import { avatarText } from '@/@core/utils/formatters'
 import { integerValidator, requiredValidator } from '@/@core/utils/validators'
+import { refreshUserLogin } from '@/common/reusing_functions'
+
 import router from '@/router'
 
 // import AddNewPropertyDrawer from '@/views/apps/user/list/AddNewPropertyDrawer.vue'
@@ -103,6 +105,11 @@ const editedItemObj = ref({
 })
  
 const editPropertyItem = item => {
+  if(!sessionStorage.getItem("accessToken")){
+    router.push('/login')
+
+    return 
+  }
   axios.get("http://localhost:8000/prop-app/property/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
@@ -110,6 +117,10 @@ const editPropertyItem = item => {
     },
   }).then(response => {
     prefillPropertyEditForm(response.data.property_data[0])
+  }).catch(error => {
+    if(error.response.status === 401){
+      refreshUserLogin()
+    }
   })
 
   // editedIndex.value = userList.value.indexOf(item)
@@ -272,6 +283,9 @@ function getAllProperties(){
     console.log(response)
     fetchedPropertiesList.value = response.data.propertiesData
   }).catch(error => {
+    if(error.response.status === 401){
+      refreshUserLogin()
+    }
   })
 }
 
@@ -329,6 +343,9 @@ function updateProperty(property){
     propPageAlertSnackbar.value.message = error.response.data.message
     propPageAlertSnackbar.value.color = "error"
     propPageAlertSnackbar.value.show = true
+    if(error.response.status === 401){
+      refreshUserLogin()
+    }
   })
 }
 

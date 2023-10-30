@@ -1,4 +1,5 @@
 <script setup>
+import { refreshUserLogin } from '@/common/reusing_functions'
 import axios from '@axios'
 import {
   requiredValidator,
@@ -50,6 +51,13 @@ const closeNavigationDrawer = () => {
 const onUnitFormSubmit = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
+
+
+      if(!sessionStorage.getItem("accessToken")){
+        router.push('/login')
+
+        return 
+      }
       let sendData = {
         "userId": sessionStorage.getItem("userId"),
         "propertyId": unitProperty.value,
@@ -82,6 +90,9 @@ const onUnitFormSubmit = () => {
         unitDrawerAlert.value.message = error.response.data.message
         unitDrawerAlert.value.color = "error"
         unitDrawerAlert.value.show = true
+        if(error.response.status === 401){
+          refreshUserLogin()
+        }
       })
 
     }
@@ -114,7 +125,9 @@ function populatePropertiesList(){
     }
   }).catch(error => {
     console.log(error)
-    alert(error.response.data.message)
+    if(error.response.status === 401){
+      refreshUserLogin()
+    }
   })
 }
 

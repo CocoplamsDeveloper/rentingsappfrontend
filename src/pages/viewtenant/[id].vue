@@ -1,5 +1,6 @@
 
 <script setup>
+import { refreshUserLogin } from '@/common/reusing_functions'
 import TenantBioPanel from '@/views/apps/tenant/view/TenantBioPanel.vue'
 import TenantTabBillingsPlans from '@/views/apps/tenant/view/TenantTabBillingsPlans.vue'
 import TenantTabNotifications from '@/views/apps/tenant/view/TenantTabNotifications.vue'
@@ -41,6 +42,11 @@ const tabs = [
 
 
 const fetchTenant = item => {
+  if(!sessionStorage.getItem("accessToken")){
+    router.push('/login')
+
+    return 
+  }
   console.log(item)
   axios.get("http://localhost:8000/prop-app/tenant/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
@@ -52,6 +58,9 @@ const fetchTenant = item => {
     tenantData.value = response.data.tenantRecord
   }).catch( error => {
     console.log(error)
+    if(error.response.status === 401){
+      refreshUserLogin()
+    }
   })
 }
 

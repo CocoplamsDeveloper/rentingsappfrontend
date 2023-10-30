@@ -2,7 +2,7 @@
 import AppCombobox from '@/@core/components/app-form-elements/AppCombobox.vue'
 import { requiredValidator } from '@/@core/utils/validators'
 import { paginationMeta } from '@/@fake-db/utils'
-import populatePropertiesList from '@/common/reusing_functions'
+import { populatePropertiesList, refreshUserLogin } from '@/common/reusing_functions'
 import axios from '@axios'
 import { VDataTable } from 'vuetify/labs/VDataTable'
 
@@ -79,6 +79,12 @@ function getFloorUnits(){
     let sendData = {
       "userId": sessionStorage.getItem("userId"),
     }
+
+    if(!sessionStorage.getItem("accessToken")){
+      router.push('/login')
+
+      return 
+    }
     sendData['propertyId'] = selectedPropertyToAssign.value
     sendData['floor'] = selectedFloorToAssign.value
 
@@ -91,6 +97,9 @@ function getFloorUnits(){
       availableUnits.value = response.data.units
     }).catch(error => {
       console.log(error)
+      if(error.response.status){
+        refreshUserLogin()
+      }
     })
   }
 }
@@ -349,6 +358,9 @@ onMounted(() => {
     propertyList.value = response.data.propertiesData
   }).catch(error => {
     console.log(error)
+    if(error.response.status){
+      refreshUserLogin()
+    }
   }) 
 })
 </script>

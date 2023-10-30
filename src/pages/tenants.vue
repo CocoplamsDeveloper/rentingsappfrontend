@@ -1,5 +1,6 @@
 <script setup>
 import { avatarText } from '@/@core/utils/formatters'
+import { refreshUserLogin } from '@/common/reusing_functions'
 import router from '@/router'
 import CardStatisticsGeneratedLeads from '@/views/pages/cards/card-statistics/CardStatisticsGeneratedLeads.vue'
 import axios from '@axios'
@@ -129,6 +130,11 @@ const getTenantsData = () => {
   let queryData = {
     "userId": sessionStorage.getItem("userId"),
   }
+  if(!sessionStorage.getItem("accessToken")){
+    router.push('/login')
+
+    return 
+  }
   axios.get("http://localhost:8000/prop-app/details/tenants", {
     params: queryData,
     headers: {
@@ -140,6 +146,9 @@ const getTenantsData = () => {
 
   }).catch(error => {
     console.log(error)
+    if(error.response.status === 401){
+      refreshUserLogin()
+    }
   })
 }
 

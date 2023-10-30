@@ -56,6 +56,12 @@ const simpleStatisticsDemoCards = [
     change: '+25.2%',
   },
 ]
+
+onMounted(()=>{
+  if(!sessionStorage.getItem("accessToken")){
+    router.push('/login')
+  }
+})
 </script>
 
 <template>

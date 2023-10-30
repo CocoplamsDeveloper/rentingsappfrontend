@@ -1,5 +1,6 @@
 <script setup>
 import { requiredValidator } from '@/@core/utils/validators'
+import { refreshUserLogin } from '@/common/reusing_functions'
 import axios from '@axios'
 import avatar1 from '@images/avatars/avatar-14.png'
 
@@ -283,6 +284,12 @@ const createTenant = () => {
   tenantRefForm.value?.validate().then(({ valid }) => {
     if (valid) {
 
+      if(!sessionStorage.getItem("accessToken")){
+        router.push('/login')
+
+        return 
+      }
+
       let tenantData = {
         "userFirstname": tenantFirstName.value,
         "userLastname": tenantLastName.value,
@@ -322,6 +329,9 @@ const createTenant = () => {
         addTenantAlertSnackbar.value.message = error.response.data.message
         addTenantAlertSnackbar.value.color = 'error'
         addTenantAlertSnackbar.value.show = true
+        if(error.response.status === 401){
+          refreshUserLogin()
+        }
       }) 
 
 

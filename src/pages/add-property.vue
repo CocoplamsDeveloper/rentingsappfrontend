@@ -1,5 +1,6 @@
 <script setup>
 import { integerValidator, requiredValidator } from '@/@core/utils/validators'
+import { refreshUserLogin } from '@/common/reusing_functions'
 import axios from '@axios'
 
 const router = useRouter()
@@ -60,6 +61,12 @@ async function addPropertyFunc(){
         "propertyFloor": propertyFloors.value,
       }
 
+      if(!sessionStorage.getItem("accessToken")){
+        router.push('/login')
+
+        return 
+      }
+
       axios.post('http://127.0.0.1:8000/prop-app/add', propertywisedata, {
         headers: {
           'Authorization': sessionStorage.getItem("AccessToken"),  
@@ -77,7 +84,9 @@ async function addPropertyFunc(){
         alertSnackbar.value.message = error.response.data.message
         alertSnackbar.value.color = "error"
         alertSnackbar.value.show = true
-
+        if(error.response.status === 401){
+          refreshUserLogin()
+        }
       })
     }
     else{
@@ -120,7 +129,10 @@ async function getUserPropertiesList(){
     }
   }).catch(error => {
     console.log(error)
-    alert(error.response.data.message)
+    if(error.response.status === 401){
+      refreshUserLogin()
+    }
+
   })
 }
 
@@ -149,7 +161,11 @@ function addPropertyAdditionalDetails(){
 
   otherDetailsForm?.value.validate().then(({ valid: isValid }) => {
     if(isValid){
+      if(!sessionStorage.getItem("accessToken")){
+        router.push('/login')
 
+        return 
+      }
       const formData = new FormData()
       if(imageFile){
         formData.append('imageFile', imageFile)
@@ -178,6 +194,9 @@ function addPropertyAdditionalDetails(){
         alertSnackbar.value.message = error.response.data.message
         alertSnackbar.value.color = "error"
         alertSnackbar.value.show = true
+        if(error.response.status === 401){
+          refreshUserLogin()
+        }
       })
     }
     else{

@@ -1,6 +1,6 @@
 <script setup>
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
-import populatePropertiesList from '@/common/reusing_functions'
+import { populatePropertiesList, refreshUserLogin } from '@/common/reusing_functions'
 import AddNewUnitDrawer from '@/views/apps/units/AddNewUnitDrawer.vue'
 import axios from '@axios'
 import { onMounted } from 'vue'
@@ -144,6 +144,11 @@ function getAllUnits(){
   let queryData = {
     "userId": sessionStorage.getItem("userId"),
   }
+  if(!sessionStorage.getItem("accessToken")){
+    router.push('/login')
+
+    return 
+  }
 
   axios({
     url: 'http://localhost:8000/prop-app/allunits/get',
@@ -156,7 +161,9 @@ function getAllUnits(){
     console.log(response)
     fetchedUnitsList.value = response.data.unitsData
   }).catch(error => {
-    console.log(error)
+    if(error.response.status === 401){
+      refreshUserLogin()
+    }
   })
 
 }
