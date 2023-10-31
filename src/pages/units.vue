@@ -151,7 +151,7 @@ function getAllUnits(){
   }
 
   axios({
-    url: 'http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/allunits/get',
+    url: 'http://localhost:8000/prop-app/allunits/get',
     method: 'GET',
     params: queryData,
     headers: {
@@ -314,7 +314,7 @@ onMounted(() => {
                   >
                   <VImg
                   v-if="item.raw.unitsData.unit"
-                  :src="'http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/media/'+item.raw.details.property_image"
+                  :src="'http://localhost:8000/media/'+item.raw.details.property_image"
                   />
                   <span v-else>{{ avatarText(item.raw.unitsData.unit_name) }}</span>
                   </VAvatar>  

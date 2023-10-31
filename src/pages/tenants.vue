@@ -135,7 +135,7 @@ const getTenantsData = () => {
 
     return 
   }
-  axios.get("http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/details/tenants", {
+  axios.get("http://localhost:8000/prop-app/details/tenants", {
     params: queryData,
     headers: {
       'Authorization': sessionStorage.getItem("accessToken"),
@@ -303,7 +303,7 @@ onMounted(() => {
                 >
                   <VImg
                     v-if="item.raw.tenant.user_image"
-                    :src="'http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/media/'+item.raw.tenant.user_image"
+                    :src="'http://localhost:8000/media/'+item.raw.tenant.user_image"
                   />
                   <span v-else>{{ avatarText(item.raw.tenant.user_fullname) }}</span>
                 </VAvatar>  

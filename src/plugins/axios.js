@@ -1,4 +1,5 @@
-import axios from '@axios'
+import axios from 'axios'
+import router from '@/router'
 
 const axiosIns = axios.create({
 // You can add your headers here
@@ -7,7 +8,7 @@ const axiosIns = axios.create({
 // timeout: 1000,
 // headers: {'X-Custom-Header': 'foobar'}
 
-  url: "http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com",
+  url: "http://localhost:8000",
   headers: {
     'Authorization': sessionStorage.getItem("accessToken"),
   },

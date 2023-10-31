@@ -74,7 +74,7 @@ const onUnitFormSubmit = () => {
       }
 
       axios({
-        url: "http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/units/add",
+        url: "http://localhost:8000/prop-app/units/add",
         method: 'POST',
         data: sendData,
         headers: {
@@ -113,7 +113,7 @@ function populatePropertiesList(){
     "userId": sessionStorage.getItem('userId'),
   }
 
-  axios('http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/landlord-prop/get', {
+  axios('http://localhost:8000/prop-app/landlord-prop/get', {
     params: queryData,
     headers: {
       "Authorization": sessionStorage.getItem("AccessToken"),

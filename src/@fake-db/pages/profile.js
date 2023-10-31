@@ -9,6 +9,16 @@ import avatar5 from '@images/avatars/avatar-5.png'
 import avatar6 from '@images/avatars/avatar-6.png'
 import avatar7 from '@images/avatars/avatar-7.png'
 import avatar8 from '@images/avatars/avatar-8.png'
+import eventLabel from '@images/icons/project-icons/event.png'
+import figmaLabel from '@images/icons/project-icons/figma.png'
+import htmlLabel from '@images/icons/project-icons/html5.png'
+import reactLabel from '@images/icons/project-icons/react.png'
+import socialLabel from '@images/icons/project-icons/social.png'
+import supportLabel from '@images/icons/project-icons/support.png'
+import twitterLabel from '@images/icons/project-icons/twitter.png'
+import vueLabel from '@images/icons/project-icons/vue.png'
+import xdLabel from '@images/icons/project-icons/xd.png'
+import UserProfileHeaderBg from '@images/pages/user-profile-header-bg.png'
 
 const data = {
   profileHeader: {
@@ -17,8 +27,7 @@ const data = {
     joiningDate: 'April 2021',
     designation: 'UX Designer',
     profileImg: avatar15,
-
-    // coverImg: UserProfileHeaderBg,
+    coverImg: UserProfileHeaderBg,
   },
   profile: {
     about: [
@@ -80,40 +89,35 @@ const data = {
         ChipColor: 'error',
         chipText: 'Developer',
         title: 'React Developers',
-
-        // avatar: reactLabel,
+        avatar: reactLabel,
       },
       {
         members: 122,
         chipText: 'Support',
         ChipColor: 'primary',
         title: 'Support Team',
-
-        // avatar: supportLabel,
+        avatar: supportLabel,
       },
       {
         members: 7,
         ChipColor: 'info',
         chipText: 'Designer',
         title: 'UI Designer',
-
-        // avatar: figmaLabel,
+        avatar: figmaLabel,
       },
       {
         members: 289,
         ChipColor: 'error',
         chipText: 'Developer',
         title: 'Vue.js Developers',
-
-        // avatar: vueLabel,
+        avatar: vueLabel,
       },
       {
         members: 24,
         chipText: 'Marketing',
         ChipColor: 'secondary',
         title: 'Digital Marketing',
-
-        // avatar: twitterLabel,
+        avatar: twitterLabel,
       },
     ],
   },
@@ -121,8 +125,7 @@ const data = {
     {
       extraMembers: 25,
       title: 'React Developers',
-
-      // avatar: reactLabel,
+      avatar: reactLabel,
       avatarGroup: [
         { avatar: avatar1, name: 'Vinnie Mostowy' },
         { avatar: avatar2, name: 'Allen Rieske' },
@@ -166,8 +169,7 @@ const data = {
     {
       extraMembers: 55,
       title: 'Creative Designers',
-
-      // avatar: xdLabel,
+      avatar: xdLabel,
       avatarGroup: [
         { avatar: avatar1, name: 'Jimmy Ressula' },
         { avatar: avatar2, name: 'Kristi Lawker' },
@@ -189,8 +191,7 @@ const data = {
     {
       extraMembers: 35,
       title: 'Support Team',
-
-      // avatar: supportLabel,
+      avatar: supportLabel,
       avatarGroup: [
         { avatar: avatar5, name: 'Andrew Tye' },
         { avatar: avatar6, name: 'Rishi Swaat' },
@@ -208,8 +209,7 @@ const data = {
     {
       extraMembers: 19,
       title: 'Digital Marketing',
-
-      // avatar: socialLabel,
+      avatar: socialLabel,
       avatarGroup: [
         { avatar: avatar1, name: 'Kim Merchent' },
         { avatar: avatar2, name: 'Sam D\'souza' },
@@ -231,8 +231,7 @@ const data = {
     {
       title: 'Event',
       extraMembers: 55,
-
-      // avatar: eventLabel,
+      avatar: eventLabel,
       avatarGroup: [
         { avatar: avatar5, name: 'Vinnie Mostowy' },
         { avatar: avatar6, name: 'Allen Rieske' },
@@ -250,8 +249,7 @@ const data = {
     {
       extraMembers: 45,
       title: 'Figma Resources',
-
-      // avatar: figmaLabel,
+      avatar: figmaLabel,
       avatarGroup: [
         { avatar: avatar1, name: 'Andrew Mostowy' },
         { avatar: avatar2, name: 'Micky Ressula' },
@@ -273,8 +271,7 @@ const data = {
     {
       extraMembers: 50,
       title: 'Only Beginners',
-
-      // avatar: htmlLabel,
+      avatar: htmlLabel,
       avatarGroup: [
         { avatar: avatar5, name: 'Kim Karlos' },
         { avatar: avatar6, name: 'Katy Turner' },
@@ -310,8 +307,7 @@ const data = {
       members: '280 members',
       title: 'Social Banners',
       client: 'Christian Jimenez',
-
-      // avatar: socialLabel,
+      avatar: socialLabel,
       description: 'We are Consulting, Software Development and Web Development Services.',
       avatarGroup: [
         { avatar: avatar1, name: 'Vinnie Mostowy' },
@@ -334,8 +330,7 @@ const data = {
       members: '1.1k members',
       title: 'Admin Template',
       client: 'Jeffrey Phillips',
-
-      // avatar: reactLabel,
+      avatar: reactLabel,
       avatarGroup: [
         { avatar: avatar4, name: 'Kaith D\'souza' },
         { avatar: avatar5, name: 'John Doe' },
@@ -358,8 +353,7 @@ const data = {
       startDate: '24/7/21',
       members: '458 members',
       client: 'Ricky McDonald',
-
-      // avatar: vueLabel,
+      avatar: vueLabel,
       description: 'App design combines the user interface (UI) and user experience (UX).',
       avatarGroup: [
         { avatar: avatar7, name: 'Jimmy Ressula' },
@@ -382,8 +376,7 @@ const data = {
       members: '137 members',
       client: 'Hulda Wright',
       title: 'Create Website',
-
-      // avatar: htmlLabel,
+      avatar: htmlLabel,
       description: 'Your domain name should reflect your products or services so that your...',
       avatarGroup: [
         { avatar: avatar2, name: 'Andrew Tye' },
@@ -406,8 +399,7 @@ const data = {
       budgetSpent: '$52.7k',
       client: 'Jerry Greene',
       title: 'Figma Dashboard',
-
-      // avatar: figmaLabel,
+      avatar: figmaLabel,
       description: 'Use this template to organize your design project. Some of the key features are…',
       avatarGroup: [
         { avatar: avatar5, name: 'Kim Merchent' },
@@ -430,8 +422,7 @@ const data = {
       title: 'Logo Design',
       members: '16 members',
       client: 'Olive Strickland',
-
-      // avatar: xdLabel,
+      avatar: xdLabel,
       description: 'Premium logo designs created by top logo designers. Create the branding of business.',
       avatarGroup: [
         { avatar: avatar8, name: 'Kim Karlos' },
@@ -591,8 +582,7 @@ const projectTable = [
     leader: 'Keith',
     date: '12 Aug 2021',
     name: 'Logo Designs',
-
-    // avatar: '/images/icons/project-icons/sketch-label.png',
+    avatar: '/images/icons/project-icons/sketch-label.png',
     avatarGroup: [avatar7, avatar8, avatar1, avatar2],
   },
   {
@@ -601,8 +591,7 @@ const projectTable = [
     leader: 'Merline',
     date: '19 Apr 2021',
     name: 'IOS App Design',
-
-    // avatar: '/images/icons/project-icons/sketch-label.png',
+    avatar: '/images/icons/project-icons/sketch-label.png',
     avatarGroup: [avatar3, avatar4, avatar5, avatar6],
   },
   {

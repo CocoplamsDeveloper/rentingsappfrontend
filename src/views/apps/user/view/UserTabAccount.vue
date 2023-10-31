@@ -1,11 +1,17 @@
 <script setup>
-import { paginationMeta } from '@/@fake-db/utils'
 import { VDataTable } from 'vuetify/labs/VDataTable'
 import UserInvoiceTable from './UserInvoiceTable.vue'
+import { paginationMeta } from '@/@fake-db/utils'
 
 // Images
 import avatar2 from '@images/avatars/avatar-2.png'
-
+import figma from '@images/icons/project-icons/figma.png'
+import html5 from '@images/icons/project-icons/html5.png'
+import python from '@images/icons/project-icons/python.png'
+import react from '@images/icons/project-icons/react.png'
+import sketch from '@images/icons/project-icons/sketch.png'
+import vue from '@images/icons/project-icons/vue.png'
+import xamarin from '@images/icons/project-icons/xamarin.png'
 
 const projectTableHeaders = [
   {
@@ -35,7 +41,7 @@ const options = ref({
 
 const projects = [
   {
-    // logo: react,
+    logo: react,
     name: 'BGC eCommerce App',
     project: 'React Project',
     totalTask: '122/240',
@@ -43,7 +49,7 @@ const projects = [
     hours: '18:42',
   },
   {
-    // logo: figma,
+    logo: figma,
     name: 'Falcon Logo Design',
     project: 'Figma Project',
     totalTask: '09/56',
@@ -51,7 +57,7 @@ const projects = [
     hours: '20:42',
   },
   {
-    // logo: vue,
+    logo: vue,
     name: 'Dashboard Design',
     project: 'Vuejs Project',
     totalTask: '290/320',
@@ -59,7 +65,7 @@ const projects = [
     hours: '120:87',
   },
   {
-    // logo: xamarin,
+    logo: xamarin,
     name: 'Foodista mobile app',
     project: 'Xamarin Project',
     totalTask: '290/320',
@@ -67,7 +73,7 @@ const projects = [
     hours: '120:87',
   },
   {
-    // logo: python,
+    logo: python,
     name: 'Dojo Email App',
     project: 'Python Project',
     totalTask: '120/186',
@@ -75,7 +81,7 @@ const projects = [
     hours: '230:10',
   },
   {
-    // logo: sketch,
+    logo: sketch,
     name: 'Blockchain Website',
     project: 'Sketch Project',
     totalTask: '99/109',
@@ -83,7 +89,7 @@ const projects = [
     hours: '342:41',
   },
   {
-    // logo: html5,
+    logo: html5,
     name: 'Hoffman Website',
     project: 'HTML Project',
     totalTask: '98/110',

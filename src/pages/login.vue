@@ -41,7 +41,7 @@ function loginUsers (){
     userPassword: password.value,
   }
   axios({
-    url: "http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/user/login",
+    url: "http://127.0.0.1:8000/prop-app/user/login",
     method: "post",
     data: data,
     headers: {
@@ -64,7 +64,7 @@ function loginUsers (){
     loginScreenAlert.value = true
   })
 
-  // axios.post('http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/properties/user/login', {
+  // axios.post('http://localhost:8000/properties/user/login', {
   //   email: email.value,
   //   password: password.value,
   // }).then(r => {

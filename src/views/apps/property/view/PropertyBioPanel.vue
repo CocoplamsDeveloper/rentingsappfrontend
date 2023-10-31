@@ -85,7 +85,7 @@ const resolveUserRoleVariant = role => {
           >
             <VImg
               v-if="props.propertyData.property_image"
-              :src="'http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/media/'+props.propertyData.property_image"
+              :src="'http://localhost:8000/media/'+props.propertyData.property_image"
             />
             <span
               v-else
