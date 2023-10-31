@@ -1,7 +1,6 @@
 <script setup>
 import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
-import pdf from '@images/icons/project-icons/pdf.png'
 import pumaShoes from '@images/pages/puma-shoes.jpeg'
 
 const serverSwitch = ref(false)
@@ -57,10 +56,12 @@ const serverSwitch = ref(false)
 
               <div class="app-timeline-text d-flex align-center gap-2">
                 <div>
-                  <VImg
+                  <!--
+                    <VImg
                     :src="pdf"
                     :width="22"
-                  />
+                    /> 
+                  -->
                 </div>
 
                 <span>booking-card.pdf</span>

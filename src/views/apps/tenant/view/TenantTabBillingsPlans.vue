@@ -1,8 +1,4 @@
 <script setup>
-import americanExpress from '@images/icons/payments/american-express.png'
-import mastercard from '@images/icons/payments/mastercard.png'
-import visa from '@images/icons/payments/visa.png'
-
 const isUpgradePlanDialogVisible = ref(false)
 const currentCardDetails = ref()
 const isCardEditDialogVisible = ref(false)
@@ -22,7 +18,8 @@ const creditCards = [
     isPrimary: true,
     type: 'mastercard',
     cvv: '123',
-    image: mastercard,
+
+    // image: mastercard,
   },
   {
     name: 'Mildred Wagner',
@@ -31,7 +28,8 @@ const creditCards = [
     isPrimary: false,
     type: 'visa',
     cvv: '456',
-    image: visa,
+
+    // image: visa,
   },
   {
     name: 'Lester Jennings',
@@ -40,7 +38,8 @@ const creditCards = [
     isPrimary: false,
     type: 'visa',
     cvv: '456',
-    image: americanExpress,
+
+    // image: americanExpress,
   },
 ]
 
