@@ -1,4 +1,5 @@
-import txt from '@images/icons/file/txt.png'
+
+import mock from '@/@fake-db/mock'
 import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
@@ -7,8 +8,7 @@ import avatar5 from '@images/avatars/avatar-5.png'
 import avatar6 from '@images/avatars/avatar-6.png'
 import avatar7 from '@images/avatars/avatar-7.png'
 import avatar8 from '@images/avatars/avatar-8.png'
-import mock from '@/@fake-db/mock'
-import xls from '@images/icons/file/xls.png'
+
 
 const data = {
   emails: [
@@ -32,13 +32,13 @@ const data = {
       attachments: [
         {
           fileName: 'log.txt',
-          thumbnail: txt,
+          // thumbnail: txt,
           url: '',
           size: '5mb',
         },
         {
           fileName: 'performance.xls',
-          thumbnail: xls,
+          // thumbnail: xls,
           url: '',
           size: '10mb',
         },

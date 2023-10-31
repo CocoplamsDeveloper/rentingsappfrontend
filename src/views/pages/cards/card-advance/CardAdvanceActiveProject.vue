@@ -1,49 +1,44 @@
 <script setup>
-import bootstrapLogo from '@images/icons/brands/bootstrap-logo.png'
-import figmaLogo from '@images/icons/brands/figma-logo.png'
-import laravelLogo from '@images/icons/brands/laravel-logo.png'
-import reactLogo from '@images/icons/brands/react-logo.png'
-import sketchLogo from '@images/icons/brands/sketch-logo.png'
-import vuejsLogo from '@images/icons/brands/vuejs-logo.png'
+
 
 const activeProjects = [
   {
-    avatarImg: laravelLogo,
+    // avatarImg: laravelLogo,
     title: 'Laravel',
     subtitle: 'Ecommerce',
     stats: '65',
     progressColor: 'error',
   },
   {
-    avatarImg: figmaLogo,
+    // avatarImg: figmaLogo,
     title: 'Figma',
     subtitle: 'App UI Kit',
     stats: '86',
     progressColor: 'primary',
   },
   {
-    avatarImg: vuejsLogo,
+    // avatarImg: vuejsLogo,
     title: 'VueJs',
     subtitle: 'Calendar App',
     stats: '90',
     progressColor: 'success',
   },
   {
-    avatarImg: reactLogo,
+    // avatarImg: reactLogo,
     title: 'React',
     subtitle: 'Dashboard',
     stats: '37',
     progressColor: 'info',
   },
   {
-    avatarImg: bootstrapLogo,
+    // avatarImg: bootstrapLogo,
     title: 'Bootstrap',
     subtitle: 'Website',
     stats: '22',
     progressColor: 'primary',
   },
   {
-    avatarImg: sketchLogo,
+    // avatarImg: sketchLogo,
     title: 'Sketch',
     subtitle: 'Website Design',
     stats: '29',

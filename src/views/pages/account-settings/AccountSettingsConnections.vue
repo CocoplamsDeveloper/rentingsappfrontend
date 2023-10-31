@@ -1,42 +1,33 @@
 <script setup>
-import asana from '@images/icons/brands/asana.png'
-import behance from '@images/icons/brands/behance.png'
-import dribbble from '@images/icons/brands/dribbble.png'
-import facebook from '@images/icons/brands/facebook.png'
-import github from '@images/icons/brands/github.png'
-import google from '@images/icons/brands/google.png'
-import intagram from '@images/icons/brands/instagram.png'
-import mailchimp from '@images/icons/brands/mailchimp.png'
-import slack from '@images/icons/brands/slack.png'
-import twitter from '@images/icons/brands/twitter.png'
+
 
 const connectedAccounts = ref([
   {
-    logo: google,
+    // logo: google,
     name: 'Google',
     subtitle: 'Calendar and contacts',
     connected: true,
   },
   {
-    logo: slack,
+    // logo: slack,
     name: 'Slack',
     subtitle: 'Communication',
     connected: false,
   },
   {
-    logo: github,
+    // logo: github,
     name: 'GitHub',
     subtitle: 'Manage your Git repositories',
     connected: true,
   },
   {
-    logo: mailchimp,
+    // logo: mailchimp,
     name: 'MailChimp',
     subtitle: 'Email marketing service',
     connected: true,
   },
   {
-    logo: asana,
+    // logo: asana,
     name: 'Asana',
     subtitle: 'Task management',
     connected: false,
@@ -45,12 +36,12 @@ const connectedAccounts = ref([
 
 const socialAccounts = ref([
   {
-    logo: facebook,
+    // logo: facebook,
     name: 'Facebook',
     connected: false,
   },
   {
-    logo: twitter,
+    // logo: twitter,
     name: 'Twitter',
     links: {
       username: '@Pixinvent',
@@ -59,7 +50,7 @@ const socialAccounts = ref([
     connected: true,
   },
   {
-    logo: intagram,
+    // logo: intagram,
     name: 'Instagram',
     links: {
       username: '@Pixinvent',
@@ -68,12 +59,12 @@ const socialAccounts = ref([
     connected: true,
   },
   {
-    logo: dribbble,
+    // logo: dribbble,
     name: 'Dribbble',
     connected: false,
   },
   {
-    logo: behance,
+    // logo: behance,
     name: 'Behance',
     connected: false,
   },

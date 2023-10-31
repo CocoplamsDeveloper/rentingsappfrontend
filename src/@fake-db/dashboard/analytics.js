@@ -4,13 +4,7 @@ import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import avatar4 from '@images/avatars/avatar-4.png'
 import avatar5 from '@images/avatars/avatar-5.png'
-import figmaLabel from '@images/icons/brands/figma-label.png'
-import htmlLabel from '@images/icons/brands/html-label.png'
-import reactLabel from '@images/icons/brands/react-label.png'
-import sketchLabel from '@images/icons/brands/sketch-label.png'
-import socialLabel from '@images/icons/brands/social-label.png'
-import vueLabel from '@images/icons/brands/vue-label.png'
-import xdLabel from '@images/icons/brands/xd-label.png'
+
 
 const database = [
   {
@@ -22,7 +16,7 @@ const database = [
     status: 38,
   },
   {
-    logo: socialLabel,
+    // logo: socialLabel,
     name: 'Social Banners',
     date: '03 Jan 2021',
     leader: 'Owen',
@@ -30,7 +24,7 @@ const database = [
     status: 45,
   },
   {
-    logo: sketchLabel,
+    // logo: sketchLabel,
     name: 'Logo Designs',
     date: '12 Aug 2021',
     leader: 'Keith',
@@ -38,7 +32,7 @@ const database = [
     status: 92,
   },
   {
-    logo: sketchLabel,
+    // logo: sketchLabel,
     name: 'IOS App Design',
     date: '19 Apr 2021',
     leader: 'Merlin',
@@ -46,7 +40,7 @@ const database = [
     status: 56,
   },
   {
-    logo: figmaLabel,
+    // logo: figmaLabel,
     name: 'Figma Dashboards',
     date: '08 Apr 2021',
     leader: 'Harmonica',
@@ -54,7 +48,7 @@ const database = [
     status: 25,
   },
   {
-    logo: htmlLabel,
+    // logo: htmlLabel,
     name: 'Crypto Admin',
     date: '29 Sept 2021',
     leader: 'Allyson',
@@ -62,7 +56,7 @@ const database = [
     status: 36,
   },
   {
-    logo: reactLabel,
+    // logo: reactLabel,
     name: 'Create Website',
     date: '20 Mar 2021',
     leader: 'Georgia',
@@ -70,7 +64,7 @@ const database = [
     status: 72,
   },
   {
-    logo: xdLabel,
+    // logo: xdLabel,
     name: 'App Design',
     date: '09 Feb 2021',
     leader: 'Fred',
@@ -78,7 +72,7 @@ const database = [
     status: 89,
   },
   {
-    logo: xdLabel,
+    // logo: xdLabel,
     name: 'Angular APIs',
     date: '17 June 2021',
     leader: 'Richard',
@@ -86,7 +80,7 @@ const database = [
     status: 77,
   },
   {
-    logo: vueLabel,
+    // logo: vueLabel,
     name: 'Admin Template',
     date: '06 Oct 2021',
     leader: 'Geneva',

@@ -1,11 +1,9 @@
 <script setup>
-import aeIcon from '@images/icons/payments/ae-icon.png'
-import mastercardIcon from '@images/icons/payments/mastercard-icon.png'
-import visaIcon from '@images/icons/payments/visa-icon.png'
+
 
 const lastTransitions = [
   {
-    cardImg: visaIcon,
+    // cardImg: visaIcon,
     lastDigit: '*4230',
     cardType: 'Credit',
     sentDate: '17 Mar 2022',
@@ -13,7 +11,7 @@ const lastTransitions = [
     trend: '+$1,678',
   },
   {
-    cardImg: mastercardIcon,
+    // cardImg: mastercardIcon,
     lastDigit: '*5578',
     cardType: 'Credit',
     sentDate: '12 Feb 2022',
@@ -21,7 +19,7 @@ const lastTransitions = [
     trend: '-$839',
   },
   {
-    cardImg: aeIcon,
+    // cardImg: aeIcon,
     lastDigit: '*4567',
     cardType: 'Credit',
     sentDate: '28 Feb 2022',
@@ -29,7 +27,7 @@ const lastTransitions = [
     trend: '+$435',
   },
   {
-    cardImg: visaIcon,
+    // cardImg: visaIcon,
     lastDigit: '*5699',
     cardType: 'Credit',
     sentDate: '8 Jan 2022',
@@ -37,7 +35,7 @@ const lastTransitions = [
     trend: '+$2,345',
   },
   {
-    cardImg: visaIcon,
+    // cardImg: visaIcon,
     lastDigit: '*5699',
     cardType: 'Credit',
     sentDate: '8 Jan 2022',

@@ -5,13 +5,7 @@ import { VDataTable } from 'vuetify/labs/VDataTable'
 // Images
 import avatar2 from '@images/avatars/avatar-2.png'
 
-// import figma from '@images/icons/project-icons/figma.png'
-// import html5 from '@images/icons/project-icons/html5.png'
-// import python from '@images/icons/project-icons/python.png'
-// import react from '@images/icons/project-icons/react.png'
-// import sketch from '@images/icons/project-icons/sketch.png'
-// import vue from '@images/icons/project-icons/vue.png'
-// import xamarin from '@images/icons/project-icons/xamarin.png'
+
 
 
 
