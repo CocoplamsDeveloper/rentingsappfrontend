@@ -1,42 +1,31 @@
 <script setup>
-import asana from '@images/icons/brands/asana.png'
-import behance from '@images/icons/brands/behance.png'
-import dribbble from '@images/icons/brands/dribbble.png'
-import facebook from '@images/icons/brands/facebook.png'
-import github from '@images/icons/brands/github.png'
-import google from '@images/icons/brands/google.png'
-import linkedin from '@images/icons/brands/linkedin.png'
-import mailchimp from '@images/icons/brands/mailchimp.png'
-import slack from '@images/icons/brands/slack.png'
-import twitter from '@images/icons/brands/twitter.png'
-
 const connectedAccounts = ref([
   {
-    img: google,
+    // img: google,
     title: 'Google',
     text: 'Calendar and contacts',
     connected: true,
   },
   {
-    img: slack,
+    // img: slack,
     title: 'Slack',
     text: 'Communication',
     connected: false,
   },
   {
-    img: github,
+    // img: github,
     title: 'Github',
     text: 'Manage your Git repositories',
     connected: true,
   },
   {
-    img: mailchimp,
+    // img: mailchimp,
     title: 'Mailchimp',
     text: 'Email marketing service',
     connected: false,
   },
   {
-    img: asana,
+    // img: asana,
     title: 'Asana',
     text: 'Communication',
     connected: false,
@@ -45,31 +34,31 @@ const connectedAccounts = ref([
 
 const socialAccounts = ref([
   {
-    img: facebook,
+    // img: facebook,
     title: 'Facebook',
     connected: false,
   },
   {
-    img: twitter,
+    // img: twitter,
     title: 'Twitter',
     link: 'https://twitter.com/theme_selection',
     username: '@Theme_Selection',
     connected: true,
   },
   {
-    img: linkedin,
+    // img: linkedin,
     title: 'Linkedin',
     link: 'https://www.linkedin.com/company/pixinvent',
     username: '@Pixinvent',
     connected: true,
   },
   {
-    img: dribbble,
+    // img: dribbble,
     title: 'Dribbble',
     connected: false,
   },
   {
-    img: behance,
+    // img: behance,
     title: 'Behance',
     connected: false,
   },

@@ -2,8 +2,7 @@
 import BillingHistoryTable from './BillingHistoryTable.vue'
 
 // Images
-import mastercard from '@images/icons/payments/mastercard.png'
-import visa from '@images/icons/payments/visa.png'
+
 
 const selectedPaymentMethod = ref('credit-debit-atm-card')
 const isPricingPlanDialogVisible = ref(false)
@@ -19,7 +18,8 @@ const creditCards = [
     isPrimary: true,
     type: 'visa',
     cvv: '456',
-    image: visa,
+
+    // image: visa,
   },
   {
     name: 'Mildred Wagner',
@@ -28,7 +28,8 @@ const creditCards = [
     isPrimary: false,
     type: 'mastercard',
     cvv: '123',
-    image: mastercard,
+
+    // image: mastercard,
   },
 ]
 
