@@ -56,7 +56,7 @@ const fetchProperty = item => {
 
     return 
   }
-  axios.get("http://localhost:8000/prop-app/property/"+item, {
+  axios.get("http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/property/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),
