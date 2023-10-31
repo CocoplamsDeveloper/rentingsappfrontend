@@ -27,6 +27,7 @@
 -->
 
 <script setup>
+import router from '@/router'
 import CrmActiveProject from '@/views/dashboards/crm/CrmActiveProject.vue'
 import CrmActivityTimeline from '@/views/dashboards/crm/CrmActivityTimeline.vue'
 import CrmAnalyticsSales from '@/views/dashboards/crm/CrmAnalyticsSales.vue'
