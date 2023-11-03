@@ -41,7 +41,7 @@ function loginUsers (){
     userPassword: password.value,
   }
   axios({
-    url: "http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/user/login",
+    url: "https://api.rentings.me/prop-app/user/login",
     method: "post",
     data: data,
     headers: {
