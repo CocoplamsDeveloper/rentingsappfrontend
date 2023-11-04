@@ -314,7 +314,7 @@ const createTenant = () => {
         formData.append('userDocument', tenantDoc.value)
       }
 
-      axios.post("https://api.rentings.me/prop-app/users/create", formData, {
+      axios.post("http://localhost:8000/prop-app/users/create", formData, {
         headers: {
           'Authorization': sessionStorage.getItem('accessToken'),
         },

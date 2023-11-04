@@ -88,7 +88,7 @@ function getFloorUnits(){
     sendData['propertyId'] = selectedPropertyToAssign.value
     sendData['floor'] = selectedFloorToAssign.value
 
-    axios.get("https://api.rentings.me/prop-app/floors/units", {
+    axios.get("http://localhost:8000/prop-app/floors/units", {
       params: sendData,
       headers: {
         'Authorization': sessionStorage.getItem('accessToken'),
@@ -119,6 +119,18 @@ const closeUnitAssignForm = () => {
   isAssignUnitDialogVisible.value = false
   assignUnitForm?.value.reset()
 }
+
+const calculateContractEndDate = () => {
+  
+  let start = new Date(tenancyStartDate.value)
+  let months = selectedContractPeriod.value
+  let days = months*30
+  var end = new Date(tenancyStartDate.value);
+  end.setDate(end.getDate() + days);
+  // let futureDate = new Date(new Date().getFullYear(),months-1, start.getDate())
+  console.log(start.getDate(), months, end)
+
+} 
 
 const handleContractDoc = e => {
   contractDocument.value = e.target.files[0]
@@ -207,7 +219,7 @@ const createTenancyRecord = () =>{
 
       console.log(tenancyData)
 
-
+      calculateContractEndDate()
       //     let currentDate = new Date()
       //     if(new Date(tenancyStartDate.value).getTime() <= currentDate.getTime()){
       //       tenantTabAlertSnackbar.value.message = "Please enter a valid Start Date"

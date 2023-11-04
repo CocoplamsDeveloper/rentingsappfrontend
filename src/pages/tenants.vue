@@ -135,7 +135,7 @@ const getTenantsData = () => {
 
     return 
   }
-  axios.get("https://api.rentings.me/prop-app/details/tenants", {
+  axios.get("http://localhost:8000/prop-app/details/tenants", {
     params: queryData,
     headers: {
       'Authorization': sessionStorage.getItem("accessToken"),

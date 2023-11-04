@@ -110,7 +110,7 @@ const editPropertyItem = item => {
 
     return 
   }
-  axios.get("https://api.rentings.me/prop-app/property/"+item, {
+  axios.get("http://localhost:8000/prop-app/property/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),
@@ -245,7 +245,7 @@ function updatedImageUpload(e){
     propPageAlertSnackbar.value.message = "Image size should be less then 2MB"
     propPageAlertSnackbar.value.color = "error"
     propPageAlertSnackbar.value.show = true
-    propertyEditFormImage.value = 'https://api.rentings.me/media/'+editedItemObj.value.propertyImage
+    propertyEditFormImage.value = 'http://localhost:8000/media/'+editedItemObj.value.propertyImage
     imageUpdateField.value?.reset()
 
     return
@@ -256,7 +256,7 @@ function updatedImageUpload(e){
 
 
 function imageFieldChecker(){
-  propertyEditFormImage.value = 'https://api.rentings.me/media/'+editedItemObj.value.propertyImage
+  propertyEditFormImage.value = 'http://localhost:8000/media/'+editedItemObj.value.propertyImage
 }
 
 function goToAddPage(){
@@ -274,7 +274,7 @@ function getAllProperties(){
     return 
   }
 
-  axios.get("https://api.rentings.me/prop-app/alllandlord/props", {
+  axios.get("http://localhost:8000/prop-app/alllandlord/props", {
     params: queryData,
     headers: {
       'Authorization': sessionStorage.getItem("accessToken"),
@@ -328,7 +328,7 @@ function updateProperty(property){
     formData.append('updatedImage', updatedImageFile.value)
   }
 
-  axios.post('https://api.rentings.me/prop-app/property/update', formData, {
+  axios.post('http://localhost:8000/prop-app/property/update', formData, {
     headers: {
       'Authorization': sessionStorage.getItem("AccessToken"),  
     },

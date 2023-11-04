@@ -40,7 +40,7 @@ function loginUsers (){
     userPassword: password.value,
   }
   axios({
-    url: "https://api.rentings.me/prop-app/user/login",
+    url: "http://localhost:8000/prop-app/user/login",
     method: "post",
     data: data,
     headers: {

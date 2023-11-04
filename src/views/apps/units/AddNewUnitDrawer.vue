@@ -74,7 +74,7 @@ const onUnitFormSubmit = () => {
       }
 
       axios({
-        url: "https://api.rentings.me/prop-app/units/add",
+        url: "http://localhost:8000/prop-app/units/add",
         method: 'POST',
         data: sendData,
         headers: {
@@ -113,7 +113,7 @@ function populatePropertiesList(){
     "userId": sessionStorage.getItem('userId'),
   }
 
-  axios.get('https://api.rentings.me/prop-app/landlord-prop/get', {
+  axios.get('http://localhost:8000/prop-app/landlord-prop/get', {
     params: queryData,
     headers: {
       "Authorization": sessionStorage.getItem("AccessToken"),
