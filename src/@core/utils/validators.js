@@ -82,7 +82,7 @@ export const alphaValidator = value => {
 export const urlValidator = value => {
   if (isEmpty(value))
     return true
-  const re = /^(http[s]?:\/\/){0,1}(www\.){0,1}[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,5}[\.]{0,1}/
+  const re = /^(https[s]?:\/\/){0,1}(www\.){0,1}[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,5}[\.]{0,1}/
   
   return re.test(String(value)) || 'URL is invalid'
 }

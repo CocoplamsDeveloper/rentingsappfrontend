@@ -63,7 +63,7 @@ function loginUsers (){
     loginScreenAlert.value = true
   })
 
-  // axios.post('http://localhost:8000/properties/user/login', {
+  // axios.post('https://api.rentings.me/properties/user/login', {
   //   email: email.value,
   //   password: password.value,
   // }).then(r => {

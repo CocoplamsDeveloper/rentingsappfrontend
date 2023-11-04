@@ -6,7 +6,7 @@ const axiosIns = axios.create({
 // timeout: 1000,
 // headers: {'X-Custom-Header': 'foobar'}
 
-  url: "http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com",
+  url: "https://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com",
   headers: {
     'Authorization': sessionStorage.getItem("accessToken"),
   },

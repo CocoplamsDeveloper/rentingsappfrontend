@@ -142,7 +142,7 @@ const changedContractDoc = e => {
 
 const downloadContractDocument = (Id, tenantName) => {
 
-  axios.get("http://localhost:8000/prop-app/contract-doc/download", {
+  axios.get("https://api.rentings.me/prop-app/contract-doc/download", {
     params: {
       "userId": sessionStorage.getItem('userId'),
       "tenancyId": Id,
@@ -231,7 +231,7 @@ const createTenancyRecord = () =>{
       //       formData.append('contractDoc', contractDocument.value)
       //     }
 
-      //     axios.post("http://localhost:8000/prop-app/tenancy-record/create", formData, {
+      //     axios.post("https://api.rentings.me/prop-app/tenancy-record/create", formData, {
       //       headers: {
       //         'Authorization': sessionStorage.getItem("accessToken"),
       //       },
@@ -280,7 +280,7 @@ function updateContractDocument(tenancyId){
   formData.append('userId', sessionStorage.getItem('userId'))
   formData.append('tenancyId', tenancyId)
 
-  axios.post("http://localhost:8000/prop-app/contract-doc/update", formData, {
+  axios.post("https://api.rentings.me/prop-app/contract-doc/update", formData, {
     headers: {
       'Authorization': sessionStorage.getItem("accessToken"),
     },

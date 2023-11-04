@@ -1,7 +1,7 @@
 <script setup>
 import {
-  avatarText,
-  kFormatter,
+avatarText,
+kFormatter,
 } from '@core/utils/formatters'
 
 const props = defineProps({
@@ -88,7 +88,7 @@ const resolveUserRoleVariant = role => {
           >
             <VImg
               v-if="props.tenantData.tenant.user_image"
-              :src="'http://localhost:8000/media/'+props.tenantData.tenant.user_image"
+              :src="'https://api.rentings.me/media/'+props.tenantData.tenant.user_image"
             />
             <span
               v-else

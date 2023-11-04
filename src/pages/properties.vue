@@ -153,7 +153,7 @@ const prefillPropertyEditForm = property => {
   else{
     statusToggleSwitch.value = true
   }
-  propertyEditFormImage.value ='http://localhost:8000/media/'+property.property_image
+  propertyEditFormImage.value ='https://api.rentings.me/media/'+property.property_image
 }
 
 const deleteItem = item => {
@@ -504,7 +504,7 @@ onMounted(() => {
                 >
                   <VImg
                     v-if="item.raw.details.property_image"
-                    :src="'http://localhost:8000/media/'+item.raw.details.property_image"
+                    :src="'https://api.rentings.me/media/'+item.raw.details.property_image"
                   />
                   <span v-else>{{ avatarText(item.raw.details.property_name) }}</span>
                 </VAvatar>

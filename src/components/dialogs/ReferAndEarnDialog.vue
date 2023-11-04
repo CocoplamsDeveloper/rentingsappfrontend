@@ -113,7 +113,7 @@ const referAndEarnSteps = [
         >
           <AppTextField
             density="compact"
-            placeholder="http://referral.link"
+            placeholder="https://referral.link"
             class="refer-link-input me-1"
           >
             <template #append-inner>

@@ -314,7 +314,7 @@ onMounted(() => {
                   >
                   <VImg
                   v-if="item.raw.unitsData.unit"
-                  :src="'http://localhost:8000/media/'+item.raw.details.property_image"
+                  :src="'https://api.rentings.me/media/'+item.raw.details.property_image"
                   />
                   <span v-else>{{ avatarText(item.raw.unitsData.unit_name) }}</span>
                   </VAvatar>  
