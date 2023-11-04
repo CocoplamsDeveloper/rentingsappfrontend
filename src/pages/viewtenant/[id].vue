@@ -47,7 +47,7 @@ const fetchTenant = item => {
 
     return 
   }
-  axios.get(import.meta.env.VITE_API_URL+"/prop-app/tenant/"+item, {
+  axios.get("https://api.rentings.me/prop-app/tenant/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),

@@ -22,7 +22,7 @@ function userLogout(){
   }
 
   axios({
-    url: import.meta.env.VITE_API_URL+"/prop-app/user/logout",
+    url: "https://api.rentings.me/prop-app/user/logout",
     method: "get",
     params: data,
   }).then(response => {

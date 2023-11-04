@@ -67,7 +67,7 @@ async function addPropertyFunc(){
         return 
       }
 
-      axios.post(import.meta.env.VITE_API_URL+'/prop-app/add', propertywisedata, {
+      axios.post('https://api.rentings.me/prop-app/add', propertywisedata, {
         headers: {
           'Authorization': sessionStorage.getItem("AccessToken"),  
         },
@@ -117,7 +117,7 @@ async function getUserPropertiesList(){
   }
 
   axios({
-    url: import.meta.env.VITE_API_URL+'/prop-app/landlord-prop/get',
+    url: 'https://api.rentings.me/prop-app/landlord-prop/get',
     params: queryData,
     method: "GET",
     headers: {
@@ -179,7 +179,7 @@ function addPropertyAdditionalDetails(){
       }
       formData.append('data', JSON.stringify(propertyAdditionalData))
       formData.append('userId', sessionStorage.getItem('userId'))
-      axios.post(import.meta.env.VITE_API_URL+'/prop-app/property-details/add', formData, {
+      axios.post('https://api.rentings.me/prop-app/property-details/add', formData, {
         headers: {
           'Authorization': sessionStorage.getItem("AccessToken"),  
         },

@@ -151,7 +151,7 @@ function getAllUnits(){
   }
 
   axios({
-    url: import.meta.env.VITE_API_URL+'/prop-app/allunits/get',
+    url: 'https://api.rentings.me/prop-app/allunits/get',
     method: 'GET',
     params: queryData,
     headers: {

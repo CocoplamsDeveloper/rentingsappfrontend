@@ -40,7 +40,7 @@ function loginUsers (){
     userPassword: password.value,
   }
   axios({
-    url: import.meta.env.VITE_API_URL+"/prop-app/user/login",
+    url: "https://api.rentings.me/prop-app/user/login",
     method: "post",
     data: data,
     headers: {
