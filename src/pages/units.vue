@@ -151,7 +151,7 @@ function getAllUnits(){
   }
 
   axios({
-    url: 'http://localhost:8000/prop-app/allunits/get',
+    url: import.meta.env.VITE_API_URL+'/prop-app/allunits/get',
     method: 'GET',
     params: queryData,
     headers: {

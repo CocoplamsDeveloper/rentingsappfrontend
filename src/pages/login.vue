@@ -1,5 +1,6 @@
 <script setup>
-import { useAppAbility } from '@/plugins/casl/useAppAbility'
+// import { useAppAbility } from '@/plugins/casl/useAppAbility'
+
 import axios from '@axios'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
@@ -11,7 +12,6 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import { VForm } from 'vuetify/components/VForm'
-
 // import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 
 
@@ -19,7 +19,7 @@ import { VForm } from 'vuetify/components/VForm'
 
 const route = useRoute()
 const router = useRouter()
-const ability = useAppAbility()
+// const ability = useAppAbility()
 
 const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
@@ -41,7 +41,7 @@ function loginUsers (){
     userPassword: password.value,
   }
   axios({
-    url: "https://api.rentings.me/prop-app/user/login",
+    url: import.meta.env.VITE_API_URL+"/prop-app/user/login",
     method: "post",
     data: data,
     headers: {

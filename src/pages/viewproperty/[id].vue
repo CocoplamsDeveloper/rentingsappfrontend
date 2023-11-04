@@ -56,7 +56,7 @@ const fetchProperty = item => {
 
     return 
   }
-  axios.get("http://localhost:8000/prop-app/property/"+item, {
+  axios.get(import.meta.env.VITE_API_URL+'/prop-app/property/'+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),

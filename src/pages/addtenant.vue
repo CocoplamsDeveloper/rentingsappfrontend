@@ -314,7 +314,7 @@ const createTenant = () => {
         formData.append('userDocument', tenantDoc.value)
       }
 
-      axios.post("http://localhost:8000/prop-app/users/create", formData, {
+      axios.post(import.meta.env.VITE_API_URL+"/prop-app/users/create", formData, {
         headers: {
           'Authorization': sessionStorage.getItem('accessToken'),
         },

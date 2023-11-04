@@ -135,7 +135,7 @@ const getTenantsData = () => {
 
     return 
   }
-  axios.get("http://localhost:8000/prop-app/details/tenants", {
+  axios.get(import.meta.env.VITE_API_URL+"/prop-app/details/tenants", {
     params: queryData,
     headers: {
       'Authorization': sessionStorage.getItem("accessToken"),

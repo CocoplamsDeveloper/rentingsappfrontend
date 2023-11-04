@@ -110,7 +110,7 @@ const editPropertyItem = item => {
 
     return 
   }
-  axios.get("http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/property/"+item, {
+  axios.get(import.meta.env.VITE_API_URL+"/prop-app/property/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),
@@ -245,7 +245,7 @@ function updatedImageUpload(e){
     propPageAlertSnackbar.value.message = "Image size should be less then 2MB"
     propPageAlertSnackbar.value.color = "error"
     propPageAlertSnackbar.value.show = true
-    propertyEditFormImage.value = 'http://localhost:8000/media/'+editedItemObj.value.propertyImage
+    propertyEditFormImage.value = import.meta.env.VITE_API_URL+'/media/'+editedItemObj.value.propertyImage
     imageUpdateField.value?.reset()
 
     return
@@ -256,7 +256,7 @@ function updatedImageUpload(e){
 
 
 function imageFieldChecker(){
-  propertyEditFormImage.value = 'http://localhost:8000/media/'+editedItemObj.value.propertyImage
+  propertyEditFormImage.value = import.meta.env.VITE_API_URL+'/media/'+editedItemObj.value.propertyImage
 }
 
 function goToAddPage(){
@@ -328,7 +328,7 @@ function updateProperty(property){
     formData.append('updatedImage', updatedImageFile.value)
   }
 
-  axios.post('http://127.0.0.1:8000/prop-app/property/update', formData, {
+  axios.post(import.meta.env.VITE_API_URL+'/prop-app/property/update', formData, {
     headers: {
       'Authorization': sessionStorage.getItem("AccessToken"),  
     },
