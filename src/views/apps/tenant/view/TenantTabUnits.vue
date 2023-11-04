@@ -124,11 +124,13 @@ const calculateContractEndDate = () => {
   
   let start = new Date(tenancyStartDate.value)
   let months = selectedContractPeriod.value
-  let days = months*30
+  let days = months*30.5
   var end = new Date(tenancyStartDate.value);
   end.setDate(end.getDate() + days);
+  let endDateMonth = end.getMonth() + 1
+  let endDate = end.getFullYear() + "/" + endDateMonth + "/" + end.getDate()
   // let futureDate = new Date(new Date().getFullYear(),months-1, start.getDate())
-  console.log(start.getDate(), months, end)
+  console.log(end.toLocaleDateString(), start, endDate)
 
 } 
 
@@ -651,7 +653,7 @@ onMounted(() => {
               cols="12"
               sm="6"
             >
-              <AppDateTimePicker
+              <AppTextField
                 v-model="tenancyEndDate"
                 label="Contract End Date"
                 :rules="[requiredValidator]"
