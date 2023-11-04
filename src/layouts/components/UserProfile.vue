@@ -12,7 +12,6 @@ function userLogout(){
   let data = {
     userId: sessionStorage.getItem("userId"),
   }
-  console.log("line 13", sessionStorage.getItem("accessToken"))
   if(!sessionStorage.getItem("accessToken")){
     router.push('/login')
 
@@ -23,7 +22,7 @@ function userLogout(){
   }
 
   axios({
-    url: "http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/user/logout",
+    url: "https://api.rentings.me/prop-app/user/logout",
     method: "get",
     params: data,
   }).then(response => {

@@ -5,8 +5,8 @@ import layoutsPlugin from '@/plugins/layouts'
 import vuetify from '@/plugins/vuetify'
 import { loadFonts } from '@/plugins/webfontloader'
 import router from '@/router'
-import ability from '@/plugins/casl/ability'
-import { abilitiesPlugin } from '@casl/vue'
+// import ability from '@/plugins/casl/ability'
+// import { abilitiesPlugin } from '@casl/vue'
 import '@core/scss/template/index.scss'
 import '@styles/styles.scss'
 import { createPinia } from 'pinia'
@@ -24,9 +24,9 @@ app.use(vuetify)
 app.use(createPinia())
 app.use(router)
 app.use(layoutsPlugin)
-app.use(abilitiesPlugin, ability, {
-  useGlobalProperties: true,
-})
+// app.use(abilitiesPlugin, ability, {
+//   useGlobalProperties: true,
+// })
 
 // Mount vue app
 app.mount('#app')

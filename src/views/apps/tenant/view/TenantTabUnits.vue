@@ -88,7 +88,7 @@ function getFloorUnits(){
     sendData['propertyId'] = selectedPropertyToAssign.value
     sendData['floor'] = selectedFloorToAssign.value
 
-    axios.get("http://localhost:8000/prop-app/floors/units", {
+    axios.get("https://api.rentings.me/prop-app/floors/units", {
       params: sendData,
       headers: {
         'Authorization': sessionStorage.getItem('accessToken'),

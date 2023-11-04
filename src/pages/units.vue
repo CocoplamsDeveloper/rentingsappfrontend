@@ -151,7 +151,7 @@ function getAllUnits(){
   }
 
   axios({
-    url: 'http://localhost:8000/prop-app/allunits/get',
+    url: 'https://api.rentings.me/prop-app/allunits/get',
     method: 'GET',
     params: queryData,
     headers: {

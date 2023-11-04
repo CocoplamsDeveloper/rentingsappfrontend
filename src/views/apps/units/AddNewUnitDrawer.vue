@@ -2,7 +2,7 @@
 import { refreshUserLogin } from '@/common/reusing_functions'
 import axios from '@axios'
 import {
-  requiredValidator,
+requiredValidator,
 } from '@validators'
 import { watchEffect } from 'vue'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
@@ -74,7 +74,7 @@ const onUnitFormSubmit = () => {
       }
 
       axios({
-        url: "http://localhost:8000/prop-app/units/add",
+        url: "https://api.rentings.me/prop-app/units/add",
         method: 'POST',
         data: sendData,
         headers: {
@@ -113,7 +113,7 @@ function populatePropertiesList(){
     "userId": sessionStorage.getItem('userId'),
   }
 
-  axios('http://localhost:8000/prop-app/landlord-prop/get', {
+  axios.get('https://api.rentings.me/prop-app/landlord-prop/get', {
     params: queryData,
     headers: {
       "Authorization": sessionStorage.getItem("AccessToken"),
