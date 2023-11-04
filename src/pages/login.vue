@@ -1,5 +1,4 @@
 <script setup>
-// import { useAppAbility } from '@/plugins/casl/useAppAbility'
 
 import axios from '@axios'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
