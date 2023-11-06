@@ -1,9 +1,9 @@
 <script setup>
-import PropertyUpdateDialog from '@/components/dialogs/PropertyUpdateDialog.vue'
+import PropertyUpdateDialog from '@/components/dialogs/PropertyUpdateDialog.vue';
 import {
-  avatarText,
-  kFormatter,
-} from '@core/utils/formatters'
+avatarText,
+kFormatter,
+} from '@core/utils/formatters';
 
 const props = defineProps({
   propertyData: {
@@ -85,7 +85,7 @@ const resolveUserRoleVariant = role => {
           >
             <VImg
               v-if="props.propertyData.property_image"
-              :src="'http://localhost:8000/media/'+props.propertyData.property_image"
+              :src="'http://127.0.0.1:8000/media/'+props.propertyData.property_image"
             />
             <span
               v-else

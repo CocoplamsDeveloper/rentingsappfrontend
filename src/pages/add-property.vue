@@ -117,7 +117,7 @@ async function getUserPropertiesList(){
   }
 
   axios({
-    url: 'http://localhost:8000/prop-app/landlord-prop/get',
+    url: 'http://127.0.0.1:8000/prop-app/landlord-prop/get',
     params: queryData,
     method: "GET",
     headers: {

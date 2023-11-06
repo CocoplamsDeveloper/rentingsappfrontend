@@ -1,8 +1,8 @@
 <script setup>
-import { VDataTableServer } from 'vuetify/labs/VDataTable'
 import { paginationMeta } from '@/@fake-db/utils'
 import { useInvoiceStore } from '@/views/apps/invoice/useInvoiceStore'
 import { avatarText } from '@core/utils/formatters'
+import { VDataTableServer } from 'vuetify/labs/VDataTable'
 
 const invoiceListStore = useInvoiceStore()
 const searchQuery = ref('')
@@ -184,7 +184,7 @@ watchEffect(() => {
         :to="{ name: 'apps-invoice-add' }"
         class="me-3"
       >
-        Create invoice
+        Create invoice3
       </VBtn>
 
       <VSpacer />

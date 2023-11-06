@@ -1,7 +1,7 @@
 <script setup>
+import { hexToRgb } from '@layouts/utils'
 import VueApexCharts from 'vue3-apexcharts'
 import { useTheme } from 'vuetify'
-import { hexToRgb } from '@layouts/utils'
 
 const vuetifyTheme = useTheme()
 const series = [78]
@@ -93,23 +93,57 @@ const chartOptions = computed(() => {
 <template>
   <VCard>
     <VCardText>
-      <div class="mb-n2">
+      <!--
+        <div class="mb-n2">
         <h5 class="text-h5">
-          82.5k
+        82.5k
         </h5>
         <span class="text-disabled text-sm">Expenses</span>
-      </div>
+        </div> 
+      -->
 
+      <VAvatar
+        color="rgb(141 136 136)"
+        variant="tonal"
+        rounded
+        size="42"
+      >
+        <VIcon icon="tabler-users-group" />
+      </VAvatar>
+      <!--
+        <VChip
+        color="disabled"
+        label
+        style="float: right; height: 40px;"
+        >
+        82/144
+        </VChip> 
+      -->
       <VueApexCharts
         :options="chartOptions"
         :series="series"
         type="radialBar"
-        :height="155"
+        :height="150"
       />
 
-      <div class="text-sm text-center clamp-text text-disabled mt-3">
-        $21k Expenses more than last month
-      </div>
+      <p
+        class="text-sm text-center clamp-text text-disabled mt-3"
+        style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;"
+      >
+        Tenants Paid This Month
+      </p>
+
+      <!--
+        <p class="mb-3">
+        1100 88
+        </p> 
+      -->
+      <VChip
+        color="disabled"
+        label
+      >
+        <span style="font-size: 20px;">82</span><span style="font-size: 14px;">/144</span>
+      </VChip>
     </VCardText>
   </VCard>
 </template>

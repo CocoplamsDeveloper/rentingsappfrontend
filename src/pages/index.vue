@@ -36,26 +36,46 @@ import CrmEarningReportsYearlyOverview from '@/views/dashboards/crm/CrmEarningRe
 import CrmProjectStatus from '@/views/dashboards/crm/CrmProjectStatus.vue'
 import CrmRecentTransactions from '@/views/dashboards/crm/CrmRecentTransactions.vue'
 import CrmRevenueGrowth from '@/views/dashboards/crm/CrmRevenueGrowth.vue'
-import CrmSalesAreaCharts from '@/views/dashboards/crm/CrmSalesAreaCharts.vue'
-import CrmSessionsBarWithGapCharts from '@/views/dashboards/crm/CrmSessionsBarWithGapCharts.vue'
+import EcommerceExpensesRadialBarCharts from '@/views/dashboards/ecommerce/EcommerceExpensesRadialBarCharts.vue'
+import InvoiceList from '@/views/dashboards/invoice/InvoiceList.vue'
 
 const simpleStatisticsDemoCards = [
   {
     icon: 'tabler-currency-dollar',
-    color: 'error',
-    title: 'Total Profit',
-    subTitle: 'Last week',
-    stat: '1.28k',
+    color: 'info',
+    title: 'Pending Due',
+    subTitle: 'This Month',
+    stat: '12800 KWD',
     change: '-12.2%',
+    bgc: "#fff",
   },
   {
-    icon: 'tabler-chart-bar',
-    color: 'info',
-    title: 'Total Sales',
-    subTitle: 'Last week',
-    stat: '$4,673',
+    icon: 'tabler-currency-dollar',
+    color: 'error',
+    title: 'Overdue',
+    subTitle: 'Till Date',
+    stat: '800 KWD',
     change: '+25.2%',
+    bgc: "#fff",
   },
+  {
+    icon: 'tabler-currency-dollar',
+    color: 'success',
+    title: 'Payments',
+    subTitle: 'This Month',
+    stat: '52600 KWD',
+    change: '+25.2%',
+    bgc: "#fff",
+  },
+
+  // {
+  //   icon: 'tabler-chart-bar',
+  //   color: 'info',
+  //   title: 'Overdue',
+  //   subTitle: 'Till Date',
+  //   stat: '4,673 KWD',
+  //   change: '+25.2%',
+  // },
 ]
 
 onMounted(()=>{
@@ -75,23 +95,6 @@ onMounted(()=>{
     >
       <CrmRevenueGrowth />
     </VCol>
-    <VCol
-      cols="12"
-      md="4"
-      sm="6"
-      lg="2"
-    >
-      <CrmSalesAreaCharts />
-    </VCol>
-
-    <VCol
-      cols="12"
-      md="4"
-      sm="6"
-      lg="2"
-    >
-      <CrmSessionsBarWithGapCharts />
-    </VCol>
 
     <VCol
       v-for="demo in simpleStatisticsDemoCards"
@@ -101,7 +104,7 @@ onMounted(()=>{
       md="4"
       lg="2"
     >
-      <VCard>
+      <VCard :color="demo.bgc">
         <VCardText>
           <VAvatar
             :color="demo.color"
@@ -131,7 +134,42 @@ onMounted(()=>{
       </VCard>
     </VCol>
 
+    <VCol
+      cols="12"
+      md="4"
+      sm="6"
+      lg="2"
+    >
+      <EcommerceExpensesRadialBarCharts />
+    </VCol>
 
+    <!--
+      <VCol
+      cols="12"
+      md="4"
+      sm="6"
+      lg="2"
+      >
+      <CrmSalesAreaCharts />
+      </VCol>
+
+      <VCol
+      cols="12"
+      md="4"
+      sm="6"
+      lg="2"
+      >
+      <CrmSessionsBarWithGapCharts />
+      </VCol> 
+    -->
+
+    <!-- 👉 Earning Reports -->
+    <VCol
+      cols="12"
+      md="8"
+    >
+      <InvoiceList />
+    </VCol>
 
     <!-- 👉 Earning Reports -->
     <VCol

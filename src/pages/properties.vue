@@ -110,7 +110,7 @@ const editPropertyItem = item => {
 
     return 
   }
-  axios.get("http://localhost:8000/prop-app/property/"+item, {
+  axios.get("http://127.0.0.1:8000/prop-app/property/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),
@@ -153,7 +153,7 @@ const prefillPropertyEditForm = property => {
   else{
     statusToggleSwitch.value = true
   }
-  propertyEditFormImage.value ='http://localhost:8000/media/'+property.property_image
+  propertyEditFormImage.value ='http://127.0.0.1:8000/media/'+property.property_image
 }
 
 const deleteItem = item => {
@@ -245,7 +245,7 @@ function updatedImageUpload(e){
     propPageAlertSnackbar.value.message = "Image size should be less then 2MB"
     propPageAlertSnackbar.value.color = "error"
     propPageAlertSnackbar.value.show = true
-    propertyEditFormImage.value = 'http://localhost:8000/media/'+editedItemObj.value.propertyImage
+    propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedItemObj.value.propertyImage
     imageUpdateField.value?.reset()
 
     return
@@ -256,7 +256,7 @@ function updatedImageUpload(e){
 
 
 function imageFieldChecker(){
-  propertyEditFormImage.value = 'http://localhost:8000/media/'+editedItemObj.value.propertyImage
+  propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedItemObj.value.propertyImage
 }
 
 function goToAddPage(){
@@ -274,7 +274,7 @@ function getAllProperties(){
     return 
   }
 
-  axios.get("http://localhost:8000/prop-app/alllandlord/props", {
+  axios.get("http://127.0.0.1:8000/prop-app/alllandlord/props", {
     params: queryData,
     headers: {
       'Authorization': sessionStorage.getItem("accessToken"),
@@ -504,7 +504,7 @@ onMounted(() => {
                 >
                   <VImg
                     v-if="item.raw.details.property_image"
-                    :src="'http://localhost:8000/media/'+item.raw.details.property_image"
+                    :src="'http://127.0.0.1:8000/media/'+item.raw.details.property_image"
                   />
                   <span v-else>{{ avatarText(item.raw.details.property_name) }}</span>
                 </VAvatar>

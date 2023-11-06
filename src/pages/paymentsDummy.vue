@@ -1,6 +1,7 @@
 <script setup>
 import { paginationMeta } from '@/@fake-db/utils'
 import { useInvoiceStore } from '@/views/apps/invoice/useInvoiceStore'
+import { avatarText } from '@core/utils/formatters'
 import { VDataTableServer } from 'vuetify/labs/VDataTable'
 
 const invoiceListStore = useInvoiceStore()
@@ -13,7 +14,7 @@ const selectedRows = ref([])
 
 const options = ref({
   page: 1,
-  itemsPerPage: 6,
+  itemsPerPage: 10,
   sortBy: [],
   groupBy: [],
   search: undefined,
@@ -36,6 +37,10 @@ const headers = [
     sortable: false,
   },
   {
+    title: 'Client',
+    key: 'client',
+  },
+  {
     title: 'Total',
     key: 'total',
   },
@@ -44,10 +49,13 @@ const headers = [
     key: 'date',
   },
   {
+    title: 'Balance',
+    key: 'balance',
+  },
+  {
     title: 'Actions',
     key: 'actions',
     sortable: false,
-    width: '2rem',
   },
 ]
 
@@ -68,6 +76,25 @@ const fetchInvoices = (query, currentStatus, firstDate, lastDate, option) => {
     console.log(error)
   })
   isLoading.value = false
+}
+
+// 👉 Invoice balance variant resolver
+const resolveInvoiceBalanceVariant = (balance, total) => {
+  if (balance === total)
+    return {
+      status: 'Unpaid',
+      chip: { color: 'error' },
+    }
+  if (balance === 0)
+    return {
+      status: 'Paid',
+      chip: { color: 'success' },
+    }
+  
+  return {
+    status: balance,
+    chip: { variant: 'text' },
+  }
 }
 
 const resolveInvoiceStatusVariantAndIcon = status => {
@@ -153,12 +180,11 @@ watchEffect(() => {
     v-if="invoices"
     id="invoice-list"
   >
-    <VCardText class="d-flex align-center flex-wrap gap-4 py-4">
+    <VCardText class="d-flex align-center flex-wrap gap-4">
       <div class="me-3 d-flex gap-3">
         <AppSelect
           :model-value="options.itemsPerPage"
           :items="[
-            { value: 6, title: '6' },
             { value: 10, title: '10' },
             { value: 25, title: '25' },
             { value: 50, title: '50' },
@@ -169,11 +195,8 @@ watchEffect(() => {
           @update:model-value="options.itemsPerPage = parseInt($event, 10)"
         />
         <!-- 👉 Create invoice -->
-        <VBtn
-          prepend-icon="tabler-plus"
-          :to="{ name: 'apps-invoice-add' }"
-        >
-          Create invoice2
+        <VBtn prepend-icon="tabler-plus">
+          Create invoice1
         </VBtn>
       </div>
 
@@ -260,6 +283,30 @@ watchEffect(() => {
         </VTooltip>
       </template>
 
+      <!-- client -->
+      <template #item.client="{ item }">
+        <div class="d-flex align-center">
+          <VAvatar
+            size="38"
+            :color="!item.raw.avatar.length ? resolveInvoiceStatusVariantAndIcon(item.raw.invoiceStatus).variant : undefined"
+            :variant="!item.raw.avatar.length ? 'tonal' : undefined"
+            class="me-3"
+          >
+            <VImg
+              v-if="item.raw.avatar.length"
+              :src="item.raw.avatar"
+            />
+            <span v-else>{{ avatarText(item.raw.client.name) }}</span>
+          </VAvatar>
+          <div class="d-flex flex-column">
+            <h6 class="text-body-1 font-weight-medium mb-0">
+              {{ item.raw.client.name }}
+            </h6>
+            <span class="text-sm text-disabled">{{ item.raw.client.companyEmail }}</span>
+          </div>
+        </div>
+      </template>
+
       <!-- Total -->
       <template #item.total="{ item }">
         ${{ item.raw.total }}
@@ -268,6 +315,23 @@ watchEffect(() => {
       <!-- Date -->
       <template #item.date="{ item }">
         {{ item.raw.issuedDate }}
+      </template>
+
+      <!-- Balance -->
+      <template #item.balance="{ item }">
+        <VChip
+          v-if="typeof ((resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status) === 'string'"
+          :color="resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total).chip.color"
+          label
+        >
+          {{ (resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status }}
+        </VChip>
+
+        <template v-else>
+          <span class="text-base">
+            {{ Number((resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status) > 0 ? `$${(resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status}` : `-$${Math.abs(Number((resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status))}` }}
+          </span>
+        </template>
       </template>
 
       <!-- Actions -->
@@ -281,9 +345,9 @@ watchEffect(() => {
         </IconBtn>
 
         <MoreBtn
-          color="default"
           :menu-list="computedMoreList(item.raw.id)"
           item-props
+          color="undefined"
         />
       </template>
 
@@ -291,8 +355,7 @@ watchEffect(() => {
 
       <template #bottom>
         <VDivider />
-
-        <div class="d-flex align-center justify-center justify-sm-space-between flex-wrap gap-3 pa-5 pt-3">
+        <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3">
           <p class="text-sm text-disabled mb-0">
             {{ paginationMeta(options, totalInvoices) }}
           </p>
@@ -300,7 +363,7 @@ watchEffect(() => {
           <VPagination
             v-model="options.page"
             :length="Math.ceil(totalInvoices / options.itemsPerPage)"
-            :total-visible="$vuetify.display.xs ? 1 : 5"
+            :total-visible="$vuetify.display.xs ? 1 : Math.ceil(totalInvoices / options.itemsPerPage)"
           >
             <template #prev="slotProps">
               <VBtn
@@ -342,3 +405,4 @@ watchEffect(() => {
   }
 }
 </style>
+
