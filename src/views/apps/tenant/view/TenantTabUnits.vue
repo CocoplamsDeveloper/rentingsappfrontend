@@ -1,10 +1,10 @@
 <script setup>
-import AppCombobox from '@/@core/components/app-form-elements/AppCombobox.vue'
-import { requiredValidator } from '@/@core/utils/validators'
 import { paginationMeta } from '@/@fake-db/utils'
 import { populatePropertiesList, refreshUserLogin } from '@/common/reusing_functions'
+import AssignToTenent from '@/views/apps/units/AssignToTenent.vue'
 import axios from '@axios'
 import { VDataTable } from 'vuetify/labs/VDataTable'
+
 
 
 const props = defineProps({
@@ -94,6 +94,7 @@ function getFloorUnits(){
         'Authorization': sessionStorage.getItem('accessToken'),
       },
     }).then(response => {
+      console.log("units response", response)
       availableUnits.value = response.data.units
     }).catch(error => {
       console.log(error)
@@ -152,6 +153,8 @@ const downloadContractDocument = (Id, tenantName) => {
       'Authorization': sessionStorage.getItem("accessToken"),
     },
   }).then(response => {
+    console.log("download", response)
+
     const downloadUrl = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
 
@@ -206,49 +209,6 @@ const createTenancyRecord = () =>{
       }
 
       console.log(tenancyData)
-
-
-      //     let currentDate = new Date()
-      //     if(new Date(tenancyStartDate.value).getTime() <= currentDate.getTime()){
-      //       tenantTabAlertSnackbar.value.message = "Please enter a valid Start Date"
-      //       tenantTabAlertSnackbar.value.color = "error"
-      //       tenantTabAlertSnackbar.value.show = true
-
-      //       return
-      //     }
-      //     if(new Date(tenancyEndDate.value).getTime() <= currentDate.getTime()){
-      //       tenantTabAlertSnackbar.value.message = "Please enter a valid End Date"
-      //       tenantTabAlertSnackbar.value.color = "error"
-      //       tenantTabAlertSnackbar.value.show = true
-
-      //       return
-      //     }
-      //     const formData = new FormData()
-
-      //     formData.append('userId', sessionStorage.getItem('userId'))
-      //     formData.append('tenancyData', JSON.stringify(tenancyData))
-      //     if(contractDocument.value){
-      //       formData.append('contractDoc', contractDocument.value)
-      //     }
-
-      //     axios.post("http://127.0.0.1:8000/prop-app/tenancy-record/create", formData, {
-      //       headers: {
-      //         'Authorization': sessionStorage.getItem("accessToken"),
-      //       },
-      //     }).then(response => {
-      //       tenantTabAlertSnackbar.value.message = response.data.message
-      //       tenantTabAlertSnackbar.value.color = "success"
-      //       tenantTabAlertSnackbar.value.show = true
-      //       assignUnitForm?.value.reset()
-      //       isAssignUnitDialogVisible.value = false
-      //     }).catch(error => {
-      //       tenantTabAlertSnackbar.value.message = error.response.data.message
-      //       tenantTabAlertSnackbar.value.color = "error"
-      //       tenantTabAlertSnackbar.value.show = true
-      //       assignUnitForm?.value.reset()
-      //       isAssignUnitDialogVisible.value = false
-      //     })
-      //   }
     }
   })
 }
@@ -546,130 +506,135 @@ onMounted(() => {
       </VCard>
     </VCol>
   </VRow>
+  <AssignToTenent v-model:isDrawerOpen="isAssignUnitDialogVisible" />
 
-  <VDialog
+  
+  <!--
+    <VDialog
     v-model="isAssignUnitDialogVisible"
     max-width="600"
     persistent
-  > 
+    > 
     <DialogCloseBtn @click="isAssignUnitDialogVisible = !isAssignUnitDialogVisible" />
 
     <VCard title="Assign Unit">
-      <VCardText>
-        <VForm ref="assignUnitForm">
-          <VRow>
-            <VCol
-              cols="12"
-              sm="6"
-            >
-              <AppSelect
-                v-model="selectedPropertyToAssign"
-                label="Select Property"
-                :items="propertyList"
-                item-title="propertyName"
-                item-value="propertyId"
-                :rules="[requiredValidator]"
-                chips
-              />
-            </VCol>
-            <VCol
-              cols="12"
-              sm="6"
-            >
-              <AppSelect
-                v-model="selectedFloorToAssign"
-                label="Select Floor"
-                :items="floorsArr"
-                item-title="text"
-                item-value="value"
-                :rules="[requiredValidator]"
-                chips
-              />
-            </VCol>
-            <VCol
-              cols="12"
-              sm="6"
-            >
-              <AppSelect
-                v-model="selectedUnitToAssign"
-                :items="availableUnits"
-                item-title="unit_name"
-                item-value="unit_id"
-                :rules="[requiredValidator]"
-                label="Select Unit"
-                chips
-              />
-            </VCol>
+    <VCardText>
+    <VForm ref="assignUnitForm">
+    <VRow>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppSelect
+    v-model="selectedPropertyToAssign"
+    label="Select Property"
+    :items="propertyList"
+    item-title="propertyName"
+    item-value="propertyId"
+    :rules="[requiredValidator]"
+    chips
+    />
+    </VCol>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppSelect
+    v-model="selectedFloorToAssign"
+    label="Select Floor"
+    :items="floorsArr"
+    item-title="text"
+    item-value="value"
+    :rules="[requiredValidator]"
+    chips
+    />
+    </VCol>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppSelect
+    v-model="selectedUnitToAssign"
+    :items="availableUnits"
+    item-title="unit_name"
+    item-value="unit_id"
+    :rules="[requiredValidator]"
+    label="Select Unit"
+    chips
+    />
+    </VCol>
 
-            <VCol
-              cols="12"
-              sm="6"
-            >
-              <AppTextField
-                v-model="selectedUnitRent"
-                :rules="[requiredValidator]"
-                label="Monthly Rent"
-              />
-            </VCol>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppTextField
+    v-model="selectedUnitRent"
+    :rules="[requiredValidator]"
+    label="Monthly Rent"
+    />
+    </VCol>
 
-            <VCol
-              cols="12"
-              sm="6"
-            >
-              <AppCombobox
-                v-model="selectedContractPeriod"
-                :items="[3, 6, 12, 18, 24]"
-                :rules="[requiredValidator]"
-                label="Select Contract Period(Months)"
-                chips
-              />
-            </VCol>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppCombobox
+    v-model="selectedContractPeriod"
+    :items="[3, 6, 12, 18, 24]"
+    :rules="[requiredValidator]"
+    label="Select Contract Period(Months)"
+    chips
+    />
+    </VCol>
 
-            <VCol
-              cols="12"
-              sm="6"
-            >
-              <AppDateTimePicker
-                v-model="tenancyStartDate"
-                :rules="[requiredValidator]"
-                label="Contract Start Date"
-              />
-            </VCol>
-            <VCol
-              cols="12"
-              sm="6"
-            >
-              <AppDateTimePicker
-                v-model="tenancyEndDate"
-                label="Contract End Date"
-                :rules="[requiredValidator]"
-              />
-            </VCol>
-            <VCol cols="12">
-              <label>Contract Document</label>
-              <VFileInput
-                ref="contractDocRef"
-                label="Document"
-                @change="handleContractDoc"
-              />
-            </VCol>
-          </VRow>
-        </VForm>
-      </VCardText>
-      <VCardText class="d-flex justify-end flex-wrap gap-3">
-        <VBtn
-          variant="tonal"
-          color="secondary"
-          @click="closeUnitAssignForm"
-        >
-          Close
-        </VBtn>
-        <VBtn @click="createTenancyRecord">
-          Save
-        </VBtn>
-      </VCardText>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppDateTimePicker
+    v-model="tenancyStartDate"
+    :rules="[requiredValidator]"
+    label="Contract Start Date"
+    />
+    </VCol>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppDateTimePicker
+    v-model="tenancyEndDate"
+    label="Contract End Date"
+    :rules="[requiredValidator]"
+    />
+    </VCol>
+    <VCol cols="12">
+    <label>Contract Document</label>
+    <VFileInput
+    ref="contractDocRef"
+    label="Document"
+    @change="handleContractDoc"
+    />
+    </VCol>
+    </VRow>
+    </VForm>
+    </VCardText>
+    <VCardText class="d-flex justify-end flex-wrap gap-3">
+    <VBtn
+    variant="tonal"
+    color="secondary"
+    @click="closeUnitAssignForm"
+    >
+    Close
+    </VBtn>
+    <VBtn @click="createTenancyRecord">
+    Save
+    </VBtn>
+    </VCardText>
     </VCard>
-  </VDialog>
+    </VDialog>  
+  -->
+ 
 
   <VSnackbar
     v-model="tenantTabAlertSnackbar.show"

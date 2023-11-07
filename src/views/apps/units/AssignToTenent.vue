@@ -1,5 +1,9 @@
 <script setup>
 import { refreshUserLogin } from '@/common/reusing_functions'
+
+// import PaymentModeCheckbox from '../tenant/assign/PaymentModeCheckbox.vue'
+
+// import PaymentModeCheckbox from '@/views/apps/tenant/assign/PaymentModeCheckbox.vue'
 import axios from '@axios'
 import {
   requiredValidator,
@@ -38,6 +42,30 @@ const isInputEnabled = ref(false)
 const role = ref()
 const plan = ref()
 const status = ref()
+
+const colorCheckbox = ref([
+  'Cash',
+  'Cheque',
+  'Online',
+])
+
+const needsCheck = ref([
+  'Water',
+  'Electricity',
+  'Telephone',
+  'Internet',
+])
+
+const selectedCheckbox = ref([])
+const selectCheckMethod = ref([])
+
+watch(unitProperty, (newValue, oldValue) => {
+  // Handle the change in unitProperty here
+  console.log('New value:', newValue)
+  console.log('Old value:', oldValue)
+
+  // You can perform any additional logic or actions as needed
+})
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
@@ -200,7 +228,7 @@ onMounted(() => {
               <VCol cols="12">
                 <AppSelect
                   v-model="unitProperty"
-                  label="Select Property"
+                  label="Property"
                   :rules="[requiredValidator]"
                   :items="fetchedPropertyList"
                   item-title="propertyName"
@@ -211,7 +239,7 @@ onMounted(() => {
               <VCol cols="12">
                 <AppSelect
                   v-model="unitFloor"
-                  label="Select Floor"
+                  label="Floor"
                   :items="floorList"
                   item-title="text"
                   item-value="value"
@@ -246,76 +274,123 @@ onMounted(() => {
                 />
               </VCol>
 
-              <!-- 👉 Country -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="unitBedrooms"
+                  v-model="unitDiscount"
                   type="number"
                   :rules="[requiredValidator]"
-                  label="Nos. of Bedrooms"
+                  label="Discount"
                 />
               </VCol>
 
-              <!-- 👉 Contact -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="unitBathrooms"
+                  v-model="unitNetPayable"
                   type="number"
                   :rules="[requiredValidator]"
-                  label="Nos. of bathrooms"
+                  label="Net Payable"
                 />
               </VCol>
 
               <VCol cols="12">
                 <AppTextField
-                  v-model="unitSize"
+                  v-model="unitContract"
                   type="number"
                   :rules="[requiredValidator]"
-                  label="Unit Size"
+                  label="Contract (Months)"
                 />
               </VCol>
-
-              <!-- 👉 Status -->
-              <VCol cols="12">
-                <AppSelect
-                  v-model="unitStatus"
-                  label="Select Status"
+              <VCol
+                cols="12"
+                sm="12"
+              >
+                <AppCombobox
+                  v-model="selectedContractPeriod"
+                  :items="[3, 6, 12, 18, 24]"
                   :rules="[requiredValidator]"
-                  :items="['vacant', 'occupied']"
+                  label="Select Contract Period(Months)"
+                  chips
                 />
               </VCol>
 
-
-              <!--
-                <VCol cols="12">
-                <VCheckbox
-                v-model="singleUnitsCheck"
-                label="Single Unit"
+              <VCol cols="12">
+                <AppDateTimePicker
+                  v-model="unitStartDate"
+                  :rules="[requiredValidator]"
+                  label="Start Date"
                 />
-                <VRow>
-                <VCol
-                cols="2"
-                sm="1"
-                class="d-flex align-end"
-                >
-                <VCheckbox v-model="multipleUnitsCheck" />
-                </VCol>
+              </VCol>
+              <VCol cols="12">
+                <AppDateTimePicker
+                  v-model="unitEndDate"
+                  :rules="[requiredValidator]"
+                  label="Start Date"
+                />
+              </VCol>
 
-                <VCol
-                cols="8"
-                sm="11"
-                >
+              
+              <VCol
+                cols="12"
+                md="12"
+              >
+                <p>Payment Methods</p>
+                <!-- 👉 Colors -->
+                <div class="demo-space-x">
+                  <VCheckbox
+                    v-for="color in colorCheckbox"
+                    :key="color"
+                    v-model="selectedCheckbox"
+                    :label="color"
+                    :color="color.toLowerCase()"
+                    :value="color"
+                  />
+                </div>
+              </VCol>
+              <VCol cols="12">
                 <AppTextField
-                :disabled="!multipleUnitsCheck"
-                placeholder="Enter nos of units"
+                  v-model="unitAdvance"
+                  type="number"
+                  :rules="[requiredValidator]"
+                  label="Advance"
                 />
-                </VCol>
-                </VRow>
-                </VCol> 
-              -->
+              </VCol>
 
+              <VCol cols="12">
+                <AppTextField
+                  v-model="unitInsurance"
+                  type="number"
+                  :rules="[requiredValidator]"
+                  label="Insurance"
+                />
+              </VCol>
 
-              <!-- 👉 Submit and Cancel -->
+              <VCol cols="12">
+                <AppTextField
+                  v-model="unitRealEstateFee"
+                  type="number"
+                  :rules="[requiredValidator]"
+                  label="Real Estate Fee"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="12"
+              >
+                <p>Needs</p>
+                <!-- 👉 Colors -->
+                <div class="demo-space-x">
+                  <VCheckbox
+                    v-for="color in needsCheck"
+                    :key="color"
+                    v-model="selectCheckMethod"
+                    :label="color"
+                    :color="color.toLowerCase()"
+                    :value="color"
+                  />
+                </div>
+              </VCol>
+              
               <VCol cols="12">
                 <VBtn
                   class="me-3"
