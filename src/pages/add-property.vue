@@ -22,6 +22,7 @@ const propertyDescription = ref()
 const propertyIdNo = ref()
 const propertyImageRef = ref()
 const selectedProperty = ref(null)
+const otherDetailsProperty = ref()
 const propertyType = ref()
 const propDetailsForm = ref()
 const alertSnackbar = ref({ show: false, message: null, color: null })
@@ -73,11 +74,13 @@ async function addPropertyFunc(){
         },
 
       }).then(response => {
+        console.log(response)
         if(response.status === 201){
           alertSnackbar.value.message = response.data.message
           alertSnackbar.value.color = "success"
           alertSnackbar.value.show = true
           propDetailsForm?.value.reset()
+          otherDetailsProperty.value = response.data.propertyName
         }
 
       }).catch(error => {
@@ -99,10 +102,23 @@ async function addPropertyFunc(){
   })
 }
 
-async function submitPropertyGoToOther(){
-  await addPropertyFunc()
-  tab.value = "other-details"
+// const continueButtonFunc = async () => {
+//   await addPropertyFunc()
+//   tab.value = "other-details"
+// }
 
+async function submitPropertyGoToOther(){
+
+  await addPropertyFunc()
+  let task = new Promise(function(resolve, reject){
+    tab.value = "other-details"
+    resolve(true)
+  })
+  task.then(
+    selectedProperty.value = otherDetailsProperty.value
+  )
+  // await continueButtonFunc()
+  // selectedProperty.value = otherDetailsProperty.value
 }
 
 
@@ -400,7 +416,6 @@ onMounted(() => {
         <VWindowItem
           ref="otherDetailsWindow"
           value="other-details"
-          @click="getUserPropertiesList"
         >
           <VForm
             ref="otherDetailsForm" 
@@ -411,12 +426,9 @@ onMounted(() => {
                 cols="12"
                 md="6"
               >
-                <AppSelect
+                <AppTextField
                   v-model="selectedProperty"
-                  :items="availableProperties"
-                  item-title="propertyName"
-                  item-value="propertyId"
-                  label="Select Property"
+                  label="Property Name"
                 />
               </VCol>
 

@@ -12,6 +12,7 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+
 })
 
 const emit = defineEmits([
@@ -90,7 +91,7 @@ const onUnitFormSubmit = () => {
         unitDrawerAlert.value.message = error.response.data.message
         unitDrawerAlert.value.color = "error"
         unitDrawerAlert.value.show = true
-        if(error.response.status === 401){
+        if(error.response.status === 403){
           refreshUserLogin()
         }
       })
@@ -98,6 +99,7 @@ const onUnitFormSubmit = () => {
     }
   })
 }
+
 
 const handleDrawerModelValueUpdate = val => {
   emit('update:isDrawerOpen', val)

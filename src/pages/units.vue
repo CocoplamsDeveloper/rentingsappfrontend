@@ -14,13 +14,13 @@ const options = ref({
   search: undefined,
 })
 
-const searchQuery = ref()
+const unitsSearchQuery = ref()
 const isAddNewUnitDrawerVisible = ref(false)
-const unitTypeFilter = ref()
+const unitTypeFilter = ref(null)
 const isUnitsFilterDialogVisible = ref(false)
-const unitStatusFilter = ref()
-const unitPropertyFilter = ref()
-const unitRentFilter = ref(0)
+const unitStatusFilter = ref(null)
+const unitPropertyFilter = ref(null)
+const unitRentFilter = ref(null)
 const propertyListArr = ref()
 const isUnitsCsvDialogVisible = ref(false)
 
@@ -137,6 +137,60 @@ const fetchedUnitsList = ref([])
 
 const getFilteredUnits = () => {
 
+  let queryData = {
+    "userId" : sessionStorage.getItem("userId"),
+  }
+  if(unitTypeFilter.value){
+    queryData['type'] = unitTypeFilter.value
+  }
+  if(unitStatusFilter.value){
+    queryData['status'] = unitStatusFilter.value
+  }
+  if(unitPropertyFilter.value){
+    queryData['property'] = unitPropertyFilter.value
+  }
+  if(unitRentFilter.value){
+    queryData['rent'] = unitRentFilter.value
+  }
+
+  axios.get("http://localhost:8000/prop-app/units/filter", {
+    params: queryData,
+    headers: {
+      'Authorization' : sessionStorage.getItem('accessToken')
+    }
+  }).then((response) => {
+    fetchedUnitsList.value = response.data.filteredData
+    isUnitsFilterDialogVisible.value = false
+  }).catch((error) => {
+    if(error.response.status === 403){
+      refreshUserLogin();
+    }
+  })
+
+}
+
+function unitsSearchedResults(){
+    if(unitsSearchQuery.value !== null || unitsSearchQuery.value !== ''){
+
+      let queryData = {
+        "userId" : sessionStorage.getItem('userId'),
+        "searchParam" : unitsSearchQuery.value
+      }
+
+      axios.get("http://localhost:8000/prop-app/unit/search", {
+        params: queryData,
+        headers: {
+          'Authorization' : sessionStorage.getItem('accessToken')
+        }        
+      }).then((response) => {
+        fetchedUnitsList.value = response.data.result
+      }).catch((error) => {
+        if(error.response.status === 403){
+          refreshUserLogin();
+        }
+      })
+
+    }
 }
 
 function getAllUnits(){
@@ -158,8 +212,8 @@ function getAllUnits(){
       'Authorization': sessionStorage.getItem("accessToken"),
     },
   }).then(response => {
-    console.log(response)
     fetchedUnitsList.value = response.data.unitsData
+    rentSliderMax.value = response.data.currentMaxRent
   }).catch(error => {
     if(error.response.status === 401){
       refreshUserLogin()
@@ -173,6 +227,9 @@ const clearSelectedFilterOptions = () => {
   unitTypeFilter.value = ""
   unitPropertyFilter.value = ""
   unitStatusFilter.value = ""
+  unitRentFilter.value = ""
+  getAllUnits()
+  isUnitsFilterDialogVisible.value = false
 }
 
 
@@ -248,10 +305,11 @@ onMounted(() => {
 
             <div style="inline-size: 20rem;">
               <AppTextField
-                v-model="searchQuery"
+                v-model="unitsSearchQuery"
                 placeholder="Search"
                 density="compact"
                 append-inner-icon="tabler-search"
+                @keyup.enter="unitsSearchedResults"
               />
             </div>
             <VSpacer />
@@ -355,7 +413,7 @@ onMounted(() => {
           <!-- SECTION -->
         </VCard>
 
-        <AddNewUnitDrawer v-model:isDrawerOpen="isAddNewUnitDrawerVisible" />
+        <AddNewUnitDrawer v-model:isDrawerOpen="isAddNewUnitDrawerVisible"/>
       </VCol>
     </VRow>
   </section>
@@ -424,7 +482,7 @@ onMounted(() => {
         >
           Clear
         </VBtn>
-        <VBtn @click="isUnitsFilterDialogVisible = false">
+        <VBtn @click="getFilteredUnits">
           Apply
         </VBtn>
       </VCardText>
