@@ -32,6 +32,9 @@ const updatedImageFile = ref()
 const imageUpdateField = ref()
 const selectedItem = ref("one data")
 const isAssignUnitDialogVisible = ref(false)
+const deletePropertyConfirm = ref(false)
+const deletePropertyDialogText = ref()
+const propertyToBeDeleted = ref()
 
 const countryList = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua & Deps", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Rep", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Congo {Democratic Rep}", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland {Republic}", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar, {Burma}", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
@@ -163,10 +166,24 @@ const prefillPropertyEditForm = property => {
   propertyEditFormImage.value ='http://127.0.0.1:8000/media/'+property.property_image
 }
 
-const deleteItem = item => {
-  editedIndex.value = userList.value.indexOf(item)
-  editedItem.value = { ...item }
-  deleteDialog.value = true
+const deletePropertyItem = item => {
+
+  fetchedPropertiesList.forEach((ele) => {
+    if(ele.propertyId == item){
+      deletePropertyDialogText.value = "Are you sure you want to delete "+ele.details.property_name
+    }
+  })
+  propertyToBeDeleted.value = item
+  deletePropertyConfirm.value = true
+}
+
+const deletePropertyApi = () => {
+
+  let queryData = {
+    "userId" : sessionStorage.getItem("userId")
+  }
+
+
 }
  
 const resolveStatusVariant = stat => {
@@ -580,7 +597,7 @@ onMounted(() => {
                 <IconBtn @click="editPropertyItem(item.raw)">
                   <VIcon icon="mdi-pencil-outline" />
                 </IconBtn>
-                <IconBtn @click="deleteItem(item.raw.propertyId)">
+                <IconBtn @click="deletePropertyItem(item.raw.propertyId)">
                   <VIcon icon="mdi-delete-outline" />
                 </IconBtn>
               </div>
@@ -830,6 +847,31 @@ onMounted(() => {
           Save
         </VBtn>
       </VCardActions>
+    </VCard>
+  </VDialog>
+
+
+  <VDialog 
+    v-model="deletePropertyConfirm" 
+    :width="500"
+  >
+    <DialogCloseBtn @click="deletePropertyConfirm = !deletePropertyConfirm" />
+    <VCard title="Delete">
+      <VCardText>
+        {{ deletePropertyDialogText }}
+      </VCardText>
+
+      <VCardText class="d-flex justify-end">
+        <VBtn 
+          :style="{marginRight:'10px'}"
+          @click="deletePropertyConfirm = false"
+        >
+          No
+        </VBtn>
+        <VBtn @click="deletePropApi">
+          Yes
+        </VBtn>
+      </VCardText>
     </VCard>
   </VDialog>
 

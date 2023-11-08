@@ -14,7 +14,7 @@ import { VDataTable } from 'vuetify/labs/VDataTable'
 
 const vuetifyTheme = useTheme()
 const currentTheme = vuetifyTheme.current.value.colors
-
+const tenantPageAlertSnackbar = ref({ show: false, message: null, color: null })
 const isTenantsFilterDrawerOpen = ref(false)
 const tenantFilterUnits = ref([])
 const tenantFilterFloors = ref([])
@@ -23,9 +23,13 @@ const filterSelectedUnitFloor = ref()
 const filterSelectedProperty = ref()
 const filterSelectedNationality = ref()
 const filterSelectedStatus = ref()
+const filterSelectedRent = ref()
 const startDateRange = ref()
 const endDateRange = ref()
 const tenantsMaxRent = ref()
+const tenancyRentSliderMin = ref()
+const tenancyRentSliderMax = ref()
+const tenantfiltersRef = ref()
 
 const fetchedPropertiesList = ref([])
 const options = ref({
@@ -285,6 +289,18 @@ const nationalityList = [
   'Zambian',		
   'Zimbabwean',		
 ]
+const clearTenantFilters = () =>{
+  tenantfiltersRef.value?.reset()
+  isTenantsFilterDrawerOpen.value=false
+  tenantFilterFloors.value = []
+}
+
+const tenantsFilterCancel = () => {
+  tenantfiltersRef.value?.reset()
+  isTenantsFilterDrawerOpen.value=false
+  tenantFilterFloors.value = []
+  getTenantsData()
+}
 
 const simpleStatisticsDemoCards = [
   {
@@ -415,7 +431,7 @@ const getTenantsData = () => {
   }).then(response => {
     console.log(response)
     fetchedTenantsList.value = response.data.tenantsData
-    tenantsMaxRent.value = response.data.tenancyMaxRent
+    tenancyRentSliderMax.value = response.data.tenancyMaxRent
   }).catch(error => {
     console.log(error)
     if(error.response.status === 403){
@@ -491,6 +507,66 @@ if(filterSelectedProperty.value){
 
 watchEffect(populateFloorsDropdown)
 watchEffect(getFloorUnits)
+
+function getFilteredTenants() {
+
+  let queryData = {
+    "userId": sessionStorage.getItem("userId")
+  }
+
+  if(filterSelectedProperty.value){
+    queryData['property'] = filterSelectedProperty.value
+  }
+  if(filterSelectedUnitFloor.value){
+    queryData['floor'] = filterSelectedUnitFloor.value
+  }
+  if(filterSelectedUnits.value){
+    queryData['unit'] = filterSelectedUnits.value
+  }
+  if(filterSelectedNationality.value){
+    queryData['nationality'] = filterSelectedNationality.value
+  }
+  if(filterSelectedRent.value){
+    queryData['rent'] = filterSelectedRent.value
+  }
+  if(filterSelectedStatus.value){
+    queryData['status'] = filterSelectedStatus.value
+  }
+  if(startDateRange.value){
+    queryData['startDate'] = startDateRange.value
+  }
+  if(endDateRange.value){
+    queryData['endDate'] = endDateRange.value
+  }
+  
+
+  if(Object.keys(queryData).length > 1){
+
+    axios.get("http://localhost:8000/prop-app/tenants/filter", {
+      params: queryData,
+      headers: {
+        'Authorization' : sessionStorage.getItem("accessToken")
+      }
+    }).then((response) => {
+      console.log("tenants filter", response)
+      fetchedTenantsList.value = response.data.result
+      isTenantsFilterDrawerOpen.value = true
+    }).catch((error) =>{
+      if(error.response.status == 403){
+        refreshUserLogin()
+      }
+    })
+
+  }
+  else{
+    tenantPageAlertSnackbar.message = "Select filters to proceed",
+    tenantPageAlertSnackbar.color = "warning",
+    tenantPageAlertSnackbar.show = true
+    return
+  }
+
+}
+
 
 
 onMounted(() => {
@@ -694,7 +770,6 @@ onMounted(() => {
     </VRow>
   </section>
 
-  <!-- <tenantsFilterDrawer v-model:isDrawerOpen="isTenantsFilterDrawerOpen" :fetched-tenants-list="fetchedTenantsList"/> -->
   <VNavigationDrawer
     temporary
     :width="400"
@@ -705,21 +780,20 @@ onMounted(() => {
     <!-- 👉 Title -->
     <AppDrawerHeaderSection
       title="Filter Tenants"
-      @click="isTenantsFilterDrawerOpen=false"
+      @click="clearTenantFilters"
     />
 
     <PerfectScrollbar :options="{ wheelPropagation: false }">
       <VCard flat>
         <VCardText>
           <!-- 👉 Form -->
-          <VForm ref="tenantRefForm">
+          <VForm ref="tenantfiltersRef">
             <VRow>
               <!-- 👉 Property -->
               <VCol cols="12">
                 <AppSelect
                   v-model="filterSelectedProperty"
                   label="Select Property"
-                  :rules="[requiredValidator]"
                   :items="fetchedPropertiesList"
                   item-title="propertyName"
                   item-value="propertyId"
@@ -729,7 +803,6 @@ onMounted(() => {
               <VCol cols="12">
                 <AppSelect
                   v-model="filterSelectedUnitFloor"
-                  :rules="[requiredValidator]"
                   label="Select Floor"
                   :items="tenantFilterFloors"
                   item-title="text"
@@ -740,7 +813,6 @@ onMounted(() => {
               <VCol cols="12">
                 <AppSelect
                   v-model="filterSelectedUnits"
-                  :rules="[requiredValidator]"
                   label="Select Unit"
                   :items="tenantFilterUnits"
                   item-title="unit_name"
@@ -748,7 +820,7 @@ onMounted(() => {
                 />
               </VCol>
 
-              <!-- <VCol cols="12">
+              <VCol cols="12">
                 <AppDateTimePicker
                   v-model="startDateRange"
                   label="Start Date"
@@ -762,14 +834,30 @@ onMounted(() => {
                   label="End Date"
                   :config="{ mode: 'range' }"
                 />
-              </VCol> -->
+              </VCol>
 
+              <VCol cols="12">
+                <VSlider
+                  v-model="filterSelectedRent"
+                  label="Rent"
+                  :max="tenancyRentSliderMax"
+                  :min="tenancyRentSliderMin"
+                  :step="1"
+                >
+                  <template #append>
+                    <AppTextField
+                      v-model="filterSelectedRent"
+                      type="number"
+                      style="inline-size: 100px;"
+                    />
+                  </template>
+                </VSlider>
+              </VCol>
 
               <!-- 👉 Country -->
               <VCol cols="12">
                 <AppSelect
                   v-model="filterSelectedNationality"
-                  :rules="[requiredValidator]"
                   :items="nationalityList"
                   label="Nationality"
                 />
@@ -781,7 +869,6 @@ onMounted(() => {
                 <AppSelect
                   v-model="filterSelectedStatus"
                   label="Select Status"
-                  :rules="[requiredValidator]"
                   :items="['Active', 'Inactive']"
                 />
               </VCol>
@@ -791,6 +878,7 @@ onMounted(() => {
               <VCol cols="12">
                 <VBtn
                   class="me-3"
+                  @click="getFilteredTenants"
                 >
                   Submit
                 </VBtn>
@@ -798,7 +886,7 @@ onMounted(() => {
                   type="reset"
                   variant="tonal"
                   color="secondary"
-                  @click="isTenantsFilterDrawerOpen=false"
+                  @click="tenantsFilterCancel"
                 >
                   Cancel
                 </VBtn>
@@ -809,6 +897,16 @@ onMounted(() => {
       </VCard>
     </PerfectScrollbar>
   </VNavigationDrawer>
+
+
+  <VSnackbar
+    v-model="tenantPageAlertSnackbar.show"
+    transition="fade-transition"
+    location="botton center"
+    :color="tenantPageAlertSnackbar.color"
+  >
+    {{ tenantPageAlertSnackbar.message }}
+  </VSnackbar>
 </template>
 
 

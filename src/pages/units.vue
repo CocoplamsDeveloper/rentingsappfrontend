@@ -347,7 +347,7 @@ onMounted(() => {
               prepend-icon="tabler-plus"
               @click="isAddNewUnitDrawerVisible = true"
             >
-              Add Units 01
+              Add Units
             </VBtn>
           </VCardText>
 
