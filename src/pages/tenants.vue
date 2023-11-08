@@ -1,17 +1,33 @@
 <script setup>
 import { avatarText } from '@/@core/utils/formatters'
-import { refreshUserLogin } from '@/common/reusing_functions'
+import { refreshUserLogin, populatePropertiesList } from '@/common/reusing_functions'
 import router from '@/router'
-import tenantsFilterDrawer from '@/views/apps/tenant/tenantsFilterDrawer.vue'
 import CardStatisticsGeneratedLeads from '@/views/pages/cards/card-statistics/CardStatisticsGeneratedLeads.vue'
 import axios from '@axios'
+import {
+requiredValidator,
+} from '@validators'
+import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useTheme } from 'vuetify'
 import { VDataTable } from 'vuetify/labs/VDataTable'
+
 
 const vuetifyTheme = useTheme()
 const currentTheme = vuetifyTheme.current.value.colors
 
 const isTenantsFilterDrawerOpen = ref(false)
+const tenantFilterUnits = ref([])
+const tenantFilterFloors = ref([])
+const filterSelectedUnits = ref()
+const filterSelectedUnitFloor = ref()
+const filterSelectedProperty = ref()
+const filterSelectedNationality = ref()
+const filterSelectedStatus = ref()
+const startDateRange = ref()
+const endDateRange = ref()
+const tenantsMaxRent = ref()
+
+const fetchedPropertiesList = ref([])
 const options = ref({
   page: 1,
   itemsPerPage: 10,
@@ -41,6 +57,234 @@ const resolveTenantStatusVariant = stat => {
 }
 
 const tenantSearchQuery = ref()
+
+const nationalityList = [
+  'Afghan',		
+  'Albanian',		
+  'Algerian',		
+  'American',		
+  'Andorran',		
+  'Angolan',	
+  'Anguillan',		
+  'Argentine',		
+  'Armenian',		
+  'Australian',		
+  'Austrian',		
+  'Azerbaijani',		
+  'Bahamian',		
+  'Bahraini',		
+  'Bangladeshi',		
+  'Barbadian',		
+  'Belarusian',		
+  'Belgian',		
+  'Belizean',	
+  'Beninese',	
+  'Bermudian',		
+  'Bhutanese',		
+  'Bolivian',	
+  'Botswanan',		
+  'Brazilian',		
+  'British',	
+  'British Virgin Islander',		
+  'Bruneian',		
+  'Bulgarian',		
+  'Burkinan',		
+  'Burmese',		
+  'Burundian',		
+  'Cambodian',		
+  'Cameroonian',		
+  'Canadian',		
+  'Cape Verdean',		
+  'Cayman Islander',		
+  'Central African',		
+  'Chadian',		
+  'Chilean',		
+  'Chinese',		
+  'Citizen of Antigua and Barbuda',
+  'Citizen of Bosnia and Herzegovina',		
+  'Citizen of Guinea-Bissau',		
+  'Citizen of Kiribati',		
+  'Citizen of Seychelles',		
+  'Citizen of the Dominican Republic',		
+  'Citizen of Vanuatu', 		
+  'Colombian',		
+  'Comoran',		
+  'Congolese (Congo)',		
+  'Congolese (DRC)',		
+  'Cook Islander',		
+  'Costa Rican',		
+  'Croatian',		
+  'Cuban',		
+  'Cymraes',		
+  'Cymro',		
+  'Cypriot',		
+  'Czech',		
+  'Danish',		
+  'Djiboutian',		
+  'Dominican',		
+  'Dutch',		
+  'East Timorese',		
+  'Ecuadorean',		
+  'Egyptian',		
+  'Emirati',		
+  'English',		
+  'Equatorial Guinean',		
+  'Eritrean',		
+  'Estonian',		
+  'Ethiopian',		
+  'Faroese',		
+  'Fijian',		
+  'Filipino',		
+  'Finnish',		
+  'French',	
+  'Gabonese',		
+  'Gambian',		
+  'Georgian',		
+  'German',		
+  'Ghanaian',		
+  'Gibraltarian',		
+  'Greek',		
+  'Greenlandic',		
+  'Grenadian',		
+  'Guamanian',		
+  'Guatemalan',		
+  'Guinean',		
+  'Guyanese',		
+  'Haitian',		
+  'Honduran	',	
+  'Hong Konger',		
+  'Hungarian',		
+  'Icelandic',		
+  'Indian',		
+  'Indonesian',		
+  'Iranian',		
+  'Iraqi',		
+  'Irish',		
+  'Israeli',		
+  'Italian',		
+  'Ivorian',		
+  'Jamaican',		
+  'Japanese',		
+  'Jordanian',		
+  'Kazakh',		
+  'Kenyan',		
+  'Kittitian',		
+  'Kosovan',		
+  'Kuwaiti',		
+  'Kyrgyz',		
+  'Lao',		
+  'Latvian',		
+  'Lebanese',		
+  'Liberian',		
+  'Libyan',		
+  'Liechtenstein citizen',	
+  'Lithuanian',		
+  'Luxembourger',		
+  'Macanese',		
+  'Macedonian',		
+  'Malagasy',		
+  'Malawian',	
+  'Malaysian',		
+  'Maldivian',		
+  'Malian',		
+  'Maltese',		
+  'Marshallese',		
+  'Martiniquais',		
+  'Mauritanian',		
+  'Mauritian',		
+  'Mexican',		
+  'Micronesian',		
+  'Moldovan',		
+  'Monegasque',		
+  'Mongolian',		
+  'Montenegrin',		
+  'Montserratian',		
+  'Moroccan',		
+  'Mosotho',		
+  'Mozambican',		
+  'Namibian',		
+  'Nauruan',		
+  'Nepalese',	
+  'New Zealander',		
+  'Nicaraguan',		
+  'Nigerian',		
+  'Nigerien',		
+  'Niuean',		
+  'North Korean',		
+  'Northern Irish',		
+  'Norwegian',		
+  'Omani',		
+  'Pakistani',		
+  'Palauan',		
+  'Palestinian',		
+  'Panamanian',		
+  'Papua New Guinean',		
+  'Paraguayan',		
+  'Peruvian',		
+  'Pitcairn Islander',		
+  'Polish',		
+  'Portuguese',		
+  'Prydeinig',		
+  'Puerto Rican',		
+  'Qatari',		
+  'Romanian',		
+  'Russian',		
+  'Rwandan',		
+  'Salvadorean',		
+  'Sammarinese',		
+  'Samoan',		
+  'Sao Tomean',		
+  'Saudi Arabian',		
+  'Scottish',		
+  'Senegalese',		
+  'Serbian',		
+  'Sierra Leonean',		
+  'Singaporean',		
+  'Slovak',		
+  'Slovenian',		
+  'Solomon Islander',		
+  'Somali',		
+  'South African',		
+  'South Korean',		
+  'South Sudanese',		
+  'Spanish',		
+  'Sri Lankan',		
+  'St Helenian',		
+  'St Lucian',		
+  'Stateless',		
+  'Sudanese',		
+  'Surinamese',		
+  'Swazi',		
+  'Swedish',		
+  'Swiss',		
+  'Syrian',		
+  'Taiwanese',		
+  'Tajik',		
+  'Tanzanian',		
+  'Thai',		
+  'Togolese',		
+  'Tongan',		
+  'Trinidadian',		
+  'Tristanian',		
+  'Tunisian',		
+  'Turkish',		
+  'Turkmen',		
+  'Turks and Caicos Islander',		
+  'Tuvaluan',		
+  'Ugandan',		
+  'Ukrainian',		
+  'Uruguayan',		
+  'Uzbek',		
+  'Vatican citizen',		
+  'Venezuelan',		
+  'Vietnamese',		
+  'Vincentian',		
+  'Wallisian',		
+  'Welsh',		
+  'Yemeni',		
+  'Zambian',		
+  'Zimbabwean',		
+]
 
 const simpleStatisticsDemoCards = [
   {
@@ -171,7 +415,7 @@ const getTenantsData = () => {
   }).then(response => {
     console.log(response)
     fetchedTenantsList.value = response.data.tenantsData
-
+    tenantsMaxRent.value = response.data.tenancyMaxRent
   }).catch(error => {
     console.log(error)
     if(error.response.status === 403){
@@ -180,9 +424,80 @@ const getTenantsData = () => {
   })
 }
 
+function getFloorUnits(){
+
+if(filterSelectedProperty.value && filterSelectedUnitFloor.value >= 0){
+  let sendData = {
+    "userId": sessionStorage.getItem("userId"),
+  }
+
+  if(!sessionStorage.getItem("accessToken")){
+    router.push('/login')
+
+    return 
+  }
+  sendData['propertyId'] = filterSelectedProperty.value
+  sendData['floor'] = filterSelectedUnitFloor.value
+
+  axios.get("http://localhost:8000/prop-app/floors/units", {
+    params: sendData,
+    headers: {
+      'Authorization': sessionStorage.getItem('accessToken'),
+    },
+  }).then((response) => {
+    tenantFilterUnits.value = response.data.units
+  }).catch((error) => {
+    console.log(error)
+    if(error.response.status){
+      refreshUserLogin()
+    }
+  })
+}
+}
+
+function populateFloorsDropdown(){
+
+if(filterSelectedProperty.value){
+  fetchedPropertiesList.value.forEach(element => {
+    if(element.propertyId === filterSelectedProperty.value){
+
+      tenantFilterFloors.value = []
+      if(element.floors === 0){
+        tenantFilterFloors.value.push({
+          "text": "ground floor",
+          "value": 0,
+        })
+        
+        return
+      }
+      else{
+        for(let i = 0; i < element.floors; i++){
+
+          let key = "floor "+i
+          if(i == 0){
+            key = "ground floor"
+          }
+          floorList.value.push({
+            "text": key,
+            "value": i,
+          })
+        }
+      }
+    }
+  })
+}
+}
+
+
+watchEffect(populateFloorsDropdown)
+watchEffect(getFloorUnits)
+
 
 onMounted(() => {
   getTenantsData()
+  populatePropertiesList().then((response) => {
+    fetchedPropertiesList.value = response.data.propertiesData
+  })
 })
 </script>
 
@@ -379,7 +694,121 @@ onMounted(() => {
     </VRow>
   </section>
 
-  <tenantsFilterDrawer v-model:isDrawerOpen="isTenantsFilterDrawerOpen"/>
+  <!-- <tenantsFilterDrawer v-model:isDrawerOpen="isTenantsFilterDrawerOpen" :fetched-tenants-list="fetchedTenantsList"/> -->
+  <VNavigationDrawer
+    temporary
+    :width="400"
+    location="end"
+    class="scrollable-content"
+    :model-value="isTenantsFilterDrawerOpen"
+  >
+    <!-- 👉 Title -->
+    <AppDrawerHeaderSection
+      title="Filter Tenants"
+      @click="isTenantsFilterDrawerOpen=false"
+    />
+
+    <PerfectScrollbar :options="{ wheelPropagation: false }">
+      <VCard flat>
+        <VCardText>
+          <!-- 👉 Form -->
+          <VForm ref="tenantRefForm">
+            <VRow>
+              <!-- 👉 Property -->
+              <VCol cols="12">
+                <AppSelect
+                  v-model="filterSelectedProperty"
+                  label="Select Property"
+                  :rules="[requiredValidator]"
+                  :items="fetchedPropertiesList"
+                  item-title="propertyName"
+                  item-value="propertyId"
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppSelect
+                  v-model="filterSelectedUnitFloor"
+                  :rules="[requiredValidator]"
+                  label="Select Floor"
+                  :items="tenantFilterFloors"
+                  item-title="text"
+                  item-value="value"
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppSelect
+                  v-model="filterSelectedUnits"
+                  :rules="[requiredValidator]"
+                  label="Select Unit"
+                  :items="tenantFilterUnits"
+                  item-title="unit_name"
+                  item-value="unit_id"
+                />
+              </VCol>
+
+              <!-- <VCol cols="12">
+                <AppDateTimePicker
+                  v-model="startDateRange"
+                  label="Start Date"
+                  :config="{ mode: 'range' }"
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppDateTimePicker
+                  v-model="endDateRange"
+                  label="End Date"
+                  :config="{ mode: 'range' }"
+                />
+              </VCol> -->
+
+
+              <!-- 👉 Country -->
+              <VCol cols="12">
+                <AppSelect
+                  v-model="filterSelectedNationality"
+                  :rules="[requiredValidator]"
+                  :items="nationalityList"
+                  label="Nationality"
+                />
+              </VCol>
+
+
+              <!-- 👉 Status -->
+              <VCol cols="12">
+                <AppSelect
+                  v-model="filterSelectedStatus"
+                  label="Select Status"
+                  :rules="[requiredValidator]"
+                  :items="['Active', 'Inactive']"
+                />
+              </VCol>
+
+
+              <!-- 👉 Submit and Cancel -->
+              <VCol cols="12">
+                <VBtn
+                  class="me-3"
+                >
+                  Submit
+                </VBtn>
+                <VBtn
+                  type="reset"
+                  variant="tonal"
+                  color="secondary"
+                  @click="isTenantsFilterDrawerOpen=false"
+                >
+                  Cancel
+                </VBtn>
+              </VCol>
+            </VRow>
+          </VForm>
+        </VCardText>
+      </VCard>
+    </PerfectScrollbar>
+  </VNavigationDrawer>
 </template>
 
 
