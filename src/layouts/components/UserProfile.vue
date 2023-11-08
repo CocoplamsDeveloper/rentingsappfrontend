@@ -12,7 +12,6 @@ function userLogout(){
   let data = {
     userId: sessionStorage.getItem("userId"),
   }
-  console.log("line 13", sessionStorage.getItem("accessToken"))
   if(!sessionStorage.getItem("accessToken")){
     router.push('/login')
 

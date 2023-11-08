@@ -2,6 +2,7 @@
 import { avatarText } from '@/@core/utils/formatters'
 import { refreshUserLogin } from '@/common/reusing_functions'
 import router from '@/router'
+import tenantsFilterDrawer from '@/views/apps/tenant/tenantsFilterDrawer.vue'
 import CardStatisticsGeneratedLeads from '@/views/pages/cards/card-statistics/CardStatisticsGeneratedLeads.vue'
 import axios from '@axios'
 import { useTheme } from 'vuetify'
@@ -10,6 +11,7 @@ import { VDataTable } from 'vuetify/labs/VDataTable'
 const vuetifyTheme = useTheme()
 const currentTheme = vuetifyTheme.current.value.colors
 
+const isTenantsFilterDrawerOpen = ref(false)
 const options = ref({
   page: 1,
   itemsPerPage: 10,
@@ -38,7 +40,7 @@ const resolveTenantStatusVariant = stat => {
   }
 }
 
-const searchQuery = ref()
+const tenantSearchQuery = ref()
 
 const simpleStatisticsDemoCards = [
   {
@@ -126,6 +128,32 @@ const goToAddTenantPage = () => {
 }
 
 
+const tenantsSearchedResults = () => {
+
+  if(tenantSearchQuery.value !== null || tenantSearchQuery.value !== ""){
+
+    let queryData = {
+      "userId": sessionStorage.getItem('userId'),
+      "searchParam" : tenantSearchQuery.value
+    }
+
+    axios.get("http://localhost:8000/prop-app/tenant/search", {
+      params: queryData,
+      headers: {
+        'Authorization' : sessionStorage.getItem("accessToken") 
+      }
+    }).then((response) => {
+      fetchedTenantsList.value = response.data.result
+    }).catch((error) => {
+      if(error.response.status == 403){
+        refreshUserLogin()
+      }
+    })
+  }
+
+}
+
+
 const getTenantsData = () => {
   let queryData = {
     "userId": sessionStorage.getItem("userId"),
@@ -146,7 +174,7 @@ const getTenantsData = () => {
 
   }).catch(error => {
     console.log(error)
-    if(error.response.status === 401){
+    if(error.response.status === 403){
       refreshUserLogin()
     }
   })
@@ -244,10 +272,11 @@ onMounted(() => {
 
             <div style="inline-size: 20rem;">
               <AppTextField
-                v-model="searchQuery"
+                v-model="tenantSearchQuery"
                 placeholder="Search"
                 density="compact"
                 append-inner-icon="tabler-search"
+                @keyup.enter="tenantsSearchedResults"
               />
             </div>
             <VSpacer />
@@ -259,7 +288,7 @@ onMounted(() => {
               size="38"
               color="warning"
               prepend-icon="tabler-filter"
-              @click="isUnitsFilterDialogVisible=true"
+              @click="isTenantsFilterDrawerOpen=true"
             />
 
             <!-- 👉 Export button -->
@@ -349,6 +378,8 @@ onMounted(() => {
       </VCol>
     </VRow>
   </section>
+
+  <tenantsFilterDrawer v-model:isDrawerOpen="isTenantsFilterDrawerOpen"/>
 </template>
 
 

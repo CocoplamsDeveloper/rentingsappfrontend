@@ -17,7 +17,7 @@ import { VDataTable } from 'vuetify/labs/VDataTable'
  
 
 const userListStore = useUserListStore()
-const searchQuery = ref('')
+const propertySearchQuery = ref()
 const selectedRole = ref()
 const selectedPlan = ref()
 const selectedStatus = ref()
@@ -335,7 +335,7 @@ function updateProperty(property){
     formData.append('updatedImage', updatedImageFile.value)
   }
 
-  axios.post('http://127.0.0.1:8000/prop-app/property/update', formData, {
+  axios.post('http://localhost:8000/prop-app/property/update', formData, {
     headers: {
       'Authorization': sessionStorage.getItem("AccessToken"),  
     },
@@ -355,6 +355,30 @@ function updateProperty(property){
     }
   })
 }
+
+function propertySearchResults(){
+    if(propertySearchQuery.value !== null || propertySearchQuery.value !== ''){
+
+      let queryData = {
+        "userId": sessionStorage.getItem("userId"),
+        "searchParam" : propertySearchQuery.value
+      }
+
+      axios.get("http://127.0.0.1:8000/prop-app/property/search", {
+        params: queryData,
+        headers: {
+          'Authorization' : sessionStorage.getItem("accessToken")
+        }
+      }).then((response) => {
+        fetchedPropertiesList.value = response.data.result
+      }).catch((error) => {
+        if(error.response.status == 403){
+          refreshUserLogin()
+        }
+      })
+    }
+}
+
 
 
 onMounted(() => {
@@ -398,12 +422,12 @@ onMounted(() => {
         <CardStatisticsSalesOverview />
       </VCol>
       <VCol cols="12">
-        <VCard title="Search Filter">
+        <VCard title="Properties">
           <!-- 👉 Filters -->
-          <VCardText>
-            <VRow>
+          <!-- <VCardText>
+            <VRow> -->
               <!-- 👉 Select Role -->
-              <VCol
+              <!-- <VCol
                 cols="12"
                 sm="4"
               >
@@ -414,9 +438,9 @@ onMounted(() => {
                   clearable
                   clear-icon="tabler-x"
                 />
-              </VCol>
+              </VCol> -->
               <!-- 👉 Select Plan -->
-              <VCol
+              <!-- <VCol
                 cols="12"
                 sm="4"
               >
@@ -427,9 +451,9 @@ onMounted(() => {
                   clearable
                   clear-icon="tabler-x"
                 />
-              </VCol>
+              </VCol> -->
               <!-- 👉 Select Status -->
-              <VCol
+              <!-- <VCol
                 cols="12"
                 sm="4"
               >
@@ -440,14 +464,14 @@ onMounted(() => {
                   clearable
                   clear-icon="tabler-x"
                 />
-              </VCol>
-            </VRow>
-          </VCardText>
+              </VCol> -->
+            <!-- </VRow>
+          </VCardText> -->
  
           <VDivider />
  
           <VCardText class="d-flex flex-wrap py-4 gap-4">
-            <div class="me-3 d-flex gap-3">
+            <!-- <div class="me-3 d-flex gap-3">
               <AppSelect
                 :model-value="options.itemsPerPage"
                 :items="[
@@ -460,18 +484,23 @@ onMounted(() => {
                 style="width: 6.25rem;"
                 @update:model-value="options.itemsPerPage = parseInt($event, 10)"
               />
-            </div>
-            <VSpacer />
- 
-            <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
-              <!-- 👉 Search  -->
-              <div style="inline-size: 10rem;">
+            </div> -->
+
+            <div style="inline-size: 15rem;">
                 <AppTextField
-                  v-model="searchQuery"
+                  v-model="propertySearchQuery"
                   placeholder="Search"
                   density="compact"
+                  append-inner-icon="tabler-search"
+                  @keyup.enter="propertySearchResults"
                 />
               </div>
+
+            <VSpacer />
+ 
+            <div class="d-flex align-center flex-wrap gap-4">
+              <!-- 👉 Search  -->
+
  
               <!-- 👉 Export button -->
               <VBtn

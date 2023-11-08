@@ -121,6 +121,21 @@ const closeUnitAssignForm = () => {
   assignUnitForm?.value.reset()
 }
 
+const calculateContractEndDate = () => {
+  
+  let start = new Date(tenancyStartDate.value)
+  let months = selectedContractPeriod.value
+  let days = months*30.5
+  var end = new Date(tenancyStartDate.value)
+  end.setDate(end.getDate() + days)
+  let endDateMonth = end.getMonth() + 1
+  let endDate = end.getFullYear() + "/" + endDateMonth + "/" + end.getDate()
+
+  // let futureDate = new Date(new Date().getFullYear(),months-1, start.getDate())
+  console.log(end.toLocaleDateString(), start, endDate)
+
+} 
+
 const handleContractDoc = e => {
   contractDocument.value = e.target.files[0]
   let fileName = contractDocument.value.name
@@ -442,6 +457,132 @@ onMounted(() => {
     </VCol>
   </VRow>
   <AssignToTenent v-model:isDrawerOpen="isAssignUnitDialogVisible" />
+
+  <!--
+    <VDialog
+    v-model="isAssignUnitDialogVisible"
+    max-width="600"
+    persistent
+    > 
+    <DialogCloseBtn @click="isAssignUnitDialogVisible = !isAssignUnitDialogVisible" />
+
+    <VCard title="Assign Unit">
+    <VCardText>
+    <VForm ref="assignUnitForm">
+    <VRow>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppSelect
+    v-model="selectedPropertyToAssign"
+    label="Select Property"
+    :items="propertyList"
+    item-title="propertyName"
+    item-value="propertyId"
+    :rules="[requiredValidator]"
+    chips
+    />
+    </VCol>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppSelect
+    v-model="selectedFloorToAssign"
+    label="Select Floor"
+    :items="floorsArr"
+    item-title="text"
+    item-value="value"
+    :rules="[requiredValidator]"
+    chips
+    />
+    </VCol>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppSelect
+    v-model="selectedUnitToAssign"
+    :items="availableUnits"
+    item-title="unit_name"
+    item-value="unit_id"
+    :rules="[requiredValidator]"
+    label="Select Unit"
+    chips
+    />
+    </VCol>
+
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppTextField
+    v-model="selectedUnitRent"
+    :rules="[requiredValidator]"
+    label="Monthly Rent"
+    />
+    </VCol>
+
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppCombobox
+    v-model="selectedContractPeriod"
+    :items="[3, 6, 12, 18, 24]"
+    :rules="[requiredValidator]"
+    label="Select Contract Period(Months)"
+    chips
+    />
+    </VCol>
+
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppDateTimePicker
+    v-model="tenancyStartDate"
+    :rules="[requiredValidator]"
+    label="Contract Start Date"
+    />
+    </VCol>
+    <VCol
+    cols="12"
+    sm="6"
+    >
+    <AppTextField
+    v-model="tenancyEndDate"
+    label="Contract End Date"
+    :rules="[requiredValidator]"
+    />
+    </VCol>
+    <VCol cols="12">
+    <label>Contract Document</label>
+    <VFileInput
+    ref="contractDocRef"
+    label="Document"
+    @change="handleContractDoc"
+    />
+    </VCol>
+    </VRow>
+    </VForm>
+    </VCardText>
+    <VCardText class="d-flex justify-end flex-wrap gap-3">
+    <VBtn
+    variant="tonal"
+    color="secondary"
+    @click="closeUnitAssignForm"
+    >
+    Close
+    </VBtn>
+    <VBtn @click="createTenancyRecord">
+    Save
+    </VBtn>
+    </VCardText>
+    </VCard>
+    </VDialog> 
+  -->
 
   <VSnackbar
     v-model="tenantTabAlertSnackbar.show"

@@ -2,7 +2,7 @@
 import { refreshUserLogin } from '@/common/reusing_functions'
 import axios from '@axios'
 import {
-  requiredValidator,
+requiredValidator,
 } from '@validators'
 import { watchEffect } from 'vue'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
@@ -12,6 +12,7 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+
 })
 
 const emit = defineEmits([
@@ -90,7 +91,7 @@ const onUnitFormSubmit = () => {
         unitDrawerAlert.value.message = error.response.data.message
         unitDrawerAlert.value.color = "error"
         unitDrawerAlert.value.show = true
-        if(error.response.status === 401){
+        if(error.response.status === 403){
           refreshUserLogin()
         }
       })
@@ -98,6 +99,7 @@ const onUnitFormSubmit = () => {
     }
   })
 }
+
 
 const handleDrawerModelValueUpdate = val => {
   emit('update:isDrawerOpen', val)
@@ -113,7 +115,7 @@ function populatePropertiesList(){
     "userId": sessionStorage.getItem('userId'),
   }
 
-  axios('http://localhost:8000/prop-app/landlord-prop/get', {
+  axios.get('http://localhost:8000/prop-app/landlord-prop/get', {
     params: queryData,
     headers: {
       "Authorization": sessionStorage.getItem("AccessToken"),
