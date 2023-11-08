@@ -13,7 +13,7 @@ function populatePropertiesList(){
     return 
   }
   
-  return axios.get('http://localhost:8000/prop-app/landlord-prop/get', {
+  return axios('http://127.0.0.1:8000/prop-app/landlord-prop/get', {
     params: queryData,
     headers: {
       "Authorization": sessionStorage.getItem("AccessToken"),
@@ -33,7 +33,7 @@ function refreshUserLogin(){
     return 
   }
   
-  axios.get('http://localhost:8000/prop-app/login/refresh', {
+  axios('http://127.0.0.1:8000/prop-app/login/refresh', {
     params: queryData,
   }).then(response => {
     if(response.status == 200){

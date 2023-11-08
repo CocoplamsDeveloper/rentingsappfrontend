@@ -47,7 +47,8 @@ const fetchTenant = item => {
 
     return 
   }
-  axios.get("http://localhost:8000/prop-app/tenant/"+item, {
+  console.log(item)
+  axios.get("http://127.0.0.1:8000/prop-app/tenant/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),

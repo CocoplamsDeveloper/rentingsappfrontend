@@ -205,7 +205,7 @@ function getAllUnits(){
   }
 
   axios({
-    url: 'http://localhost:8000/prop-app/allunits/get',
+    url: 'http://127.0.0.1:8000/prop-app/allunits/get',
     method: 'GET',
     params: queryData,
     headers: {
@@ -347,7 +347,7 @@ onMounted(() => {
               prepend-icon="tabler-plus"
               @click="isAddNewUnitDrawerVisible = true"
             >
-              Add Units
+              Add Units 01
             </VBtn>
           </VCardText>
 
@@ -372,7 +372,7 @@ onMounted(() => {
                   >
                   <VImg
                   v-if="item.raw.unitsData.unit"
-                  :src="'http://localhost:8000/media/'+item.raw.details.property_image"
+                  :src="'http://127.0.0.1:8000/media/'+item.raw.details.property_image"
                   />
                   <span v-else>{{ avatarText(item.raw.unitsData.unit_name) }}</span>
                   </VAvatar>  

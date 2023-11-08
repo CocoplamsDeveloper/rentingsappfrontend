@@ -8,7 +8,7 @@ import { refreshUserLogin } from '@/common/reusing_functions'
 
 import router from '@/router'
 
-// import AddNewPropertyDrawer from '@/views/apps/user/list/AddNewPropertyDrawer.vue'
+import PropertyEditDrawer from '@/views/apps/property/PropertyEditDrawer.vue'
 import { useUserListStore } from '@/views/apps/user/useUserListStore'
 import CardStatisticsSalesOverview from '@/views/pages/cards/card-statistics/CardStatisticsSalesOverview.vue'
 import axios from '@axios'
@@ -30,6 +30,8 @@ const statusToggleSwitch = ref(true)
 const propertyEditFormImage = ref()
 const updatedImageFile = ref()
 const imageUpdateField = ref()
+const selectedItem = ref("one data")
+const isAssignUnitDialogVisible = ref(false)
 
 const countryList = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua & Deps", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Rep", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Congo {Democratic Rep}", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland {Republic}", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar, {Burma}", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
@@ -105,12 +107,15 @@ const editedItemObj = ref({
 })
  
 const editPropertyItem = item => {
-  if(!sessionStorage.getItem("accessToken")){
+  isAssignUnitDialogVisible.value = true 
+  selectedItem.value = item
+  
+  if (!sessionStorage.getItem("accessToken")) {
     router.push('/login')
-
-    return 
+    
+    return
   }
-  axios.get("http://localhost:8000/prop-app/property/"+item, {
+  axios.get("http://127.0.0.1:8000/prop-app/property/" + item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),
@@ -118,15 +123,17 @@ const editPropertyItem = item => {
   }).then(response => {
     prefillPropertyEditForm(response.data.property_data[0])
   }).catch(error => {
-    if(error.response.status === 401){
+    if (error.response.status === 401) {
       refreshUserLogin()
     }
   })
 
-  // editedIndex.value = userList.value.indexOf(item)
-  // editedItem.value = { ...item }
-  propertyEditDialog.value = true
+  // propertyEditDialog.value = true
 }
+
+watch(selectedItem, (newValue, oldValue) => {
+  console.log({ selectedItem: newValue })
+})
 
 const prefillPropertyEditForm = property => {
   let currentProp = editedItemObj.value
@@ -153,7 +160,7 @@ const prefillPropertyEditForm = property => {
   else{
     statusToggleSwitch.value = true
   }
-  propertyEditFormImage.value ='http://localhost:8000/media/'+property.property_image
+  propertyEditFormImage.value ='http://127.0.0.1:8000/media/'+property.property_image
 }
 
 const deleteItem = item => {
@@ -245,7 +252,7 @@ function updatedImageUpload(e){
     propPageAlertSnackbar.value.message = "Image size should be less then 2MB"
     propPageAlertSnackbar.value.color = "error"
     propPageAlertSnackbar.value.show = true
-    propertyEditFormImage.value = 'http://localhost:8000/media/'+editedItemObj.value.propertyImage
+    propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedItemObj.value.propertyImage
     imageUpdateField.value?.reset()
 
     return
@@ -256,7 +263,7 @@ function updatedImageUpload(e){
 
 
 function imageFieldChecker(){
-  propertyEditFormImage.value = 'http://localhost:8000/media/'+editedItemObj.value.propertyImage
+  propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedItemObj.value.propertyImage
 }
 
 function goToAddPage(){
@@ -274,7 +281,7 @@ function getAllProperties(){
     return 
   }
 
-  axios.get("http://localhost:8000/prop-app/alllandlord/props", {
+  axios.get("http://127.0.0.1:8000/prop-app/alllandlord/props", {
     params: queryData,
     headers: {
       'Authorization': sessionStorage.getItem("accessToken"),
@@ -533,7 +540,7 @@ onMounted(() => {
                 >
                   <VImg
                     v-if="item.raw.details.property_image"
-                    :src="'http://localhost:8000/media/'+item.raw.details.property_image"
+                    :src="'http://127.0.0.1:8000/media/'+item.raw.details.property_image"
                   />
                   <span v-else>{{ avatarText(item.raw.details.property_name) }}</span>
                 </VAvatar>
@@ -563,7 +570,14 @@ onMounted(() => {
             <!-- Actions -->
             <template #item.actions="{ item }">
               <div class="d-flex gap-1">
-                <IconBtn @click="editPropertyItem(item.raw.propertyId)">
+                <!--
+                  <IconBtn @click="isAssignUnitDialogVisible = true">
+                  <VIcon icon="mdi-pencil-outline" />
+                  </IconBtn>  
+                -->
+               
+                <!-- <IconBtn @click="editPropertyItem(item.raw.propertyId)"> -->
+                <IconBtn @click="editPropertyItem(item.raw)">
                   <VIcon icon="mdi-pencil-outline" />
                 </IconBtn>
                 <IconBtn @click="deleteItem(item.raw.propertyId)">
@@ -827,6 +841,10 @@ onMounted(() => {
   >
     {{ propPageAlertSnackbar.message }}
   </VSnackbar>
+  <PropertyEditDrawer
+    v-model:isDrawerOpen="isAssignUnitDialogVisible"
+    :selected-item="selectedItem"
+  />
 </template>
  
  <style lang="scss">
