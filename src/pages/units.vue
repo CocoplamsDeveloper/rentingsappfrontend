@@ -23,10 +23,11 @@ const unitPropertyFilter = ref(null)
 const unitRentFilter = ref(null)
 const propertyListArr = ref()
 const isUnitsCsvDialogVisible = ref(false)
-
+const unitCsvFile = ref()
 const rentSliderMin = ref(0)
 const rentSliderMax = ref(1000)
-
+const selectedPropertyForCsv = ref()
+const unitsCsvRef = ref()
 
 const resolveUnitsStatusVariant = stat => {
 
@@ -48,6 +49,9 @@ const resolveUnitsStatusVariant = stat => {
   }
 }
 
+const csvUnitsFileUpload = (e) => {
+    unitCsvFile.value = e.target.files[0]
+}
 
 // Headers
 const headers = [
@@ -220,6 +224,26 @@ function getAllUnits(){
     }
   })
 
+}
+
+function uploadCsvUnits(){
+
+  const formData = new FormData()
+  formData.append("userId", sessionStorage.getItem("userId"))
+  formData.append("propertyId", selectedPropertyForCsv.value)
+  if(unitCsvFile.value){
+    formData.append("unitscsvfile", )
+  }
+
+  axios.post("http://localhost:8000/prop-app/units/csv-add", formData,{
+    headers: {
+      'Authorization' : sessionStorage.getItem("accessToken")
+    }
+  }).then((response) => {
+
+  }).catch((error) => {
+
+  })
 }
 
 
@@ -413,7 +437,7 @@ onMounted(() => {
           <!-- SECTION -->
         </VCard>
 
-        <AddNewUnitDrawer v-model:isDrawerOpen="isAddNewUnitDrawerVisible"/>
+        <AddNewUnitDrawer v-model:isDrawerOpen="isAddNewUnitDrawerVisible" @get-all-units="getAllUnits"/>
       </VCol>
     </VRow>
   </section>
@@ -515,14 +539,25 @@ onMounted(() => {
       <VCardText>
         <VRow>
           <VCol cols="12">
+            <AppSelect
+            v-model="selectedPropertyForCsv"
+            label="Select Property"
+            prepend-icon="tabler-building"
+            :items="propertyListArr"
+            item-title="propertyName"
+            item-value="propertyId"
+            />
+          </VCol>
+
+          <VCol cols="12">
             <VFileInput
-              ref=""
+              ref="unitsCsvRef"
               prepend-icon="tabler-file"
-              label="Units CSV file"
+              label="Upload csv file"
               chips
               accept="image/*"
               density="compact"
-              @change="imageUpload"
+              @change="csvUnitsFileUpload"
             />
           </VCol>
         </VRow>

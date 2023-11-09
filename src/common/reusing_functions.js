@@ -40,6 +40,7 @@ function refreshUserLogin(){
       data = response.data.access_tokens
       sessionStorage.setItem("accessToken", data.accessToken)
       sessionStorage.setItem("tokenId", data.refreshTokenId)
+      router.push('/')
     }
     else{
       router.push('/login')

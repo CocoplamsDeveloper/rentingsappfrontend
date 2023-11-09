@@ -3,7 +3,6 @@
 
 <script setup>
 import { avatarText } from '@/@core/utils/formatters'
-import { integerValidator, requiredValidator } from '@/@core/utils/validators'
 import { refreshUserLogin } from '@/common/reusing_functions'
 
 import router from '@/router'
@@ -31,7 +30,7 @@ const propertyEditFormImage = ref()
 const updatedImageFile = ref()
 const imageUpdateField = ref()
 const selectedItem = ref("one data")
-const isAssignUnitDialogVisible = ref(false)
+const isEditPropertyDrawerVisible = ref(false)
 const deletePropertyConfirm = ref(false)
 const deletePropertyDialogText = ref()
 const propertyToBeDeleted = ref()
@@ -110,7 +109,7 @@ const editedItemObj = ref({
 })
  
 const editPropertyItem = item => {
-  isAssignUnitDialogVisible.value = true 
+  isEditPropertyDrawerVisible.value = true 
   selectedItem.value = item
   
   if (!sessionStorage.getItem("accessToken")) {
@@ -123,9 +122,9 @@ const editPropertyItem = item => {
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),
     },
-  }).then(response => {
+  }).then((response) => {
     prefillPropertyEditForm(response.data.property_data[0])
-  }).catch(error => {
+  }).catch((error) => {
     if (error.response.status === 401) {
       refreshUserLogin()
     }
@@ -134,9 +133,9 @@ const editPropertyItem = item => {
   // propertyEditDialog.value = true
 }
 
-watch(selectedItem, (newValue, oldValue) => {
-  console.log({ selectedItem: newValue })
-})
+// watch(selectedItem, (newValue, oldValue) => {
+//   console.log({ selectedItem: newValue })
+// })
 
 const prefillPropertyEditForm = property => {
   let currentProp = editedItemObj.value
@@ -156,21 +155,13 @@ const prefillPropertyEditForm = property => {
   currentProp.propertySaleValue = property.selling_price
   currentProp.propertyBuyValue = property.buying_price
   currentProp.propertyCountry = property.governate
-
-  if(property.property_status === "Inactive"){
-    statusToggleSwitch.value = false
-  }
-  else{
-    statusToggleSwitch.value = true
-  }
-  propertyEditFormImage.value ='http://127.0.0.1:8000/media/'+property.property_image
 }
 
 const deletePropertyItem = item => {
 
-  fetchedPropertiesList.forEach((ele) => {
+  fetchedPropertiesList.value.forEach((ele) => {
     if(ele.propertyId == item){
-      deletePropertyDialogText.value = "Are you sure you want to delete "+ele.details.property_name
+      deletePropertyDialogText.value = "Are you sure you want to delete "+ele.details.property_name+ " Property"
     }
   })
   propertyToBeDeleted.value = item
@@ -180,9 +171,27 @@ const deletePropertyItem = item => {
 const deletePropertyApi = () => {
 
   let queryData = {
-    "userId" : sessionStorage.getItem("userId")
+    "userId" : sessionStorage.getItem("userId"),
+    "propertyId": propertyToBeDeleted.value
   }
-
+  axios.delete("http://localhost:8000/prop-app/property/delete", {
+    params: queryData,
+    headers: {
+      'Authorization' : sessionStorage.getItem("accessToken")
+    }
+  }).then((response) => {
+    if(response.status == 200){
+      deletePropertyConfirm.value = false
+      propPageAlertSnackbar.message = response.data.message
+      propPageAlertSnackbar.color = "success"
+      propPageAlertSnackbar.show = true
+      getAllProperties()
+    }
+  }).catch((error) => {
+    if(error.response.status == 403){
+      refreshUserLogin()
+    }
+  })
 
 }
  
@@ -259,29 +268,8 @@ const userListMeta = [
   // },
 ]
 
-function updatedImageUpload(e){
-
-  // console.log(editedItemObj.value.propertyImage, e.target.files[0])
-
-  let img = e.target.files[0]
-  let imgSize = img/1000
-  if(imgSize > 2048){
-    propPageAlertSnackbar.value.message = "Image size should be less then 2MB"
-    propPageAlertSnackbar.value.color = "error"
-    propPageAlertSnackbar.value.show = true
-    propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedItemObj.value.propertyImage
-    imageUpdateField.value?.reset()
-
-    return
-  }
-  propertyEditFormImage.value = URL.createObjectURL(e.target.files[0])
-  updatedImageFile.value = e.target.files[0]
-}
 
 
-function imageFieldChecker(){
-  propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedItemObj.value.propertyImage
-}
 
 function goToAddPage(){
   router.push("/add-property")
@@ -313,65 +301,7 @@ function getAllProperties(){
   })
 }
 
-function updateProperty(property){
 
-  property = JSON.parse(property)
-  let propertyUpdatedStatus = null
-  if(statusToggleSwitch.value){
-    propertyUpdatedStatus = "Active"
-  }
-  else{
-    propertyUpdatedStatus = "Inactive"
-  }
-
-  let updatedProperty = {
-    "propertyId": property.propertyId,
-    "propertyName": property.propertyName,
-    "governateName": property.propertyCountry,
-    "propertyCity": property.propertyCity,
-    "propertyStreet": property.propertyStreet,
-    "propertyBlock": property.propertyBlock,
-    "propertyNumber": property.propertyNumber,
-    "propertyBuiltYear": property.propertyBuiltYear,
-    "propertyType": property.propertyType,
-    "propertyStatus": propertyUpdatedStatus,
-    "propertySize": property.propertySize,
-    "propertySaleValue": property.propertySaleValue,
-    "propertyBuyValue": property.propertyBuyValue,
-    "propertyCivilId": property.propertyCivilId,
-    "propertyDescription": property.propertyDescription,
-  }
-  const formData = new FormData()
-
-  formData.append('userId', sessionStorage.getItem('userId'))
-  formData.append('data', JSON.stringify(updatedProperty))
-  
-  let imgstr = propertyEditFormImage.value.split("media/")
-  imgstr = imgstr[1]
-  if(imgstr !== property.propertyImage){
-    formData.append('updatedImage', updatedImageFile.value)
-  }
-
-  axios.post('http://localhost:8000/prop-app/property/update', formData, {
-    headers: {
-      'Authorization': sessionStorage.getItem("AccessToken"),  
-    },
-
-  }).then(response => {
-    propPageAlertSnackbar.value.message = response.data.message
-    propPageAlertSnackbar.value.color = "success"
-    propPageAlertSnackbar.value.show = true
-    propertyEditDialog.value = false
-    getAllProperties()
-  }).catch(error => {
-    propPageAlertSnackbar.value.message = error.response.data.message
-    propPageAlertSnackbar.value.color = "error"
-    propPageAlertSnackbar.value.show = true
-    if(error.response.status === 401){
-      refreshUserLogin()
-    }
-  })
-}
 
 function propertySearchResults(){
     if(propertySearchQuery.value !== null || propertySearchQuery.value !== ''){
@@ -588,13 +518,13 @@ onMounted(() => {
             <template #item.actions="{ item }">
               <div class="d-flex gap-1">
                 <!--
-                  <IconBtn @click="isAssignUnitDialogVisible = true">
+                  <IconBtn @click="isEditPropertyDrawerVisible = true">
                   <VIcon icon="mdi-pencil-outline" />
                   </IconBtn>  
                 -->
                
                 <!-- <IconBtn @click="editPropertyItem(item.raw.propertyId)"> -->
-                <IconBtn @click="editPropertyItem(item.raw)">
+                <IconBtn @click="editPropertyItem(item.raw.propertyId)">
                   <VIcon icon="mdi-pencil-outline" />
                 </IconBtn>
                 <IconBtn @click="deletePropertyItem(item.raw.propertyId)">
@@ -609,7 +539,7 @@ onMounted(() => {
     </vrow>
   </section>
 
-  <VDialog
+  <!-- <VDialog
     v-model="propertyEditDialog"
     max-width="600px"
   >
@@ -653,7 +583,6 @@ onMounted(() => {
         {{ editedItemObj.property_name }}
         <VContainer>
           <VRow>
-            <!-- full_name -->
             <VCol
               cols="12"
               sm="6"
@@ -666,7 +595,6 @@ onMounted(() => {
               />
             </VCol>
 
-            <!-- email -->
             <VCol
               cols="12"
               sm="6"
@@ -679,7 +607,6 @@ onMounted(() => {
               />
             </VCol>
 
-            <!-- salary -->
             <VCol
               cols="12"
               sm="6"
@@ -693,7 +620,6 @@ onMounted(() => {
               />
             </VCol>
 
-            <!-- age -->
             <VCol
               cols="12"
               sm="6"
@@ -706,7 +632,6 @@ onMounted(() => {
               />
             </VCol>
 
-            <!-- start date -->
             <VCol
               cols="12"
               sm="6"
@@ -813,7 +738,6 @@ onMounted(() => {
               />
             </VCol>
 
-            <!-- status -->
             <VCol
               cols="12"
               sm="6"
@@ -848,7 +772,7 @@ onMounted(() => {
         </VBtn>
       </VCardActions>
     </VCard>
-  </VDialog>
+  </VDialog> -->
 
 
   <VDialog 
@@ -868,7 +792,7 @@ onMounted(() => {
         >
           No
         </VBtn>
-        <VBtn @click="deletePropApi">
+        <VBtn @click="deletePropertyApi">
           Yes
         </VBtn>
       </VCardText>
@@ -884,8 +808,9 @@ onMounted(() => {
     {{ propPageAlertSnackbar.message }}
   </VSnackbar>
   <PropertyEditDrawer
-    v-model:isDrawerOpen="isAssignUnitDialogVisible"
-    :selected-item="selectedItem"
+    v-model:isDrawerOpen="isEditPropertyDrawerVisible"
+    :edited-item-obj="editedItemObj"
+    @get-all-properties="getAllProperties"
   />
 </template>
  

@@ -18,6 +18,7 @@ const props = defineProps({
 const emit = defineEmits([
   'update:isDrawerOpen',
   'userData',
+  'getAllUnits'
 ])
 
 const singleUnitsCheck = ref(false)
@@ -86,6 +87,7 @@ const onUnitFormSubmit = () => {
         unitDrawerAlert.value.color = "success"
         unitDrawerAlert.value.show = true
         emit('update:isDrawerOpen', false)
+        emit('getAllUnits')
         refForm.value?.reset()
       }).catch(error => {
         unitDrawerAlert.value.message = error.response.data.message

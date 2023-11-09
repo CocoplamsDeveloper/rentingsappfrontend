@@ -2,6 +2,7 @@
 import { integerValidator, requiredValidator } from '@/@core/utils/validators'
 import { refreshUserLogin } from '@/common/reusing_functions'
 import axios from '@axios'
+import { watchEffect } from 'vue'
 
 const router = useRouter()
 
@@ -22,7 +23,8 @@ const propertyDescription = ref()
 const propertyIdNo = ref()
 const propertyImageRef = ref()
 const selectedProperty = ref(null)
-const otherDetailsProperty = ref()
+const otherDetailsPropertyName = ref()
+const otherDetailsPropertyId = ref()
 const propertyType = ref()
 const propDetailsForm = ref()
 const alertSnackbar = ref({ show: false, message: null, color: null })
@@ -80,7 +82,8 @@ async function addPropertyFunc(){
           alertSnackbar.value.color = "success"
           alertSnackbar.value.show = true
           propDetailsForm?.value.reset()
-          otherDetailsProperty.value = response.data.propertyName
+          otherDetailsPropertyId.value = response.data.propertyId
+          otherDetailsPropertyName.value = response.data.propertyName
         }
 
       }).catch(error => {
@@ -110,17 +113,17 @@ async function addPropertyFunc(){
 async function submitPropertyGoToOther(){
 
   await addPropertyFunc()
-  let task = new Promise(function(resolve, reject){
-    tab.value = "other-details"
-    resolve(true)
-  })
-  task.then(
-    selectedProperty.value = otherDetailsProperty.value
-  )
+  tab.value = "other-details"
   // await continueButtonFunc()
   // selectedProperty.value = otherDetailsProperty.value
 }
 
+const watchOtherDetailsTab = () => {
+  if(tab.value === "other-details"){
+    selectedProperty.value = otherDetailsPropertyName.value
+  }
+}
+watchEffect(watchOtherDetailsTab)
 
 async function getUserPropertiesList(){
   let queryData =  {
@@ -168,7 +171,7 @@ function addPropertyAdditionalDetails(){
 
   // otherDetailsWindow.click
   if(!selectedProperty.value){
-    alertSnackbar.value.message = "Select the Property to proceed!"
+    alertSnackbar.value.message = "Kindly add property basic info first!"
     alertSnackbar.value.color = "error"
     alertSnackbar.value.show = true
 
@@ -187,7 +190,7 @@ function addPropertyAdditionalDetails(){
         formData.append('imageFile', imageFile)
       }
       let propertyAdditionalData = {
-        "propertyId": selectedProperty.value,
+        "propertyId": otherDetailsPropertyId.value,
         "propertySaleValue": propertySalePrice.value,
         "propertyBuyValue": propertyBoughtPrice.value,
         "propertyCivilId": propertyIdNo.value,
@@ -223,7 +226,6 @@ function addPropertyAdditionalDetails(){
 
 
 onMounted(() => {
-  getUserPropertiesList()
 })
 </script>
 
