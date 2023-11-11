@@ -2,6 +2,7 @@
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import { populatePropertiesList, refreshUserLogin } from '@/common/reusing_functions'
 import AddNewUnitDrawer from '@/views/apps/units/AddNewUnitDrawer.vue'
+// import EditUnitsDrawer from '@/views/apps/units/EditUnitsDrawer.vue'
 import axios from '@axios'
 import { onMounted } from 'vue'
 import { VDataTable } from 'vuetify/labs/VDataTable'
@@ -19,15 +20,18 @@ const isAddNewUnitDrawerVisible = ref(false)
 const unitTypeFilter = ref(null)
 const isUnitsFilterDialogVisible = ref(false)
 const unitStatusFilter = ref(null)
+const isEditUnitDrawerVisible = ref(false)
 const unitPropertyFilter = ref(null)
 const unitRentFilter = ref(null)
 const propertyListArr = ref()
 const isUnitsCsvDialogVisible = ref(false)
+const singleUnit = ref()
 const unitCsvFile = ref()
 const rentSliderMin = ref(0)
 const rentSliderMax = ref(1000)
 const selectedPropertyForCsv = ref()
 const unitsCsvRef = ref()
+const unitPageAlert = ref({ show: false, message: null, color: null })
 
 const resolveUnitsStatusVariant = stat => {
 
@@ -136,6 +140,18 @@ const userListMeta = [
   },
 ]
 
+const editUnitItem = (unitId) => {
+  isEditUnitDrawerVisible.value = true
+
+  let unitToEdit = null
+  fetchedUnitsList.value.forEach((element)=>{
+    if(element.unitId === unitId){
+      unitToEdit = element
+    }
+  })
+  singleUnit.value = unitToEdit
+}
+
 
 const fetchedUnitsList = ref([])
 
@@ -228,21 +244,36 @@ function getAllUnits(){
 
 function uploadCsvUnits(){
 
+
+  if(!selectedPropertyForCsv.value){
+    unitPageAlert.message = "Kindly select property first"
+    unitPageAlert.color = "warning"
+    unitPageAlert.show = true
+    return
+  }
+
   const formData = new FormData()
   formData.append("userId", sessionStorage.getItem("userId"))
-  formData.append("propertyId", selectedPropertyForCsv.value)
+  formData.append("propertyId", parseInt(selectedPropertyForCsv.value))
   if(unitCsvFile.value){
-    formData.append("unitscsvfile", )
+    formData.append("unitscsvfile", unitCsvFile.value)
   }
+
 
   axios.post("http://localhost:8000/prop-app/units/csv-add", formData,{
     headers: {
       'Authorization' : sessionStorage.getItem("accessToken")
     }
   }).then((response) => {
-
+    if(response.status == 200){
+      unitPageAlert.message = response.data.message
+      unitPageAlert.color = "success"
+      unitPageAlert.show = true
+    }
   }).catch((error) => {
-
+    if(error.response.status == 403){
+      refreshUserLogin()
+    }
   })
 }
 
@@ -425,10 +456,10 @@ onMounted(() => {
             <!-- Actions -->
             <template #item.actions="{ item }">
               <div class="d-flex gap-1">
-                <IconBtn @click="editPropertyItem(item.raw.propertyId)">
+                <IconBtn @click="editUnitItem(item.raw.unitId)">
                   <VIcon icon="mdi-pencil-outline" />
                 </IconBtn>
-                <IconBtn @click="deleteItem(item.raw.propertyId)">
+                <IconBtn @click="deleteItem(item.raw.unitId)">
                   <VIcon icon="mdi-delete-outline" />
                 </IconBtn>
               </div>
@@ -555,7 +586,6 @@ onMounted(() => {
               prepend-icon="tabler-file"
               label="Upload csv file"
               chips
-              accept="image/*"
               density="compact"
               @change="csvUnitsFileUpload"
             />
@@ -571,10 +601,27 @@ onMounted(() => {
         >
           Cancel
         </VBtn>
-        <VBtn @click="isUnitsCsvDialogVisible = false">
+        <VBtn @click="uploadCsvUnits">
           Upload
         </VBtn>
       </VCardText>
     </VCard>
   </VDialog>
+
+
+  <!-- <EditUnitsDrawer 
+    v-model:isDrawerOpen="isEditUnitDrawerVisible"
+    :single-unit="singleUnit"
+    @get-all-units="getAllUnits"
+  /> -->
+
+
+  <VSnackbar
+    v-model="unitPageAlert.show"
+    transition="fade-transition"
+    location="botton center"
+    :color="unitPageAlert.color"
+  >
+    {{ unitPageAlert.message }}
+  </VSnackbar>
 </template>
