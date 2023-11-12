@@ -46,9 +46,9 @@ export const integerValidator = value => {
   if (isEmpty(value))
     return true
   if (Array.isArray(value))
-    return value.every(val => /^-?[0-9]+$/.test(String(val))) || 'This field must be an integer'
+    return value.every(val => /^-?[0-9]+$/.test(String(val))) || 'This field must be a number'
   
-  return /^-?[0-9]+$/.test(String(value)) || 'This field must be an integer'
+  return /^-?[0-9]+$/.test(String(value)) || 'This field must be a number'
 }
 
 export const numberValidator = value => {
