@@ -1,9 +1,10 @@
 <script setup>
-import { paginationMeta } from '@/@fake-db/utils'
+import { refreshUserLogin } from '@/common/reusing_functions'
 import router from '@/router'
 import { useUserListStore } from '@/views/apps/user/useUserListStore'
-import { avatarText } from '@core/utils/formatters'
-import { VDataTableServer } from 'vuetify/labs/VDataTable'
+
+import axios from 'axios'
+import { onMounted } from 'vue'
 
 const userListStore = useUserListStore()
 const searchQuery = ref('')
@@ -11,8 +12,13 @@ const selectedRole = ref()
 const selectedPlan = ref()
 const selectedStatus = ref()
 const totalPage = ref(1)
+const landlordsData = ref([])
 const totalUsers = ref(0)
 const users = ref([])
+const landlordsCount = ref()
+const activeLandlords = ref()
+const totalProperties = ref()
+const totalUnits = ref()
 
 const options = ref({
   page: 1,
@@ -29,20 +35,28 @@ const goToAddLandlord = () => {
 // Headers
 const headers = [
   {
-    title: 'User',
-    key: 'user',
+    title: 'Name',
+    key: 'landlordDetails.landlord_name',
   },
   {
-    title: 'Role',
-    key: 'role',
+    title: 'Company Name',
+    key: 'landlordDetails.company_name',
   },
   {
-    title: 'Plan',
-    key: 'plan',
+    title: 'Contact Name',
+    key: 'landlordDetails.contact_name',
   },
   {
-    title: 'Billing',
-    key: 'billing',
+    title: 'Contact Number',
+    key: 'landlordDetails.contact_number',
+  },
+  {
+    title: 'Nos of Properties',
+    key: 'propertyNos',
+  },
+  {
+    title: 'Charges',
+    key: 'landlordDetails.charges',
   },
   {
     title: 'Status',
@@ -72,6 +86,20 @@ const fetchUsers = () => {
     console.error(error)
   })
 }
+
+const resolveLandlordImage = (documents) => {
+  console.log(documents)
+  let imageUrl = null
+  if(documents !== null && documents.length > 0){
+  documents.forEach((element)=>{
+    if(element.document_name === "user/landlord Image"){
+      imageUrl = element.image
+    }
+  })
+  return imageUrl
+}
+}
+
 
 // watchEffect(fetchUsers)
 
@@ -134,40 +162,40 @@ const status = [
 ]
 
 const resolveUserRoleVariant = role => {
-  const roleLowerCase = role.toLowerCase()
-  if (roleLowerCase === 'subscriber')
-    return {
-      color: 'warning',
-      icon: 'tabler-circle-check',
-    }
-  if (roleLowerCase === 'author')
-    return {
-      color: 'success',
-      icon: 'tabler-user',
-    }
-  if (roleLowerCase === 'maintainer')
-    return {
-      color: 'primary',
-      icon: 'tabler-chart-pie-2',
-    }
-  if (roleLowerCase === 'editor')
-    return {
-      color: 'info',
-      icon: 'tabler-edit',
-    }
-  if (roleLowerCase === 'admin')
-    return {
-      color: 'secondary',
-      icon: 'tabler-device-laptop',
-    }
+  // const roleLowerCase = role.toLowerCase()
+  // if (roleLowerCase === 'subscriber')
+  //   return {
+  //     color: 'warning',
+  //     icon: 'tabler-circle-check',
+  //   }
+  // if (roleLowerCase === 'author')
+  //   return {
+  //     color: 'success',
+  //     icon: 'tabler-user',
+  //   }
+  // if (roleLowerCase === 'maintainer')
+  //   return {
+  //     color: 'primary',
+  //     icon: 'tabler-chart-pie-2',
+  //   }
+  // if (roleLowerCase === 'editor')
+  //   return {
+  //     color: 'info',
+  //     icon: 'tabler-edit',
+  //   }
+  // if (roleLowerCase === 'admin')
+  //   return {
+  //     color: 'secondary',
+  //     icon: 'tabler-device-laptop',
+  //   }
   
-  return {
-    color: 'primary',
-    icon: 'tabler-user',
-  }
+  // return {
+  //   color: 'primary',
+  //   icon: 'tabler-user',
+  // }
 }
 
-const resolveUserStatusVariant = stat => {
+const resolveLandlordStatusVariant = stat => {
   const statLowerCase = stat.toLowerCase()
   if (statLowerCase === 'pending')
     return 'warning'
@@ -187,39 +215,86 @@ const addNewUser = userData => {
   fetchUsers()
 }
 
+function getLandlordData(){
+
+  let queryData = {
+    "userId" : sessionStorage.getItem("userId"),
+  }
+
+  axios.get("http://localhost:8000/prop-app/landlords/get", {
+    params: queryData,
+    headers: {
+      'Authorization' : sessionStorage.getItem('accessToken')
+    }
+  }).then(response => {
+    console.log(response)
+    landlordsData.value = response.data.landlordData
+  }).catch(error => {
+    if(error.response.status == 403){
+      refreshUserLogin();
+    }
+  })
+}
+
+
+function fetchLandlordsStats(){
+
+let queryData = {
+  "userId" : sessionStorage.getItem('userId')
+}
+
+axios.get("http://localhost:8000/prop-app/landlord-page/stats", {
+  params: queryData,
+  headers: {
+    'Authorization' : sessionStorage.getItem('accessToken')
+  }
+}).then((response) => {
+  if(response.status == 200){
+    let data = response.data.pageData
+    landlordsCount.value = data.landlords
+    activeLandlords.value = data.activeLandlords
+    totalProperties.value = data.properties
+    totalUnits.value = data.units
+  }
+}).catch((error) => {
+  if(error.response.status == 403){
+    refreshUserLogin()
+  }
+})
+}
+
 // 👉 List
 const userListMeta = [
   {
     icon: 'tabler-user',
     color: 'primary',
-    title: 'Session',
-    stats: '21,459',
-    percentage: +29,
-    subtitle: 'Total Users',
+    // title: 'Landlords',
+    stats: landlordsCount,
+    subtitle: 'Landlords',
   },
   {
     icon: 'tabler-user-plus',
-    color: 'error',
-    title: 'Paid Users',
-    stats: '4,567',
-    percentage: +18,
-    subtitle: 'Last week analytics',
+    color: 'info',
+    // title: 'Paid Users',
+    stats: activeLandlords,
+    // percentage: +18,
+    subtitle: 'Active Landlords',
   },
   {
     icon: 'tabler-user-check',
     color: 'success',
-    title: 'Active Users',
-    stats: '19,860',
-    percentage: -14,
-    subtitle: 'Last week analytics',
+    // title: 'Active Users',
+    stats: totalProperties,
+    // percentage: -14,
+    subtitle: 'Total Properties',
   },
   {
     icon: 'tabler-user-exclamation',
-    color: 'warning',
-    title: 'Pending Users',
-    stats: '237',
-    percentage: +42,
-    subtitle: 'Last week analytics',
+    color: 'success',
+    // title: 'Pending Users',
+    stats: totalUnits,
+    // percentage: +42,
+    subtitle: 'Total Units',
   },
 ]
 
@@ -229,6 +304,12 @@ const deleteUser = id => {
   // refetch User
   fetchUsers()
 }
+
+onMounted(() => {
+  getLandlordData();
+  fetchLandlordsStats();
+})
+
 </script>
 
 <template>
@@ -249,7 +330,7 @@ const deleteUser = id => {
                 <h6 class="text-h4">
                   {{ meta.stats }}
                 </h6>
-                <span :class="meta.percentage > 0 ? 'text-success' : 'text-error'">( {{ meta.percentage > 0 ? '+' : '' }} {{ meta.percentage }}%)</span>
+                <span :class="meta.percentage > 0 ? 'text-success' : 'text-error'"> {{ meta.percentage > 0 ? '+' : '' }} {{ meta.percentage }}</span>
               </div>
               <span>{{ meta.subtitle }}</span>
             </div>
@@ -265,11 +346,9 @@ const deleteUser = id => {
       </VCol>
 
       <VCol cols="12">
-        <VCard title="Search Filter">
-          <!-- 👉 Filters -->
-          <VCardText>
+        <VCard title="Landlords">
+          <!-- <VCardText>
             <VRow>
-              <!-- 👉 Select Role -->
               <VCol
                 cols="12"
                 sm="4"
@@ -282,7 +361,6 @@ const deleteUser = id => {
                   clear-icon="tabler-x"
                 />
               </VCol>
-              <!-- 👉 Select Plan -->
               <VCol
                 cols="12"
                 sm="4"
@@ -295,7 +373,6 @@ const deleteUser = id => {
                   clear-icon="tabler-x"
                 />
               </VCol>
-              <!-- 👉 Select Status -->
               <VCol
                 cols="12"
                 sm="4"
@@ -309,12 +386,12 @@ const deleteUser = id => {
                 />
               </VCol>
             </VRow>
-          </VCardText>
+          </VCardText> -->
 
           <VDivider />
 
           <VCardText class="d-flex flex-wrap py-4 gap-4">
-            <div class="me-3 d-flex gap-3">
+            <!-- <div class="me-3 d-flex gap-3">
               <AppSelect
                 :model-value="options.itemsPerPage"
                 :items="[
@@ -327,12 +404,11 @@ const deleteUser = id => {
                 style="width: 6.25rem;"
                 @update:model-value="options.itemsPerPage = parseInt($event, 10)"
               />
-            </div>
+            </div> -->
             <VSpacer />
 
-            <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
-              <!-- 👉 Search  -->
-              <div style="inline-size: 10rem;">
+            <!-- <div class="app-user-search-filter d-flex align-center flex-wrap gap-4"> -->
+              <!-- <div style="inline-size: 10rem;">
                 <AppTextField
                   v-model="searchQuery"
                   placeholder="Search"
@@ -340,39 +416,38 @@ const deleteUser = id => {
                 />
               </div>
 
-              <!-- 👉 Export button -->
               <VBtn
                 variant="tonal"
                 color="secondary"
                 prepend-icon="tabler-screen-share"
               >
                 Export
-              </VBtn>
+              </VBtn> -->
 
               <!-- 👉 Add user button -->
-              <VBtn
+
+            <!-- </div> -->
+            <VBtn
                 prepend-icon="tabler-plus"
                 @click="goToAddLandlord"
               >
-                Add New User
-              </VBtn>
-            </div>
+                Add Landlord
+            </VBtn>
           </VCardText>
 
           <VDivider />
 
           <!-- SECTION datatable -->
-          <VDataTableServer
+          <!-- <VDataTableServer
             v-model:items-per-page="options.itemsPerPage"
             v-model:page="options.page"
-            :items="users"
+            :items="landlordsData"
             :items-length="totalUsers"
             :headers="headers"
             class="text-no-wrap"
             @update:options="options = $event"
           >
-            <!-- User -->
-            <template #item.user="{ item }">
+            <template #item.landlord="{ item }">
               <div class="d-flex align-center">
                 <VAvatar
                   size="34"
@@ -400,10 +475,9 @@ const deleteUser = id => {
                   <span class="text-sm text-medium-emphasis">@{{ item.raw.email }}</span>
                 </div>
               </div>
-            </template>
+            </template> -->
 
-            <!-- 👉 Role -->
-            <template #item.role="{ item }">
+            <!-- <template #item.role="{ item }">
               <div class="d-flex align-center gap-4">
                 <VAvatar
                   :size="30"
@@ -417,17 +491,15 @@ const deleteUser = id => {
                 </VAvatar>
                 <span class="text-capitalize">{{ item.raw.role }}</span>
               </div>
-            </template>
+            </template> -->
 
-            <!-- Plan -->
-            <template #item.plan="{ item }">
+            <!-- <template #item.plan="{ item }">
               <span class="text-capitalize font-weight-medium">{{ item.raw.currentPlan }}</span>
-            </template>
+            </template>  -->
 
-            <!-- Status -->
-            <template #item.status="{ item }">
+            <!-- <template #item.status="{ item }">
               <VChip
-                :color="resolveUserStatusVariant(item.raw.status)"
+                :color="resolveLandlordStatusVariant(item.raw.status)"
                 size="small"
                 label
                 class="text-capitalize"
@@ -436,7 +508,6 @@ const deleteUser = id => {
               </VChip>
             </template>
 
-            <!-- Actions -->
             <template #item.actions="{ item }">
               <IconBtn @click="deleteUser(item.raw.id)">
                 <VIcon icon="tabler-trash" />
@@ -485,7 +556,6 @@ const deleteUser = id => {
               </VBtn>
             </template>
 
-            <!-- pagination -->
             <template #bottom>
               <VDivider />
               <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3">
@@ -522,15 +592,62 @@ const deleteUser = id => {
                 </VPagination>
               </div>
             </template>
-          </VDataTableServer>
-          <!-- SECTION -->
+          </VDataTableServer> -->
         </VCard>
 
-        <!-- 👉 Add New User -->
 
       </vcol>
     </vrow>
   </section>
+
+  <VRow  >
+  <VCol
+      cols="12"
+      sm="6"
+      md="4"
+      v-for="landlord in landlordsData" key="landlord.landlordId">
+      <VCard>
+        <template v-if="landlord.landlordDocuments">
+        <VImg :src="'http://127.0.0.1:8000/media/'+resolveLandlordImage(landlord.landlordDocuments)" />
+        </template>
+        <VCardText class="position-relative">
+          <!-- User Avatar -->
+          <VAvatar
+            size="75"
+            class="avatar-center"
+            :image="avatar1"
+          />
+
+          <!-- Title, Subtitle & Action Button -->
+          <div class="d-flex justify-space-between flex-wrap pt-8">
+            <div class="me-2 mb-2">
+              <VCardTitle class="pa-0">
+                {{ landlord.landlordDetails.landlord_name }}
+              </VCardTitle>
+              <VCardSubtitle class="text-caption pa-0">
+                {{ landlord.landlordDetails.email }}
+              </VCardSubtitle>
+            </div>
+            <VBtn>View Details</VBtn>
+          </div>
+
+          <!--  Mutual Friends -->
+          <div class="d-flex justify-space-between align-center mt-8">
+            <span class="font-weight-medium">18 mutual friends</span>
+
+            <div class="v-avatar-group">
+              <VAvatar
+                v-for="avatar in avatars"
+                :key="avatar"
+                :image="avatar"
+                size="38"
+              />
+            </div>
+          </div>
+        </VCardText>
+      </VCard>
+    </VCol>
+  </VRow>
 </template>
 
 <style lang="scss">
