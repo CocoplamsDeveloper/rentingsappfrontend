@@ -1,6 +1,6 @@
 <script setup>
 import { refreshUserLogin } from '@/common/reusing_functions'
-import PropertyBioPanel from '@/views/apps/property/view/PropertyBioPanel.vue'
+import LandlordBioPanel from '@/views/apps/landlord_user/view/LandlordBioPanel.vue'
 import PropertyTabAccount from '@/views/apps/property/view/PropertyTabAccount.vue'
 import PropertyTabBillingsPlans from '@/views/apps/property/view/PropertyTabBillingsPlans.vue'
 import PropertyTabNotifications from '@/views/apps/property/view/PropertyTabNotifications.vue'
@@ -13,7 +13,7 @@ import { onMounted } from 'vue'
 // const userListStore = useUserListStore()
 const route = useRoute()
 
-const propertyData = ref({})
+const landlordData = ref({})
 const landlordsCount = ref()
 const activeLandlords = ref()
 const totalProperties = ref()
@@ -27,13 +27,13 @@ const tabs = [
   },
 
   {
-    icon: 'tabler-lock',
-    title: 'Units',
+    icon: 'tabler-building',
+    title: 'Properties',
   },
 
   {
     icon: 'tabler-currency-dollar',
-    title: 'Invoices',
+    title: 'documents',
   },
 
   {
@@ -44,21 +44,6 @@ const tabs = [
 ]
 
 const userListMeta = [
-  {
-    icon: 'tabler-user',
-    color: 'primary',
-    // title: 'Landlords',
-    stats: landlordsCount,
-    subtitle: 'Landlords',
-  },
-  {
-    icon: 'tabler-user-check',
-    color: 'info',
-    // title: 'Paid Users',
-    stats: activeLandlords,
-    // percentage: +18,
-    subtitle: 'Active Landlords',
-  },
   {
     icon: 'tabler-building',
     color: 'success',
@@ -75,30 +60,47 @@ const userListMeta = [
     // percentage: +42,
     subtitle: 'Total Units',
   },
+  {
+    icon: 'tabler-user',
+    color: 'primary',
+    // title: 'Landlords',
+    stats: landlordsCount,
+    subtitle: 'Total Tenants',
+  },
+  {
+    icon: 'tabler-user-check',
+    color: 'info',
+    // title: 'Paid Users',
+    stats: activeLandlords,
+    // percentage: +18,
+    subtitle: 'Total Users',
+  }
 ]
 
-const fetchProperty = item => {
 
-  if(!sessionStorage.getItem("accessToken")){
-    router.push('/login')
-
-    return 
-  }
-  axios.get("http://127.0.0.1:8000/prop-app/property/"+item, {
-    params: { "userId": sessionStorage.getItem('userId') },
-    headers: {
-      "Authorization": sessionStorage.getItem("accessToken"),
-    },
-  }).then(response => {
-    console.log(response)
-    propertyData.value = response.data.property_data[0]
-  }).catch( error => {
-    if(error.response.status === 401){
-      refreshUserLogin()
+function getSingleLandlord(){
+    let queryData = {
+      "userId" :  sessionStorage.getItem("userId")
     }
-    console.log(error)
-  })
+
+    axios.get("http://localhost:8000/prop-app/landlord/"+sessionStorage.getItem("userId"), {
+      params: queryData,
+      headers: {
+        'Authorization': sessionStorage.getItem("accessToken")
+      }
+    }).then((response) => {
+      console.log(response)
+      landlordData.value = response.data.landlord
+      // fillCurrentDetails(response.data.landlord)
+    }).catch((error) => {
+      if(error.response.status === 403){
+        refreshUserLogin()
+      }
+    })
+
 }
+
+
 
 
 function fetchLandlordsStats(){
@@ -128,7 +130,7 @@ axios.get("http://localhost:8000/prop-app/landlord-page/stats", {
 }
 
 onMounted(() => {
-  fetchProperty(route.params.id)
+  getSingleLandlord()
   fetchLandlordsStats()
 })
 
@@ -173,13 +175,13 @@ onMounted(() => {
     </VRow>
 </section>
 <section>
-  <VRow v-if="propertyData">
+  <VRow v-if="landlordData">
     <VCol
       cols="12"
       md="5"
       lg="4"
     >
-      <PropertyBioPanel :property-data="propertyData" />
+      <LandlordBioPanel :landlord-data="landlordData" />
     </VCol>
 
     <VCol

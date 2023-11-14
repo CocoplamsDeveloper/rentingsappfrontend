@@ -1,7 +1,7 @@
 <script setup>
-import { VDataTableServer } from 'vuetify/labs/VDataTable'
 import { paginationMeta } from '@/@fake-db/utils'
 import { useInvoiceStore } from '@/views/apps/invoice/useInvoiceStore'
+import { VDataTableServer } from 'vuetify/labs/VDataTable'
 
 const invoiceListStore = useInvoiceStore()
 const searchQuery = ref('')

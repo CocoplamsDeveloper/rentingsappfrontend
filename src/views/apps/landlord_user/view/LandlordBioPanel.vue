@@ -6,7 +6,7 @@ kFormatter,
 } from '@core/utils/formatters';
 
 const props = defineProps({
-  propertyData: {
+  landlordData: {
     type: Object,
     required: true,
   },
@@ -22,6 +22,7 @@ const standardPlan = {
   ],
 }
 
+console.log(props.landlordData)
 const isPropertyInfoEditDialogVisible = ref(false)
 const isUpgradePlanDialogVisible = ref(false)
 
@@ -74,30 +75,30 @@ const resolveUserRoleVariant = role => {
   <VRow>
     <!-- SECTION User Details -->
     <VCol cols="12">
-      <VCard v-if="props.propertyData">
+      <VCard v-if="props.landlordData">
         <VCardText class="text-center pt-15">
           <!-- 👉 Avatar -->
           <VAvatar
             rounded
             :size="100"
-            :color="!props.propertyData.avatar ? 'primary' : undefined"
-            :variant="!props.propertyData.avatar ? 'tonal' : undefined"
+            :color="!props.landlordData.avatar ? 'primary' : undefined"
+            :variant="!props.landlordData.avatar ? 'tonal' : undefined"
           >
             <VImg
-              v-if="props.propertyData.property_image"
-              :src="'http://127.0.0.1:8000/media/'+props.propertyData.property_image"
+              v-if="props.landlordData.property_image"
+              :src="'http://127.0.0.1:8000/media/'+props.landlordData.property_image"
             />
             <span
               v-else
               class="text-5xl font-weight-medium"
             >
-              {{ avatarText(props.propertyData.property_name) }}
+              {{ avatarText(props.landlordData.landlord_name) }}
             </span>
           </VAvatar>
 
           <!-- 👉 User fullName -->
           <h6 class="text-h4 mt-4">
-            {{ props.propertyData.property_name }}
+            {{ props.landlordData.landlord_name }}
           </h6>
 
           <!-- 👉 Role chip -->
@@ -128,7 +129,7 @@ const resolveUserRoleVariant = role => {
 
             <div>
               <h6 class="text-h6">
-                {{ kFormatter(props.propertyData.taskDone) }}
+                {{ kFormatter(props.landlordData.taskDone) }}
               </h6>
               <span class="text-sm">Total Units</span>
             </div>
@@ -148,7 +149,7 @@ const resolveUserRoleVariant = role => {
 
             <div>
               <h6 class="text-h6">
-                {{ kFormatter(props.propertyData.projectDone) }}
+                {{ kFormatter(props.landlordData.projectDone) }}
               </h6>
               <span class="text-sm">Tenants</span>
             </div>
@@ -168,9 +169,9 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Property Name:
+                  Name:
                   <span class="text-body-1">
-                    {{ props.propertyData.property_name }}
+                    {{ props.landlordData.landlord_name }}
                   </span>
                 </h6>
               </VListItemTitle>
@@ -179,8 +180,8 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Property Type:
-                  <span class="text-body-1">{{ props.propertyData.property_type }}</span>
+                  Email:
+                  <span class="text-body-1">{{ props.landlordData.email }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -193,10 +194,10 @@ const resolveUserRoleVariant = role => {
                   <VChip
                     label
                     size="small"
-                    :color="resolvePropertyStatusVariant(props.propertyData.property_status)"
+                    :color="resolvePropertyStatusVariant(props.landlordData.status)"
                     class="text-capitalize"
                   >
-                    {{ props.propertyData.property_status }}
+                    {{ props.landlordData.status }}
                   </VChip>
                 </h6>
               </VListItemTitle>
@@ -206,7 +207,7 @@ const resolveUserRoleVariant = role => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Property Number:
-                  <span class="text-capitalize text-body-1">{{ props.propertyData.property_number }}</span>
+                  <span class="text-capitalize text-body-1">{{ props.landlordData.property_number }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -216,7 +217,7 @@ const resolveUserRoleVariant = role => {
                 <h6 class="text-h6">
                   Built Year:
                   <span class="text-body-1">
-                    {{ props.propertyData.built_year }}
+                    {{ props.landlordData.built_year }}
                   </span>
                 </h6>
               </VListItemTitle>
@@ -226,7 +227,7 @@ const resolveUserRoleVariant = role => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Property Size:
-                  <span class="text-body-1">{{ props.propertyData.area_insqmtrs }}</span>
+                  <span class="text-body-1">{{ props.landlordData.area_insqmtrs }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -235,7 +236,7 @@ const resolveUserRoleVariant = role => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Country:
-                  <span class="text-body-1">{{ props.propertyData.governate }}</span>
+                  <span class="text-body-1">{{ props.landlordData.governate }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
