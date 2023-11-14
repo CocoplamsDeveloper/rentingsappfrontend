@@ -2,8 +2,10 @@
 import { refreshUserLogin } from '@/common/reusing_functions'
 import router from '@/router'
 import { useUserListStore } from '@/views/apps/user/useUserListStore'
-
+import avatar1 from '@images/avatars/avatar-1.png'
+import pages2 from '@images/pages/2.png'
 import axios from 'axios'
+
 import { onMounted } from 'vue'
 
 const userListStore = useUserListStore()
@@ -19,6 +21,7 @@ const landlordsCount = ref()
 const activeLandlords = ref()
 const totalProperties = ref()
 const totalUnits = ref()
+const landlordCardImage = ref()
 
 const options = ref({
   page: 1,
@@ -88,18 +91,28 @@ const fetchUsers = () => {
 }
 
 const resolveLandlordImage = (documents) => {
-  console.log(documents)
-  let imageUrl = null
+  let imageURL = null
   if(documents !== null && documents.length > 0){
-  documents.forEach((element)=>{
+  documents[0].forEach((element)=>{
     if(element.document_name === "user/landlord Image"){
-      imageUrl = element.image
+      imageURL = element.image
     }
   })
-  return imageUrl
+  return imageURL
 }
 }
 
+const resolveLandlordLogo = (documents) => {
+  let imageURL = null
+  if(documents !== null && documents.length > 0){
+  documents[0].forEach((element)=>{
+    if(element.document_name === "landlord company logo"){
+      imageURL = element.image
+    }
+  })
+  return imageURL
+}
+}
 
 // watchEffect(fetchUsers)
 
@@ -273,7 +286,7 @@ const userListMeta = [
     subtitle: 'Landlords',
   },
   {
-    icon: 'tabler-user-plus',
+    icon: 'tabler-user-check',
     color: 'info',
     // title: 'Paid Users',
     stats: activeLandlords,
@@ -281,7 +294,7 @@ const userListMeta = [
     subtitle: 'Active Landlords',
   },
   {
-    icon: 'tabler-user-check',
+    icon: 'tabler-building',
     color: 'success',
     // title: 'Active Users',
     stats: totalProperties,
@@ -289,7 +302,7 @@ const userListMeta = [
     subtitle: 'Total Properties',
   },
   {
-    icon: 'tabler-user-exclamation',
+    icon: 'tabler-home-2',
     color: 'success',
     // title: 'Pending Users',
     stats: totalUnits,
@@ -347,6 +360,7 @@ onMounted(() => {
 
       <VCol cols="12">
         <VCard title="Landlords">
+          
           <!-- <VCardText>
             <VRow>
               <VCol
@@ -607,15 +621,15 @@ onMounted(() => {
       md="4"
       v-for="landlord in landlordsData" key="landlord.landlordId">
       <VCard>
-        <template v-if="landlord.landlordDocuments">
-        <VImg :src="'http://127.0.0.1:8000/media/'+resolveLandlordImage(landlord.landlordDocuments)" />
+        <template v-if="landlord.documents.length > 0">
+        <VImg :src="resolveLandlordLogo(landlord.documents)?'http://127.0.0.1:8000/media/'+resolveLandlordLogo(landlord.documents): pages2"/>
         </template>
         <VCardText class="position-relative">
           <!-- User Avatar -->
           <VAvatar
             size="75"
             class="avatar-center"
-            :image="avatar1"
+            :image="resolveLandlordImage(landlord.documents)?'http://127.0.0.1:8000/media/'+resolveLandlordImage(landlord.documents): avatar1" 
           />
 
           <!-- Title, Subtitle & Action Button -->
@@ -628,21 +642,21 @@ onMounted(() => {
                 {{ landlord.landlordDetails.email }}
               </VCardSubtitle>
             </div>
-            <VBtn>View Details</VBtn>
+            <RouterLink :to="{ name: 'viewlandlord-id', params: { id: Number(landlord.landlordId) } }">View Details</RouterLink>
           </div>
 
           <!--  Mutual Friends -->
           <div class="d-flex justify-space-between align-center mt-8">
-            <span class="font-weight-medium">18 mutual friends</span>
-
-            <div class="v-avatar-group">
+            <span class="font-weight-medium">Company: {{ landlord.landlordDetails.company_name.toUpperCase() }}</span>
+            <span class="font-weight-medium">Contact#: {{ landlord.landlordDetails.contact_number }}</span>
+            <!-- <div class="v-avatar-group">
               <VAvatar
                 v-for="avatar in avatars"
                 :key="avatar"
                 :image="avatar"
                 size="38"
               />
-            </div>
+            </div> -->
           </div>
         </VCardText>
       </VCard>
@@ -663,3 +677,4 @@ onMounted(() => {
   color: rgba(var(--v-theme-on-background), var(--v-medium-emphasis-opacity));
 }
 </style>
+

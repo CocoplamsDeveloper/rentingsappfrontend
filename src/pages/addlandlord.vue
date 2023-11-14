@@ -38,6 +38,7 @@ const landlordDetailsToAdd = ref({
 'contactNumber' : '',
 'landlordContactPerson' : '',
 'landlordCompanyName' : '',
+'landlordAddress': '',
 'status' : '',
 'type': '',
 'bankName': '',
@@ -586,7 +587,7 @@ const getLdDoc = e =>{
                 />
               </VCol>
 
-              <VCol
+              <!-- <VCol
                 cols="12"
                 md="4"
               >
@@ -595,7 +596,7 @@ const getLdDoc = e =>{
                   label="Charges*"
                   :rules="[requiredValidator, integerValidator]"
                 />
-              </VCol>
+              </VCol> -->
 
               <VCol 
               cols="12"
@@ -609,7 +610,7 @@ const getLdDoc = e =>{
 
               <VCol
                 cols="12"
-                md="4"
+                md="6"
               >
                 <label>Logo Image</label>
                 <VFileInput
@@ -621,7 +622,7 @@ const getLdDoc = e =>{
 
               <VCol
                 cols="12"
-                md="4"
+                md="6"
               >
                 <label>Landlord ID document</label>
                 <VFileInput

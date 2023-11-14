@@ -1,9 +1,10 @@
 <script setup>
 import { emailValidator, integerValidator, passwordValidator, requiredValidator } from '@/@core/utils/validators'
 import router from '@/router'
-import axios from '@axios'
 import avatar1 from '@images/avatars/avatar-14.png'
+import axios from 'axios'
 
+const route = useRoute()
 
 const accountData = {
   avatarImg: avatar1,
@@ -21,15 +22,24 @@ const accountData = {
   currency: 'USD',
 }
 
-const addlandlordRefForm = ref()
+const editlandlordRefForm = ref()
 const landlordFormImg = ref(avatar1)
 const refInputEl = ref()
 const addTenantAlertSnackbar = ref({ show: false, message: null, color: null })
-const landlordImage = ref(null)
-const landlordLogo = ref(null)
-const landlordDocument = ref(null)
+const landlordNewImage = ref(null)
+const landlordNewLogo = ref(null)
+const landlordNewDocument = ref(null)
+const landlordCurrentImage = ref(null)
+const landlordCurrentLogo = ref(null)
+const landlordCurrentDocument = ref(null)
+const fetchedLandlord = ref({})
+const landlordLogoRef = ref()
+const landlordDocumentRef = ref()
 
-const landlordDetailsToAdd = ref({
+
+const landlordDetailsToEdit = ref({
+'landlordId': '',
+'userId': '',
 'firstName' : '',
 'lastName' : '',
 'email' : '',
@@ -38,6 +48,7 @@ const landlordDetailsToAdd = ref({
 'contactNumber' : '',
 'landlordContactPerson' : '',
 'landlordCompanyName' : '',
+'landlordAddress': '',
 'status' : '',
 'type': '',
 'bankName': '',
@@ -48,21 +59,71 @@ const landlordDetailsToAdd = ref({
 'landlordCharges': ''
 })
 
+const fillCurrentDetails = (landlord) => {
+  let ld = landlordDetailsToEdit.value
+  let data = landlord.details
+  let documents = landlord.documents
+  let name = data.landlord_name.split(' ')
+  ld.firstName = name[0]
+  ld.lastName = name[1]
+  ld.landlordId = landlord.landlordId
+  ld.userId = data.user_id
+  ld.email = data.email
+  ld.password = data.password,
+  ld.nationality = data.nationality,
+  ld.contactNumber = data.contact_number,
+  ld.landlordContactPerson = data.contact_name,
+  ld.landlordCompanyName = data.company_name,
+  ld.status = landlord.status,
+  ld.type = data.landlord_type,
+  ld.bankName = data.bank_account_details.name,
+  ld.bankAccountNo = data.bank_account_details.account_no,
+  ld.bankIbanNo = data.bank_account_details.iban_no,
+  ld.vatId = data.VAT_id,
+  ld.comments = data.comments,
+  ld.landlordAddress = data.address
+
+  documents.forEach((element) =>{
+    if(element.document_name === "user/landlord Image"){
+     landlordFormImg.value = "http://localhost:8000/media/"+element.image 
+     landlordCurrentImage.value = element.image 
+    }
+    if(element.document_name === "landlord company logo"){
+      if(element.image){
+      let t1 = element.image.split('/')
+      landlordLogoRef.value = t1[1]
+      landlordCurrentLogo.value = element.image
+      } 
+    }
+    if(element.document_name === "landlord document"){
+      if(element.document){
+      let t2 = element.image.split('/')
+      landlordDocumentRef.value = t2[1]
+      landlordCurrentDocument.value = element.document
+      console.log("line 88",element.document)
+      }
+    }
+  })
+}
 
 const resetForm = () => {
-  landlordFormImg.value = avatar1
-  addlandlordRefForm?.value.reset()
+  router.push('/landlord')
 }
 
 const changeAvatar = file => {
 
   landlordFormImg.value = URL.createObjectURL(file.target.files[0])
-  landlordImage.value = file.target.files[0]
+  landlordNewImage.value = file.target.files[0]
 }
 
 // reset avatar image
 const resetAvatar = () => {
-  landlordFormImg.value = avatar1
+  if(landlordCurrentImage.value){
+    landlordFormImg.value = "http://localhost:8000/media/"+landlordCurrentImage.value
+  }
+  else{
+    landlordFormImg.value = avatar1
+  }
 }
 
 const nationalityList = [
@@ -294,11 +355,11 @@ const nationalityList = [
 ]
 
 
-const createLandlord = () => {
-  addlandlordRefForm.value?.validate().then(({ valid }) => {
+const updateLandlord = () => {
+  editlandlordRefForm.value?.validate().then(({ valid }) => {
     if (valid) {
 
-      // console.log(landlordDetailsToAdd.value)
+      // console.log(landlordDetailsToEdit.value)
       // console.log(landlordDocument.value, landlordImage.value, landlordLogo.value)
       if(!sessionStorage.getItem("accessToken")){
         router.push('/login')
@@ -309,19 +370,19 @@ const createLandlord = () => {
       const formData = new FormData()
 
       formData.append('userId', sessionStorage.getItem("userId"))
-      formData.append('userData', JSON.stringify(landlordDetailsToAdd.value))
+      formData.append('landlordData', JSON.stringify(landlordDetailsToEdit.value))
 
-      if(landlordFormImg.value !== avatar1 && landlordImage.value !== null){
-        formData.append('userImage', landlordImage.value)
+      if(landlordNewImage.value !== null){
+        formData.append('landlordImage', landlordNewImage.value)
       }
-      if(landlordDocument.value !== null){
-        formData.append('userDocument', landlordDocument.value)
+      if(landlordNewDocument.value !== null){
+        formData.append('landlordDocument', landlordNewDocument.value)
       }
-      if(landlordLogo.value !== null){
-        formData.append('userCompanyLogo',landlordLogo.value)
+      if(landlordNewLogo.value !== null){
+        formData.append('landlordLogo',landlordNewLogo.value)
       }
 
-      axios.post("http://127.0.0.1:8000/prop-app/landlord/create", formData, {
+      axios.post("http://127.0.0.1:8000/prop-app/landlord/update", formData, {
         headers: {
           'Authorization': sessionStorage.getItem('accessToken'),
         },
@@ -347,19 +408,45 @@ const createLandlord = () => {
   })
 }
 
+function getSingleLandlord(landlordId){
+    let queryData = {
+      "userId" :  sessionStorage.getItem("userId")
+    }
+
+    axios.get("http://localhost:8000/prop-app/landlord/"+landlordId, {
+      params: queryData,
+      headers: {
+        'Authorization': sessionStorage.getItem("accessToken")
+      }
+    }).then((response) => {
+      fetchedLandlord.value = response.data.landlord
+      fillCurrentDetails(response.data.landlord)
+    }).catch((error) => {
+      if(error.response.status === 403){
+        refreshUserLogin()
+      }
+    })
+
+}
+
 const getLdLogo = e =>{
-  landlordLogo.value = e.target.files[0]
+  landlordNewLogo.value = e.target.files[0]
 }
 
 const getLdDoc = e =>{
-  landlordDocument.value = e.target.files[0]
+  landlordNewDocument.value = e.target.files[0]
 }
+
+
+onMounted(() => {
+  getSingleLandlord(route.params.id)
+})
 </script>
 
 <template>
   <VRow>
     <VCol cols="12">
-      <VCard title="Add Landlord">
+      <VCard title="Edit Landlord">
         <VCardText class="d-flex">
           <!-- 👉 Avatar -->
           <VAvatar
@@ -417,7 +504,7 @@ const getLdDoc = e =>{
         <VCardText class="pt-2">
           <!-- 👉 Form -->
           <VForm
-            ref="addlandlordRefForm"
+            ref="editlandlordRefForm"
             class="mt-6"
           >
             <VRow>
@@ -427,7 +514,7 @@ const getLdDoc = e =>{
                 cols="12"
               >
               <AppTextField
-                  v-model="landlordDetailsToAdd.firstName"
+                  v-model="landlordDetailsToEdit.firstName"
                   :rules="[requiredValidator]"
                   label="First Name*"
                 />
@@ -439,7 +526,7 @@ const getLdDoc = e =>{
                 cols="12"
               >
               <AppTextField
-                  v-model="landlordDetailsToAdd.lastName"
+                  v-model="landlordDetailsToEdit.lastName"
                   :rules="[requiredValidator]"
                   label="Last Name*"
                 />
@@ -451,7 +538,7 @@ const getLdDoc = e =>{
                 md="4"
               >
               <AppTextField
-                  v-model="landlordDetailsToAdd.email"
+                  v-model="landlordDetailsToEdit.email"
                   :rules="[requiredValidator, emailValidator]"
                   label="Email*"
                 />
@@ -462,7 +549,7 @@ const getLdDoc = e =>{
                 md="4"
               >
               <AppTextField
-                  v-model="landlordDetailsToAdd.password"
+                  v-model="landlordDetailsToEdit.password"
                   :rules="[requiredValidator, passwordValidator]"
                   label="Password*"
                 />
@@ -474,7 +561,7 @@ const getLdDoc = e =>{
                 md="4"
               >
               <AppSelect
-                  v-model="landlordDetailsToAdd.nationality"
+                  v-model="landlordDetailsToEdit.nationality"
                   :rules="[requiredValidator]"
                   label="Nationality*"
                   :items="nationalityList"
@@ -487,7 +574,7 @@ const getLdDoc = e =>{
                 md="4"
               >
               <AppTextField
-                  v-model="landlordDetailsToAdd.contactNumber"
+                  v-model="landlordDetailsToEdit.contactNumber"
                   :rules="[requiredValidator, integerValidator]"
                   label="Contact*"
                 />
@@ -500,7 +587,7 @@ const getLdDoc = e =>{
                 md="4"
               >
               <AppSelect
-                  v-model="landlordDetailsToAdd.type"
+                  v-model="landlordDetailsToEdit.type"
                   label="Type*"
                   :rules="[requiredValidator]"
                   :items="['Demo', 'Paid']"
@@ -512,7 +599,7 @@ const getLdDoc = e =>{
               md="4"
               >
                 <AppTextField
-                  v-model="landlordDetailsToAdd.bankName"
+                  v-model="landlordDetailsToEdit.bankName"
                   label="Bank Name *"
                   :rules="[requiredValidator]"
                 />
@@ -522,7 +609,7 @@ const getLdDoc = e =>{
               cols="12"
               md="4">
                 <AppTextField
-                  v-model="landlordDetailsToAdd.bankAccountNo"
+                  v-model="landlordDetailsToEdit.bankAccountNo"
                   label="Bank Account No. *"
                   :rules="[requiredValidator]"
                 />
@@ -532,7 +619,7 @@ const getLdDoc = e =>{
               cols="12"
               md="4">
                 <AppTextField
-                  v-model="landlordDetailsToAdd.bankIbanNo"
+                  v-model="landlordDetailsToEdit.bankIbanNo"
                   label="Bank Iban No. *"
                   :rules="[requiredValidator]"
                 />
@@ -543,7 +630,7 @@ const getLdDoc = e =>{
               cols="12"
               md="4">
                 <AppSelect
-                  v-model="landlordDetailsToAdd.status"
+                  v-model="landlordDetailsToEdit.status"
                   label="Status *"
                   :rules="[requiredValidator]"
                   :items="['Active', 'Inactive']"
@@ -556,7 +643,7 @@ const getLdDoc = e =>{
                 md="4"
               >
               <AppTextField
-                  v-model="landlordDetailsToAdd.landlordAddress"
+                  v-model="landlordDetailsToEdit.landlordAddress"
                   label="Address*"
                   placeholder="Street/block/city"
                   :rules="[requiredValidator]"
@@ -568,7 +655,7 @@ const getLdDoc = e =>{
                 md="4"
               >
               <AppTextField
-                  v-model="landlordDetailsToAdd.landlordCompanyName"
+                  v-model="landlordDetailsToEdit.landlordCompanyName"
                   label="Company Name*"
                   :rules="[requiredValidator]"
                 />
@@ -580,28 +667,28 @@ const getLdDoc = e =>{
                 md="4"
               >
               <AppTextField
-                  v-model="landlordDetailsToAdd.landlordContactPerson"
+                  v-model="landlordDetailsToEdit.landlordContactPerson"
                   label="Contact Person Name*"
                   :rules="[requiredValidator]"
                 />
               </VCol>
 
-              <VCol
+              <!-- <VCol
                 cols="12"
                 md="4"
               >
               <AppTextField
-                  v-model="landlordDetailsToAdd.landlordCharges"
+                  v-model="landlordDetailsToEdit.landlordCharges"
                   label="Charges*"
                   :rules="[requiredValidator, integerValidator]"
                 />
-              </VCol>
+              </VCol> -->
 
               <VCol 
               cols="12"
               md="4">
                 <AppTextField
-                  v-model="landlordDetailsToAdd.vatId"
+                  v-model="landlordDetailsToEdit.vatId"
                   label="VAT Id"
                 />
               </VCol>
@@ -613,6 +700,7 @@ const getLdDoc = e =>{
               >
                 <label>Logo Image</label>
                 <VFileInput
+                  ref="landlordLogoRef"
                   label="company Logo"
                   density="compact"
                   @change="getLdLogo"
@@ -625,6 +713,7 @@ const getLdDoc = e =>{
               >
                 <label>Landlord ID document</label>
                 <VFileInput
+                  ref="landlordDocumentRef"
                   label="Id Proof document"
                   density="compact"
                   @change="getLdDoc"
@@ -636,7 +725,7 @@ const getLdDoc = e =>{
               cols="12"
               md="6">
                 <AppTextField
-                  v-model="landlordDetailsToAdd.comments"
+                  v-model="landlordDetailsToEdit.comments"
                   label="Comments"
                 />
               </VCol>
@@ -647,8 +736,8 @@ const getLdDoc = e =>{
                 cols="12"
                 class="d-flex flex-wrap gap-4"
               >
-                <VBtn @click="createLandlord">
-                  Create
+                <VBtn @click="updateLandlord">
+                  Save Changes
                 </VBtn>
 
                 <VBtn
@@ -657,7 +746,7 @@ const getLdDoc = e =>{
                   type="reset"
                   @click.prevent="resetForm"
                 >
-                  Reset
+                  Go back
                 </VBtn>
               </VCol>
             </VRow>
@@ -676,4 +765,3 @@ const getLdDoc = e =>{
     {{ addTenantAlertSnackbar.message }}
   </VSnackbar>
 </template>
-

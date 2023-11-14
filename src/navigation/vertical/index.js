@@ -7,7 +7,7 @@ export default [
   {
     title: 'Landlord',
     icon: { icon: 'tabler-user-check' },
-    to: { name: 'landlord' },
+    to: { name: 'userlandlord' },
   },
   {
     title: 'Properties',
