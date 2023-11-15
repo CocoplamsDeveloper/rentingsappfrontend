@@ -1,8 +1,7 @@
 <script setup>
 import PropertyUpdateDialog from '@/components/dialogs/PropertyUpdateDialog.vue';
 import {
-avatarText,
-kFormatter,
+kFormatter
 } from '@core/utils/formatters';
 
 const props = defineProps({
@@ -25,6 +24,18 @@ const standardPlan = {
 console.log(props.landlordData)
 const isPropertyInfoEditDialogVisible = ref(false)
 const isUpgradePlanDialogVisible = ref(false)
+
+const resolveLandlordImage = (documents) => {
+  let imageURL = null
+  if(documents !== null && documents.length > 0){
+  documents.forEach((element)=>{
+    if(element.document_name === "user Image"){
+      imageURL = element.image
+    }
+  })
+  return imageURL
+}
+}
 
 const resolvePropertyStatusVariant = stat => {
   if (stat === 'pending')
@@ -85,20 +96,20 @@ const resolveUserRoleVariant = role => {
             :variant="!props.landlordData.avatar ? 'tonal' : undefined"
           >
             <VImg
-              v-if="props.landlordData.property_image"
-              :src="'http://127.0.0.1:8000/media/'+props.landlordData.property_image"
+              v-if="props.landlordData.documents"
+              :src="'http://127.0.0.1:8000/media/'+resolveLandlordImage(props.landlordData.documents)"
             />
             <span
               v-else
               class="text-5xl font-weight-medium"
             >
-              {{ avatarText(props.landlordData.landlord_name) }}
+              <!-- {{ avatarText(props.landlordData.details.landlord_name) }} -->
             </span>
           </VAvatar>
 
           <!-- 👉 User fullName -->
           <h6 class="text-h4 mt-4">
-            {{ props.landlordData.landlord_name }}
+            <!-- {{ props.landlordData.details.landlord_name }} -->
           </h6>
 
           <!-- 👉 Role chip -->
@@ -171,7 +182,7 @@ const resolveUserRoleVariant = role => {
                 <h6 class="text-h6">
                   Name:
                   <span class="text-body-1">
-                    {{ props.landlordData.landlord_name }}
+                    <!-- {{ props.landlordData.details.landlord_name }} -->
                   </span>
                 </h6>
               </VListItemTitle>
@@ -181,7 +192,7 @@ const resolveUserRoleVariant = role => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Email:
-                  <span class="text-body-1">{{ props.landlordData.email }}</span>
+                  <!-- <span class="text-body-1">{{ props.landlordData.details.email }}</span> -->
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -206,8 +217,8 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Property Number:
-                  <span class="text-capitalize text-body-1">{{ props.landlordData.property_number }}</span>
+                  Contact Number:
+                  <!-- <span class="text-capitalize text-body-1">{{ props.landlordData.details.contact_number }}</span> -->
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -215,9 +226,10 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Built Year:
+                  Company Name:
                   <span class="text-body-1">
-                    {{ props.landlordData.built_year }}
+                    <!-- None -->
+                    <!-- {{ props.landlordData.details.company_name }} -->
                   </span>
                 </h6>
               </VListItemTitle>
@@ -226,8 +238,8 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Property Size:
-                  <span class="text-body-1">{{ props.landlordData.area_insqmtrs }}</span>
+                  Nationality:
+                  <!-- <span class="text-body-1">{{ props.landlordData.details.nationality }}</span> -->
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -235,8 +247,8 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Country:
-                  <span class="text-body-1">{{ props.landlordData.governate }}</span>
+                  Contact Name:
+                  <!-- <span class="text-body-1">{{ props.landlordData.details.contact_name }}</span> -->
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -244,7 +256,7 @@ const resolveUserRoleVariant = role => {
         </VCardText>
 
         <!-- 👉 Edit and Suspend button -->
-        <VCardText class="d-flex justify-center">
+        <!-- <VCardText class="d-flex justify-center">
           <VBtn
             variant="elevated"
             class="me-4"
@@ -259,7 +271,7 @@ const resolveUserRoleVariant = role => {
           >
             Suspend
           </VBtn>
-        </VCardText>
+        </VCardText> -->
       </VCard>
     </VCol>
     <!-- !SECTION -->
