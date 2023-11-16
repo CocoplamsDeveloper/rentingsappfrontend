@@ -1,15 +1,14 @@
 <script setup>
-import PropertyUpdateDialog from '@/components/dialogs/PropertyUpdateDialog.vue';
 import {
 kFormatter
 } from '@core/utils/formatters';
 
-const props = defineProps({
-  landlordData: {
-    type: Object,
-    required: true,
-  },
-})
+// const props = defineProps({
+//   landlordData: {
+//     type: Object,
+//     required: true,
+//   },
+// })
 
 const standardPlan = {
   plan: 'Standard',
@@ -21,7 +20,7 @@ const standardPlan = {
   ],
 }
 
-console.log(props.landlordData)
+const bioPanelData = ref({})
 const isPropertyInfoEditDialogVisible = ref(false)
 const isUpgradePlanDialogVisible = ref(false)
 
@@ -35,6 +34,27 @@ const resolveLandlordImage = (documents) => {
   })
   return imageURL
 }
+}
+
+function getSingleLandlord(){
+    let queryData = {
+      "userId" :  sessionStorage.getItem("userId")
+    }
+
+    axios.get("http://localhost:8000/prop-app/landlord/"+sessionStorage.getItem("userId"), {
+      params: queryData,
+      headers: {
+        'Authorization': sessionStorage.getItem("accessToken")
+      }
+    }).then((response) => {
+      console.log(response)
+      bioPanelData.value = response.data.landlord
+    }).catch((error) => {
+      if(error.response.status === 403){
+        refreshUserLogin()
+      }
+    })
+
 }
 
 const resolvePropertyStatusVariant = stat => {
@@ -80,36 +100,40 @@ const resolveUserRoleVariant = role => {
     icon: 'tabler-user',
   }
 }
+
+onMounted(() => {
+  getSingleLandlord()
+})
 </script>
 
 <template>
   <VRow>
     <!-- SECTION User Details -->
     <VCol cols="12">
-      <VCard v-if="props.landlordData">
+      <VCard v-if="bioPanelData">
         <VCardText class="text-center pt-15">
           <!-- 👉 Avatar -->
           <VAvatar
             rounded
             :size="100"
-            :color="!props.landlordData.avatar ? 'primary' : undefined"
-            :variant="!props.landlordData.avatar ? 'tonal' : undefined"
+            :color="!bioPanelData.avatar ? 'primary' : undefined"
+            :variant="!bioPanelData.avatar ? 'tonal' : undefined"
           >
             <VImg
-              v-if="props.landlordData.documents"
-              :src="'http://127.0.0.1:8000/media/'+resolveLandlordImage(props.landlordData.documents)"
+              v-if="bioPanelData.documents"
+              :src="'http://127.0.0.1:8000/media/'+resolveLandlordImage(bioPanelData.documents)"
             />
             <span
               v-else
               class="text-5xl font-weight-medium"
             >
-              <!-- {{ avatarText(props.landlordData.details.landlord_name) }} -->
+              {{ avatarText(bioPanelData.details.landlord_name) }}
             </span>
           </VAvatar>
 
           <!-- 👉 User fullName -->
           <h6 class="text-h4 mt-4">
-            <!-- {{ props.landlordData.details.landlord_name }} -->
+            {{ bioPanelData.details.landlord_name }}
           </h6>
 
           <!-- 👉 Role chip -->
@@ -140,7 +164,7 @@ const resolveUserRoleVariant = role => {
 
             <div>
               <h6 class="text-h6">
-                {{ kFormatter(props.landlordData.taskDone) }}
+                {{ kFormatter(bioPanelData.taskDone) }}
               </h6>
               <span class="text-sm">Total Units</span>
             </div>
@@ -160,7 +184,7 @@ const resolveUserRoleVariant = role => {
 
             <div>
               <h6 class="text-h6">
-                {{ kFormatter(props.landlordData.projectDone) }}
+                {{ kFormatter(bioPanelData.projectDone) }}
               </h6>
               <span class="text-sm">Tenants</span>
             </div>
@@ -182,7 +206,7 @@ const resolveUserRoleVariant = role => {
                 <h6 class="text-h6">
                   Name:
                   <span class="text-body-1">
-                    <!-- {{ props.landlordData.details.landlord_name }} -->
+                    {{ bioPanelData.details.landlord_name }}
                   </span>
                 </h6>
               </VListItemTitle>
@@ -192,7 +216,7 @@ const resolveUserRoleVariant = role => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Email:
-                  <!-- <span class="text-body-1">{{ props.landlordData.details.email }}</span> -->
+                  <span class="text-body-1">{{ bioPanelData.details.email }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -208,7 +232,7 @@ const resolveUserRoleVariant = role => {
                     :color="resolvePropertyStatusVariant(props.landlordData.status)"
                     class="text-capitalize"
                   >
-                    {{ props.landlordData.status }}
+                    {{ bioPanelData.status }}
                   </VChip>
                 </h6>
               </VListItemTitle>
@@ -218,7 +242,7 @@ const resolveUserRoleVariant = role => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Contact Number:
-                  <!-- <span class="text-capitalize text-body-1">{{ props.landlordData.details.contact_number }}</span> -->
+                  <span class="text-capitalize text-body-1">{{ bioPanelData.details.contact_number }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -229,7 +253,7 @@ const resolveUserRoleVariant = role => {
                   Company Name:
                   <span class="text-body-1">
                     <!-- None -->
-                    <!-- {{ props.landlordData.details.company_name }} -->
+                    {{ bioPanelData.details.company_name }}
                   </span>
                 </h6>
               </VListItemTitle>
@@ -239,7 +263,7 @@ const resolveUserRoleVariant = role => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Nationality:
-                  <!-- <span class="text-body-1">{{ props.landlordData.details.nationality }}</span> -->
+                  <span class="text-body-1">{{ bioPanelData.details.nationality }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -248,7 +272,7 @@ const resolveUserRoleVariant = role => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Contact Name:
-                  <!-- <span class="text-body-1">{{ props.landlordData.details.contact_name }}</span> -->
+                  <span class="text-body-1">{{ bioPanelData.details.contact_name }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -366,13 +390,7 @@ const resolveUserRoleVariant = role => {
   </VRow>
 
   <!-- 👉 Edit user info dialog -->
-  <PropertyUpdateDialog
-    v-model:isDialogVisible="isPropertyInfoEditDialogVisible"
-    :property-data="props.propertyData"
-  />
 
-  <!-- 👉 Upgrade plan dialog -->
-  <UserUpgradePlanDialog v-model:isDialogVisible="isUpgradePlanDialogVisible" />
 </template>
 
 <style lang="scss" scoped>

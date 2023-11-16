@@ -303,7 +303,7 @@ const updateLandlord = () => {
           addTenantAlertSnackbar.value.color = 'success'
           addTenantAlertSnackbar.value.show = true
           resetForm()
-          emit('getSingleLandlord')
+          // emit('getSingleLandlord')
         }
       }).catch(error => {
         addTenantAlertSnackbar.value.message = error.response.data.message

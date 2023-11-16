@@ -20,6 +20,7 @@ const totalProperties = ref()
 const totalUnits = ref()
 const userTab = ref(null)
 const landlordFormImg = ref()
+const landlordDocumentsList = ref([])
 
 const tabs = [
   {
@@ -32,15 +33,15 @@ const tabs = [
     title: 'Documents',
   },
 
-  {
-    icon: 'tabler-building',
-    title: 'Invoices',
-  },
+  // {
+  //   icon: 'tabler-building',
+  //   title: 'Invoices',
+  // },
 
-  {
-    icon: 'tabler-bell',
-    title: 'Maintenance',
-  },
+  // {
+  //   icon: 'tabler-bell',
+  //   title: 'Maintenance',
+  // },
 
 ]
 
@@ -254,7 +255,7 @@ onMounted(() => {
       md="5"
       lg="4"
     >
-      <LandlordBioPanel :landlord-data="landlordData" />
+      <LandlordBioPanel />
     </VCol>
 
     <VCol
@@ -290,7 +291,7 @@ onMounted(() => {
 
         
         <VWindowItem>
-          <LandlordTabDocuments />
+          <LandlordTabDocuments/>
         </VWindowItem>
 
         
