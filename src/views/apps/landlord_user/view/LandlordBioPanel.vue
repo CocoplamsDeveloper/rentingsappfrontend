@@ -1,14 +1,12 @@
 <script setup>
-import {
-kFormatter
-} from '@core/utils/formatters';
+import axios from '@axios';
 
-// const props = defineProps({
-//   landlordData: {
-//     type: Object,
-//     required: true,
-//   },
-// })
+const props = defineProps({
+  landlordData: {
+    type: Object,
+    required: true,
+  },
+})
 
 const standardPlan = {
   plan: 'Standard',
@@ -20,7 +18,7 @@ const standardPlan = {
   ],
 }
 
-const bioPanelData = ref({})
+const bioPanelData = ref(props.landlordData)
 const isPropertyInfoEditDialogVisible = ref(false)
 const isUpgradePlanDialogVisible = ref(false)
 
@@ -101,9 +99,9 @@ const resolveUserRoleVariant = role => {
   }
 }
 
-onMounted(() => {
-  getSingleLandlord()
-})
+// watchEffect(getSingleLandlord)
+
+
 </script>
 
 <template>
@@ -127,13 +125,13 @@ onMounted(() => {
               v-else
               class="text-5xl font-weight-medium"
             >
-              {{ avatarText(bioPanelData.details.landlord_name) }}
+              <!-- {{ avatarText(bioPanelData.details.landlord_name) }} -->
             </span>
           </VAvatar>
 
           <!-- 👉 User fullName -->
           <h6 class="text-h4 mt-4">
-            {{ bioPanelData.details.landlord_name }}
+            <!-- {{ bioPanelData.details.landlord_name }} -->
           </h6>
 
           <!-- 👉 Role chip -->
@@ -164,7 +162,7 @@ onMounted(() => {
 
             <div>
               <h6 class="text-h6">
-                {{ kFormatter(bioPanelData.taskDone) }}
+                <!-- {{ kFormatter(bioPanelData.taskDone) }} -->
               </h6>
               <span class="text-sm">Total Units</span>
             </div>
@@ -184,7 +182,7 @@ onMounted(() => {
 
             <div>
               <h6 class="text-h6">
-                {{ kFormatter(bioPanelData.projectDone) }}
+                <!-- {{ kFormatter(bioPanelData.projectDone) }} -->
               </h6>
               <span class="text-sm">Tenants</span>
             </div>
@@ -206,7 +204,7 @@ onMounted(() => {
                 <h6 class="text-h6">
                   Name:
                   <span class="text-body-1">
-                    {{ bioPanelData.details.landlord_name }}
+                    <!-- {{ bioPanelData.details.landlord_name }} -->
                   </span>
                 </h6>
               </VListItemTitle>
@@ -216,7 +214,7 @@ onMounted(() => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Email:
-                  <span class="text-body-1">{{ bioPanelData.details.email }}</span>
+                  <!-- <span class="text-body-1">{{ bioPanelData.details.email }}</span> -->
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -229,7 +227,7 @@ onMounted(() => {
                   <VChip
                     label
                     size="small"
-                    :color="resolvePropertyStatusVariant(props.landlordData.status)"
+                    :color="resolvePropertyStatusVariant(bioPanelData.status)"
                     class="text-capitalize"
                   >
                     {{ bioPanelData.status }}
@@ -242,7 +240,7 @@ onMounted(() => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Contact Number:
-                  <span class="text-capitalize text-body-1">{{ bioPanelData.details.contact_number }}</span>
+                  <!-- <span class="text-capitalize text-body-1">{{ bioPanelData.details.contact_number }}</span> -->
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -253,7 +251,7 @@ onMounted(() => {
                   Company Name:
                   <span class="text-body-1">
                     <!-- None -->
-                    {{ bioPanelData.details.company_name }}
+                    <!-- {{ bioPanelData.details.company_name }} -->
                   </span>
                 </h6>
               </VListItemTitle>
@@ -263,7 +261,7 @@ onMounted(() => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Nationality:
-                  <span class="text-body-1">{{ bioPanelData.details.nationality }}</span>
+                  <!-- <span class="text-body-1">{{ bioPanelData.details.nationality }}</span> -->
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -272,7 +270,7 @@ onMounted(() => {
               <VListItemTitle>
                 <h6 class="text-h6">
                   Contact Name:
-                  <span class="text-body-1">{{ bioPanelData.details.contact_name }}</span>
+                  <!-- <span class="text-body-1">{{ bioPanelData.details.contact_name }}</span> -->
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -298,95 +296,6 @@ onMounted(() => {
         </VCardText> -->
       </VCard>
     </VCol>
-    <!-- !SECTION -->
-
-    <!-- SECTION Current Plan -->
-    <!--
-      <VCol cols="12">
-      <VCard>
-      <VCardText class="d-flex">
-      👉 Standard Chip
-      <VChip
-      label
-      color="primary"
-      size="small"
-      class="font-weight-medium"
-      >
-      Popular
-      </VChip>
-
-      <VSpacer />
-
-      👉 Current Price 
-      <div class="d-flex align-center">
-      <sup class="text-primary text-sm font-weight-regular">$</sup>
-      <h3 class="text-h3 text-primary">
-      99
-      </h3>
-      <sub class="mt-3"><h6 class="text-sm font-weight-regular text-disabled">/ month</h6></sub>
-      </div>
-      </VCardText>
-
-      <VCardText>
-      👉 Price Benefits
-      <VList class="card-list">
-      <VListItem
-      v-for="benefit in standardPlan.benefits"
-      :key="benefit"
-      >
-      <VIcon
-      size="12"
-      color="#A8AAAE"
-      class="me-2"
-      icon="tabler-circle"
-      />
-      <span>{{ benefit }}</span>
-      </VListItem>
-      </VList>
-
-      👉 Days
-      <div class="my-6">
-      <div class="d-flex mt-3 mb-2">
-      <h6 class="text-base font-weight-medium">
-      Days
-      </h6>
-      <VSpacer />
-      <h6 class="text-base font-weight-medium">
-      26 of 30 Days
-      </h6>
-      </div>
-
-      👉 Progress
-      <VProgressLinear
-      rounded
-      rounded-bar
-      :model-value="65"
-      height="10"
-      color="primary"
-      />
-
-      <p class="mt-2">
-      4 days remaining
-      </p>
-      </div>
-
-      👉 Upgrade Plan
-      <div class="d-flex gap-4">
-      <VBtn @click="isUpgradePlanDialogVisible = true">
-      Upgrade Plan
-      </VBtn>
-      <VBtn
-      variant="tonal"
-      color="default"
-      >
-      cancel
-      </VBtn>
-      </div>
-      </VCardText>
-      </VCard>
-      </VCol> 
-    -->
-    <!-- !SECTION -->
   </VRow>
 
   <!-- 👉 Edit user info dialog -->

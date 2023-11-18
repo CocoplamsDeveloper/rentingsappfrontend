@@ -1,11 +1,11 @@
 <script setup>
 import { refreshUserLogin } from '@/common/reusing_functions'
-import LandlordBioPanel from '@/views/apps/landlord_user/view/LandlordBioPanel.vue'
 import LandlordTabDocuments from '@/views/apps/landlord_user/view/LandlordTabDocuments.vue'
 import LandlordTabProfile from '@/views/apps/landlord_user/view/LandlordTabProfile.vue'
 import PropertyTabBillingsPlans from '@/views/apps/property/view/PropertyTabBillingsPlans.vue'
 import PropertyTabNotifications from '@/views/apps/property/view/PropertyTabNotifications.vue'
 import axios from "@axios"
+import { avatarText } from '@core/utils/formatters'
 import { onMounted } from 'vue'
 
 // import { useUserListStore } from '@/views/apps/property/usePropertyListStore'
@@ -21,6 +21,7 @@ const totalUnits = ref()
 const userTab = ref(null)
 const landlordFormImg = ref()
 const landlordDocumentsList = ref([])
+const landlordDetails = ref({})
 
 const tabs = [
   {
@@ -149,29 +150,52 @@ const fillCurrentDetails = (landlord) => {
 
 
 
-function getSingleLandlord(){
+async function getSingleLandlord(){
     let queryData = {
       "userId" :  sessionStorage.getItem("userId")
     }
 
-    axios.get("http://localhost:8000/prop-app/landlord/"+sessionStorage.getItem("userId"), {
-      params: queryData,
-      headers: {
-        'Authorization': sessionStorage.getItem("accessToken")
-      }
-    }).then((response) => {
-      console.log(response)
-      landlordData.value = response.data.landlord
-      fillCurrentDetails(response.data.landlord)
-    }).catch((error) => {
-      if(error.response.status === 403){
-        refreshUserLogin()
-      }
-    })
+    try {
+const response = await axios.get("http://localhost:8000/prop-app/landlord/" + sessionStorage.getItem("userId"), {
+params: queryData,
+headers: {
+'Authorization': sessionStorage.getItem("accessToken")
+}
+})
+console.log(response)
+landlordData.value = response.data.landlord
+landlordDetails.value = response.data.landlord.details
+fillCurrentDetails(response.data.landlord)
+} catch (error) {
+if (error.response.status === 403) {
+refreshUserLogin()
+}
+}
 
 }
 
+const resolvePropertyStatusVariant = stat => {
+  if (stat === 'pending')
+    return 'warning'
+  if (stat === 'active')
+    return 'success'
+  if (stat === 'inactive')
+    return 'secondary'
+  
+  return 'primary'
+}
 
+const resolveLandlordImage = (documents) => {
+  let imageURL = null
+  if(documents !== null && documents.length > 0){
+  documents.forEach((element)=>{
+    if(element.document_name === "user Image"){
+      imageURL = element.image
+    }
+  })
+  return imageURL
+}
+}
 
 
 function fetchLandlordsStats(){
@@ -200,8 +224,24 @@ axios.get("http://localhost:8000/prop-app/landlord-page/stats", {
 })
 }
 
+const resolveStartDate = (data) => {
+  let current = new Date(data)
+  let month = current.getMonth()
+  month = month + 1 
+  let localDate = current.getFullYear()+"-"+ month +"-"+ current.getDate()
+  return localDate
+  
+}
 
+const resolvePeriod = (year, month) =>{
+  if(month == 0){
+    return year+ " " + 'year'
+  }
+  else{
+    return year+" "+month+"months"
+  }
 
+}
 
 
 
@@ -209,6 +249,8 @@ onMounted(() => {
   getSingleLandlord()
   fetchLandlordsStats()
 })
+
+
 
 
 </script>
@@ -250,13 +292,211 @@ onMounted(() => {
 </section>
 <section>
   <VRow v-if="landlordData">
+
     <VCol
+    cols="12"
+      md="5"
+      lg="4">
+    <VRow>
+    <!-- SECTION User Details -->
+    <VCol cols="12">
+      <VCard v-if="landlordData">
+        <VCardText class="text-center pt-15">
+          <!-- 👉 Avatar -->
+          <VAvatar
+            rounded
+            :size="100"
+            :color="!landlordData.avatar ? 'primary' : undefined"
+            :variant="!landlordData.avatar ? 'tonal' : undefined"
+          >
+            <VImg
+              v-if="landlordData.documents"
+              :src="'http://127.0.0.1:8000/media/'+resolveLandlordImage(landlordData.documents)"
+            />
+            <span
+              v-else
+              class="text-5xl font-weight-medium"
+            >
+              {{ avatarText(landlordDetails.landlord_name) }}
+            </span>
+          </VAvatar>
+
+          <!-- 👉 User fullName -->
+          <h6 class="text-h4 mt-4" >
+            {{ landlordDetails.landlord_name }}
+          </h6>
+
+          <!-- 👉 Role chip -->
+          <!--
+            <VChip
+            label
+            :color="resolveUserRoleVariant(props.propertyData.role).color"
+            size="small"
+            class="text-capitalize mt-3"
+            >
+            {{ props.propertyData.role }}
+            </VChip> 
+          -->
+        </VCardText>
+
+        <VCardText class="d-flex justify-center flex-wrap mt-3">
+          <!-- 👉 Done task -->
+          <div class="d-flex align-center me-8">
+            <VAvatar
+              :size="38"
+              rounded
+              color="primary"
+              variant="tonal"
+              class="me-3"
+            >
+              <VIcon icon="tabler-calendar" />
+            </VAvatar>
+
+            <div>
+              <h6 class="text-h6">
+                {{ resolveStartDate(landlordDetails.subscription_start_date) }}
+              </h6>
+              <span class="text-sm">Start Date</span>
+            </div>
+          </div>
+
+          <!-- 👉 Done Project -->
+          <div class="d-flex align-center me-4">
+            <VAvatar
+              :size="38"
+              rounded
+              color="primary"
+              variant="tonal"
+              class="me-3"
+            >
+              <VIcon icon="tabler-activity" />
+            </VAvatar>
+
+            <div>
+              <h6 class="text-h6">
+                {{ resolvePeriod(landlordDetails.time_period_year, landlordDetails.time_period_months) }}
+              </h6>
+              <span class="text-sm">Validity Period</span>
+            </div>
+          </div>
+        </VCardText>
+
+        <VDivider />
+
+        <!-- 👉 Details -->
+        <VCardText>
+          <p class="text-sm text-uppercase text-disabled">
+            Details
+          </p>
+
+          <!-- 👉 User Details list -->
+          <VList class="card-list mt-2">
+            <VListItem>
+              <VListItemTitle>
+                <h6 class="text-h6">
+                  Name:
+                  <span class="text-body-1" >
+                    {{ landlordDetails.landlord_name }}
+                  </span>
+                </h6>
+              </VListItemTitle>
+            </VListItem>
+
+            <VListItem>
+              <VListItemTitle>
+                <h6 class="text-h6">
+                  Email:
+                  <span class="text-body-1" >{{ landlordDetails.email }}</span>
+                </h6>
+              </VListItemTitle>
+            </VListItem>
+
+            <VListItem>
+              <VListItemTitle>
+                <h6 class="text-h6">
+                  Status:
+
+                  <VChip
+                    label
+                    size="small"
+                    :color="resolvePropertyStatusVariant(landlordData.status)"
+                    class="text-capitalize"
+                  >
+                    {{ landlordData.status }}
+                  </VChip>
+                </h6>
+              </VListItemTitle>
+            </VListItem>
+
+            <VListItem>
+              <VListItemTitle>
+                <h6 class="text-h6">
+                  Contact Number:
+                  <span class="text-capitalize text-body-1">{{ landlordDetails.contact_number }}</span>
+                </h6>
+              </VListItemTitle>
+            </VListItem>
+
+            <VListItem>
+              <VListItemTitle>
+                <h6 class="text-h6">
+                  Company Name:
+                  <span class="text-body-1">
+                    <!-- None -->
+                    {{ landlordDetails.company_name }}
+                  </span>
+                </h6>
+              </VListItemTitle>
+            </VListItem>
+
+            <VListItem>
+              <VListItemTitle>
+                <h6 class="text-h6">
+                  Nationality:
+                  <span class="text-body-1">{{ landlordDetails.nationality }}</span>
+                </h6>
+              </VListItemTitle>
+            </VListItem>
+
+            <VListItem>
+              <VListItemTitle>
+                <h6 class="text-h6">
+                  Contact Name:
+                  <span class="text-body-1">{{ landlordDetails.contact_name }}</span>
+                </h6>
+              </VListItemTitle>
+            </VListItem>
+          </VList>
+        </VCardText>
+
+        <!-- 👉 Edit and Suspend button -->
+        <!-- <VCardText class="d-flex justify-center">
+          <VBtn
+            variant="elevated"
+            class="me-4"
+            @click="isPropertyInfoEditDialogVisible = true"
+          >
+            Edit
+          </VBtn>
+
+          <VBtn
+            variant="tonal"
+            color="error"
+          >
+            Suspend
+          </VBtn>
+        </VCardText> -->
+      </VCard>
+    </VCol>
+  </VRow>
+</VCol>
+    <!-- <VCol
       cols="12"
       md="5"
       lg="4"
     >
-      <LandlordBioPanel />
-    </VCol>
+      <LandlordBioPanel :landlord-data="landlordData"/>
+    </VCol> -->
 
     <VCol
       cols="12"

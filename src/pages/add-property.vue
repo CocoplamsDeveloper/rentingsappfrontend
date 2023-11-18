@@ -25,12 +25,14 @@ const propertyImageRef = ref()
 const selectedProperty = ref(null)
 const otherDetailsPropertyName = ref()
 const otherDetailsPropertyId = ref()
+const propertyZipCode = ref()
 const propertyType = ref()
 const propDetailsForm = ref()
 const alertSnackbar = ref({ show: false, message: null, color: null })
 const otherDetailsForm = ref()
 const otherDetailsWindow = ref()
 const propertyFloors = ref(0)
+const propertyConstructionCost = ref()
 let imageFile = null
 
 const countryList = [
@@ -330,6 +332,16 @@ onMounted(() => {
                 md="4"
               >
                 <AppTextField
+                  v-model="propertyZipCode"
+                  label="Zip Code *"
+                  :rules="[requiredValidator, integerValidator]"
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppTextField
                   v-model="propertyNumber"
                   label="Property Number *"
                   :rules="[requiredValidator]"
@@ -440,7 +452,7 @@ onMounted(() => {
               >
                 <AppTextField
                   v-model="propertyIdNo" 
-                  label="Property Civil Id/Registred No."
+                  label="License No."
                   :rules="[requiredValidator]"
                 />
               </VCol>
@@ -482,6 +494,16 @@ onMounted(() => {
                 />
               </VCol>
 
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <AppTextField
+                  v-model="propertyConstructionCost"
+                  label="Construction cost(estimate)"
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
               <VCol
                 cols="12"
                 md="6"
