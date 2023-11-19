@@ -33,6 +33,12 @@ const otherDetailsForm = ref()
 const otherDetailsWindow = ref()
 const propertyFloors = ref(0)
 const propertyConstructionCost = ref()
+const availableFacilities = ref([])
+const propertyRentType = ref()
+// const includedCheck = ref(false)
+// const billedCheck = ref(false)
+const selectedFacilites = ref([])
+const facRadioBtns = ref()
 let imageFile = null
 
 const countryList = [
@@ -172,62 +178,91 @@ function imageUpload(e){
 function addPropertyAdditionalDetails(){
 
   // otherDetailsWindow.click
-  if(!selectedProperty.value){
-    alertSnackbar.value.message = "Kindly add property basic info first!"
-    alertSnackbar.value.color = "error"
-    alertSnackbar.value.show = true
+  console.log(selectedFacilites.value)
+  // if(!selectedProperty.value){
+  //   alertSnackbar.value.message = "Kindly add property basic info first!"
+  //   alertSnackbar.value.color = "error"
+  //   alertSnackbar.value.show = true
 
-    return 
-  }
+  //   return 
+  // }
 
-  otherDetailsForm?.value.validate().then(({ valid: isValid }) => {
-    if(isValid){
-      if(!sessionStorage.getItem("accessToken")){
-        router.push('/login')
+  // otherDetailsForm?.value.validate().then(({ valid: isValid }) => {
+  //   if(isValid){
+  //     if(!sessionStorage.getItem("accessToken")){
+  //       router.push('/login')
 
-        return 
-      }
-      const formData = new FormData()
-      if(imageFile){
-        formData.append('imageFile', imageFile)
-      }
-      let propertyAdditionalData = {
-        "propertyId": otherDetailsPropertyId.value,
-        "propertySaleValue": propertySalePrice.value,
-        "propertyBuyValue": propertyBoughtPrice.value,
-        "propertyCivilId": propertyIdNo.value,
-        "propertyDescription": propertyDescription.value,
-      }
-      formData.append('data', JSON.stringify(propertyAdditionalData))
-      formData.append('userId', sessionStorage.getItem('userId'))
-      axios.post('http://localhost:8000/prop-app/property-details/add', formData, {
-        headers: {
-          'Authorization': sessionStorage.getItem("AccessToken"),  
-        },
+  //       return 
+  //     }
+  //     const formData = new FormData()
+  //     if(imageFile){
+  //       formData.append('imageFile', imageFile)
+  //     }
+  //     let propertyAdditionalData = {
+  //       "propertyId": otherDetailsPropertyId.value,
+  //       "propertySaleValue": propertySalePrice.value,
+  //       "propertyBuyValue": propertyBoughtPrice.value,
+  //       "propertyCivilId": propertyIdNo.value,
+  //       "propertyDescription": propertyDescription.value,
+  //     }
+  //     formData.append('data', JSON.stringify(propertyAdditionalData))
+  //     formData.append('userId', sessionStorage.getItem('userId'))
+  //     axios.post('http://localhost:8000/prop-app/property-details/add', formData, {
+  //       headers: {
+  //         'Authorization': sessionStorage.getItem("AccessToken"),  
+  //       },
 
-      }).then(response => {
-        alertSnackbar.value.message = response.data.message
-        alertSnackbar.value.color = "success"
-        alertSnackbar.value.show = true
-        otherDetailsForm?.value.reset()
+  //     }).then(response => {
+  //       alertSnackbar.value.message = response.data.message
+  //       alertSnackbar.value.color = "success"
+  //       alertSnackbar.value.show = true
+  //       otherDetailsForm?.value.reset()
 
-      }).catch(error => {
-        alertSnackbar.value.message = error.response.data.message
-        alertSnackbar.value.color = "error"
-        alertSnackbar.value.show = true
-        if(error.response.status === 401){
-          refreshUserLogin()
-        }
-      })
-    }
-    else{
+  //     }).catch(error => {
+  //       alertSnackbar.value.message = error.response.data.message
+  //       alertSnackbar.value.color = "error"
+  //       alertSnackbar.value.show = true
+  //       if(error.response.status === 401){
+  //         refreshUserLogin()
+  //       }
+  //     })
+  //   }
+  //   else{
 
-    }
-  })
+  //   }
+  // })
 }
 
 
+async function getFacilities(){
+  let queryData = {
+    "userId": sessionStorage.getItem('userId')
+  }
+
+  try {
+  const response = await axios.get("http://localhost:8000/prop-app/facility/get", {
+  params: queryData,
+  headers: {
+  'Authorization': sessionStorage.getItem("accessToken")
+  }
+  })
+  if(response.status == 200){
+    console.log(response)
+    availableFacilities.value = response.data.facilities
+  }
+  } 
+  catch (error) {
+  if (error.response.status === 403) {
+  refreshUserLogin()
+  }
+  else{
+    console.log(error)
+  }
+}
+}
+
 onMounted(() => {
+  getFacilities()
 })
 </script>
 
@@ -438,7 +473,7 @@ onMounted(() => {
             <VRow>
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="selectedProperty"
@@ -448,7 +483,7 @@ onMounted(() => {
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="propertyIdNo" 
@@ -459,7 +494,7 @@ onMounted(() => {
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <label>Property Image</label>
                 <VFileInput
@@ -475,7 +510,7 @@ onMounted(() => {
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="propertySalePrice"
@@ -485,7 +520,7 @@ onMounted(() => {
               </VCol>
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="propertyBoughtPrice"
@@ -496,11 +531,23 @@ onMounted(() => {
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="propertyConstructionCost"
                   label="Construction cost(estimate)"
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppSelect
+                  v-model="propertyRentType"
+                  label="Rent Type"
+                  :items="['Monthly', 'Yearly']"
                   :rules="[requiredValidator]"
                 />
               </VCol>
@@ -514,7 +561,50 @@ onMounted(() => {
                   :rules="[requiredValidator]"
                 />
               </VCol>
-              
+
+              <VCol
+                cols="12"
+                >
+                <p>Facilities</p>
+                <VRow :style="{marginTop: '10px'}">
+                  <div class="demo-space-x"              
+                  v-for="fac in availableFacilities"
+                  :key="fac.facility_id">
+                    <div :style="{marginLeft: '20px'}">
+                    <label>{{ fac.name.toUpperCase() }}</label>
+                    <div :style="{marginLeft: '10px'}">
+
+                    <VRadioGroup v-model="facRadioBtns">
+                      <VRadio
+                      v-for="n in ['Included', 'Billed']"
+                      :label="n"
+                      :value="n+'-'+fac.facility_id"
+                    />
+                    </VRadioGroup>
+                      <!-- <VCheckbox
+                        v-model="selectedFacilites"
+                        label="Included"
+                        :value="{
+                          'id' : fac.facility_id,
+                          'value': true,
+                          'key' : 'included'
+                        }"
+                      />
+                      <VCheckbox
+                        v-model="selectedFacilites"
+                        label="Billed"
+                        :value="{
+                          'id' : fac.facility_id,
+                          'value': true,
+                          'key': 'billed',
+                        }"
+                      /> -->
+                    </div>
+                    </div>
+                  </div>
+              </VRow>
+                <!-- </div> -->
+              </VCol>
               <VCol
                 cols="18"
                 md="6"

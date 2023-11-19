@@ -1,9 +1,10 @@
 <script setup>
 
 import { emailValidator, integerValidator, passwordValidator, requiredValidator } from '@/@core/utils/validators'
+import codes_data from '@/common/codes_data'
+import { refreshUserLogin } from '@/common/reusing_functions'
 import axios from "@axios"
 import avatar1 from '@images/avatars/avatar-14.png'
-
 
 
 const props = defineProps({
@@ -17,13 +18,19 @@ const emit = defineEmits([
   'getSingleLandlord'
 ])
 
+const countryList = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua & Deps", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Rep", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Congo {Democratic Rep}", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland {Republic}", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar, {Burma}", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
+]
+
+
+const countriesList = ref(codes_data)
 const landlordObj = ref(props.landlordDetailsToEdit)
 const landlordNewImage = ref(null)
 const landlordFormImage = ref()
 const refInputEl = ref()
 const editlandlordRefForm = ref()
 const landlordProfileTabAlert = ref({ show: false, message: null, color: null })
-
+const phoneCode = ref()
 
 const changeAvatar = file => {
 landlordFormImage.value = URL.createObjectURL(file.target.files[0])
@@ -347,8 +354,17 @@ const options = ref({
 })
 
 
+const fillPhoneCode = () => {
+  if(landlordObj.value.landlordCountry !== '' && landlordObj.value.landlordCountry !== null){
+    countriesList.value.forEach((ele) => {
+      if(ele.country === landlordObj.value.landlordCountry){
+        phoneCode.value = "+"+Number(ele.phonecode)
+      }
+    })
+  }
+}
 
-
+watchEffect(fillPhoneCode)
 
 // watchEffect(watchLandlordData)
 
@@ -367,7 +383,7 @@ watchEffect(resolveImg)
 
 
 // onMounted(() => {
-//   fillCurrentDetails(props.landlordData)
+//   console.log(codes_data)
 // })
 </script>
 
@@ -382,7 +398,8 @@ watchEffect(resolveImg)
             size="100"
             class="me-6"
             :image="landlordFormImage"
-          />
+          >
+          </VAvatar>
 
           <!-- 👉 Upload Photo -->
           <form class="d-flex flex-column justify-center gap-4">
@@ -390,12 +407,14 @@ watchEffect(resolveImg)
               <VBtn
                 color="primary"
                 @click="refInputEl?.click()"
+                prepend-icon="tabler-edit"
+                size="24"
               >
-                <VIcon
+                <!-- <VIcon
                   icon="tabler-cloud-upload"
                   class="d-sm-none"
                 />
-                <span class="d-none d-sm-block">Upload new photo</span>
+                <span class="d-none d-sm-block">Upload new photo</span> -->
               </VBtn>
 
               <input
@@ -412,12 +431,9 @@ watchEffect(resolveImg)
                 color="secondary"
                 variant="tonal"
                 @click="resetAvatar"
+                prepend-icon="tabler-refresh"
+                size="24"
               >
-                <span class="d-none d-sm-block">Reset</span>
-                <VIcon
-                  icon="tabler-refresh"
-                  class="d-sm-none"
-                />
               </VBtn>
             </div>
 
@@ -488,11 +504,37 @@ watchEffect(resolveImg)
                 cols="12"
                 md="4"
               >
-              <AppSelect
-                  v-model="landlordObj.nationality"
+              <AppTextField
+                  v-model="landlordObj.landlordAddress"
+                  label="Address*"
+                  placeholder="Street/block/city"
                   :rules="[requiredValidator]"
-                  label="Nationality*"
-                  :items="nationalityList"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+              <AppSelect
+                  v-model="landlordObj.landlordCountry"
+                  :rules="[requiredValidator]"
+                  label="Country*"
+                  :items="countriesList"
+                  item-title="country"
+                  item-value="country"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+              <AppTextField
+                  v-model="landlordObj.zipcode"
+                  :rules="[requiredValidator]"
+                  label="Zip Code*"
+
                 />
               </VCol>
 
@@ -505,9 +547,56 @@ watchEffect(resolveImg)
                   v-model="landlordObj.contactNumber"
                   :rules="[requiredValidator, integerValidator]"
                   label="Contact*"
+                  :prefix="phoneCode"
                 />
               </VCol>
 
+              <VCol
+                cols="12"
+                md="4"
+              >
+              <AppSelect
+                  v-model="landlordObj.nationality"
+                  :rules="[requiredValidator]"
+                  label="Nationality*"
+                  :items="nationalityList"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+              <AppTextField
+                  v-model="landlordObj.landlordCompanyName"
+                  label="Company Name*"
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+              <AppTextField
+                  v-model="landlordObj.landlordContactPerson"
+                  label="Contact Person Name*"
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+
+              <VCol 
+              cols="12"
+              md="4">
+                <AppSelect
+                  v-model="landlordObj.status"
+                  label="Status *"
+                  :rules="[requiredValidator]"
+                  :items="['Active', 'Inactive']"
+                />
+              </VCol>
               <!-- 👉 Address -->
 
               <VCol
@@ -539,7 +628,7 @@ watchEffect(resolveImg)
                 <AppTextField
                   v-model="landlordObj.bankAccountNo"
                   label="Bank Account No. *"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
 
@@ -553,64 +642,6 @@ watchEffect(resolveImg)
                 />
               </VCol>
 
-
-              <VCol 
-              cols="12"
-              md="4">
-                <AppSelect
-                  v-model="landlordObj.status"
-                  label="Status *"
-                  :rules="[requiredValidator]"
-                  :items="['Active', 'Inactive']"
-                />
-              </VCol>
-
-
-              <VCol
-                cols="12"
-                md="4"
-              >
-              <AppTextField
-                  v-model="landlordObj.landlordAddress"
-                  label="Address*"
-                  placeholder="Street/block/city"
-                  :rules="[requiredValidator]"
-                />
-              </VCol>
-
-              <VCol
-                cols="12"
-                md="4"
-              >
-              <AppTextField
-                  v-model="landlordObj.landlordCompanyName"
-                  label="Company Name*"
-                  :rules="[requiredValidator]"
-                />
-              </VCol>
-
-
-              <VCol
-                cols="12"
-                md="4"
-              >
-              <AppTextField
-                  v-model="landlordObj.landlordContactPerson"
-                  label="Contact Person Name*"
-                  :rules="[requiredValidator]"
-                />
-              </VCol>
-
-              <!-- <VCol
-                cols="12"
-                md="4"
-              >
-              <AppTextField
-                  v-model="landlordDetailsToEdit.landlordCharges"
-                  label="Charges*"
-                  :rules="[requiredValidator, integerValidator]"
-                />
-              </VCol> -->
 
               <VCol 
               cols="12"

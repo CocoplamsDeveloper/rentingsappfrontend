@@ -92,6 +92,8 @@ const landlordDetailsToEdit = ref({
 'landlordContactPerson' : '',
 'landlordCompanyName' : '',
 'landlordAddress': '',
+'landlordCountry': '',
+'zipcode': '',
 'status' : '',
 'type': '',
 'bankName': '',
