@@ -1,5 +1,6 @@
 <script setup>
-import { integerValidator, requiredValidator } from '@/@core/utils/validators'
+import { floatValidator, integerValidator, requiredValidator } from '@/@core/utils/validators'
+import codes_data from '@/common/codes_data'
 import { refreshUserLogin } from '@/common/reusing_functions'
 import axios from '@axios'
 import { watchEffect } from 'vue'
@@ -37,13 +38,15 @@ const availableFacilities = ref([])
 const propertyRentType = ref()
 // const includedCheck = ref(false)
 // const billedCheck = ref(false)
-const selectedFacilites = ref([])
-const facRadioBtns = ref()
+const selectedFacilites = ref(false)
+const selectedFacilites2 = ref(false)
+const facilitiesArr = ref([])
+const countryCodeList = codes_data
 let imageFile = null
 
-const countryList = [
-  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua & Deps", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Rep", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Congo {Democratic Rep}", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland {Republic}", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar, {Burma}", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
-]
+// const countryList = [
+//   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua & Deps", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Rep", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Congo {Democratic Rep}", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland {Republic}", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar, {Burma}", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
+// ]
 
 const propertyTypeOptions = [
   'Residential',
@@ -70,6 +73,7 @@ async function addPropertyFunc(){
         "propertyStatus": propertyStatus.value,
         "propertySize": propertySize.value,
         "propertyFloor": propertyFloors.value,
+        "propertyZipCode": propertyZipCode.value
       }
 
       if(!sessionStorage.getItem("accessToken")){
@@ -174,65 +178,111 @@ function imageUpload(e){
   }
 }
 
+const resetCheckboxes = () => {
+  facilitiesArr.value.forEach((ele) => {
+    ele.options[0].checked = false
+    ele.options[1].checked = false
+  })
+}
+
 
 function addPropertyAdditionalDetails(){
 
   // otherDetailsWindow.click
-  console.log(selectedFacilites.value)
-  // if(!selectedProperty.value){
-  //   alertSnackbar.value.message = "Kindly add property basic info first!"
-  //   alertSnackbar.value.color = "error"
-  //   alertSnackbar.value.show = true
+  if(!selectedProperty.value){
+    alertSnackbar.value.message = "Kindly add property info first!"
+    alertSnackbar.value.color = "error"
+    alertSnackbar.value.show = true
 
-  //   return 
-  // }
+    return 
+  }
 
-  // otherDetailsForm?.value.validate().then(({ valid: isValid }) => {
-  //   if(isValid){
-  //     if(!sessionStorage.getItem("accessToken")){
-  //       router.push('/login')
+  otherDetailsForm?.value.validate().then(({ valid: isValid }) => {
+    if(isValid){
+      if(!sessionStorage.getItem("accessToken")){
+        router.push('/login')
 
-  //       return 
-  //     }
-  //     const formData = new FormData()
-  //     if(imageFile){
-  //       formData.append('imageFile', imageFile)
-  //     }
-  //     let propertyAdditionalData = {
-  //       "propertyId": otherDetailsPropertyId.value,
-  //       "propertySaleValue": propertySalePrice.value,
-  //       "propertyBuyValue": propertyBoughtPrice.value,
-  //       "propertyCivilId": propertyIdNo.value,
-  //       "propertyDescription": propertyDescription.value,
-  //     }
-  //     formData.append('data', JSON.stringify(propertyAdditionalData))
-  //     formData.append('userId', sessionStorage.getItem('userId'))
-  //     axios.post('http://localhost:8000/prop-app/property-details/add', formData, {
-  //       headers: {
-  //         'Authorization': sessionStorage.getItem("AccessToken"),  
-  //       },
+        return 
+      }
+      const formData = new FormData()
+      if(imageFile){
+        formData.append('imageFile', imageFile)
+      }
+      let propertyAdditionalData = {
+        "propertyId": otherDetailsPropertyId.value,
+        "propertySaleValue": propertySalePrice.value,
+        "propertyBuyValue": propertyBoughtPrice.value,
+        "propertyLicenseNo": propertyIdNo.value,
+        "propertyDescription": propertyDescription.value,
+        "facilities" : facilitiesArr.value,
+        "rentType" : propertyRentType.value,
+        "constructionCost" : propertyConstructionCost.value
+      }
+      formData.append('data', JSON.stringify(propertyAdditionalData))
+      formData.append('userId', sessionStorage.getItem('userId'))
+      axios.post('http://localhost:8000/prop-app/property-details/add', formData, {
+        headers: {
+          'Authorization': sessionStorage.getItem("AccessToken"),  
+        },
 
-  //     }).then(response => {
-  //       alertSnackbar.value.message = response.data.message
-  //       alertSnackbar.value.color = "success"
-  //       alertSnackbar.value.show = true
-  //       otherDetailsForm?.value.reset()
+      }).then(response => {
+        alertSnackbar.value.message = response.data.message
+        alertSnackbar.value.color = "success"
+        alertSnackbar.value.show = true
+        otherDetailsForm?.value.reset()
+        resetCheckboxes()
 
-  //     }).catch(error => {
-  //       alertSnackbar.value.message = error.response.data.message
-  //       alertSnackbar.value.color = "error"
-  //       alertSnackbar.value.show = true
-  //       if(error.response.status === 401){
-  //         refreshUserLogin()
-  //       }
-  //     })
-  //   }
-  //   else{
+      }).catch(error => {
+        alertSnackbar.value.message = error.response.data.message
+        alertSnackbar.value.color = "error"
+        alertSnackbar.value.show = true
+        if(error.response.status === 403){
+          refreshUserLogin()
+        }
+      })
+    }
+    else{
+      alertSnackbar.value.message = "Kindly Fill details to add!"
+      alertSnackbar.value.color = "error"
+      alertSnackbar.value.show = true
 
-  //   }
-  // })
+      return 
+    }
+  })
 }
 
+const createFacItems = (fac) => {
+  fac.forEach((ele) => {
+    facilitiesArr.value.push({
+      "id" : ele.facility_id,
+      "name": ele.name,
+      "options": [
+      {
+        "label": "Included",
+        "checked" : false
+      },
+      {
+        "label": "Billed",
+        "checked" : false
+      },
+      ]
+    })
+  })
+}
+
+const restrictChecks = (fac_id, ind) => {
+  facilitiesArr.value.forEach((ele) => {
+    if(ele.id === fac_id){
+      if(ind == 0){
+        ele.options[1].checked = false
+      }
+      else{
+        ele.options[0].checked = false
+      }
+    }
+  })
+
+}
 
 async function getFacilities(){
   let queryData = {
@@ -247,8 +297,7 @@ async function getFacilities(){
   }
   })
   if(response.status == 200){
-    console.log(response)
-    availableFacilities.value = response.data.facilities
+    createFacItems(response.data.facilities)
   }
   } 
   catch (error) {
@@ -260,6 +309,8 @@ async function getFacilities(){
   }
 }
 }
+
+
 
 onMounted(() => {
   getFacilities()
@@ -324,8 +375,10 @@ onMounted(() => {
               >
                 <AppSelect
                   v-model="propertyCountry"
-                  :items="countryList"
+                  :items="countryCodeList"
                   label="Country/Governate *"
+                  item-title="country"
+                  item-value="country"
                   chips
                   clearable
                   :rules="[requiredValidator]"
@@ -379,7 +432,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertyNumber"
                   label="Property Number *"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
               <VCol
@@ -389,7 +442,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertyBuiltYear"
                   label="Built Year *"
-                  :rules="[integerValidator, requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
 
@@ -413,7 +466,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertySize"
                   label="Property Size *"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, floatValidator]"
                 />
               </VCol>
 
@@ -425,7 +478,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertyFloors"
                   label="Nos. Of floors*"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
 
@@ -488,7 +541,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertyIdNo" 
                   label="License No."
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
 
@@ -515,7 +568,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertySalePrice"
                   label="Property Sale Value"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, floatValidator]"
                 />
               </VCol>
               <VCol
@@ -525,7 +578,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertyBoughtPrice"
                   label="Property Bought Value"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, floatValidator]"
                 />
               </VCol>
 
@@ -536,7 +589,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertyConstructionCost"
                   label="Construction cost(estimate)"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, floatValidator]"
                 />
               </VCol>
 
@@ -568,36 +621,29 @@ onMounted(() => {
                 <p>Facilities</p>
                 <VRow :style="{marginTop: '10px'}">
                   <div class="demo-space-x"              
-                  v-for="fac in availableFacilities"
-                  :key="fac.facility_id">
+                  v-for="fac in facilitiesArr"
+                  :key="fac.id">
                     <div :style="{marginLeft: '20px'}">
                     <label>{{ fac.name.toUpperCase() }}</label>
                     <div :style="{marginLeft: '10px'}">
 
-                    <VRadioGroup v-model="facRadioBtns">
-                      <VRadio
-                      v-for="n in ['Included', 'Billed']"
-                      :label="n"
-                      :value="n+'-'+fac.facility_id"
-                    />
-                    </VRadioGroup>
-                      <!-- <VCheckbox
-                        v-model="selectedFacilites"
-                        label="Included"
-                        :value="{
-                          'id' : fac.facility_id,
-                          'value': true,
-                          'key' : 'included'
-                        }"
-                      />
+
                       <VCheckbox
-                        v-model="selectedFacilites"
+                        v-for="(op, index) in fac.options"
+                        :key="index"
+                        v-model="op.checked"
+                        :label="op.label"
+                        @click="restrictChecks(fac.id, index)"
+                      />
+                      <!-- <VCheckbox
+                        v-model="selectedFacilites2"
                         label="Billed"
                         :value="{
                           'id' : fac.facility_id,
                           'value': true,
                           'key': 'billed',
                         }"
+                        @click="selectedFacilites = !selectedFacilites"
                       /> -->
                     </div>
                     </div>

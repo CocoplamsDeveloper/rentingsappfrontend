@@ -301,6 +301,16 @@ function getAllProperties(){
   })
 }
 
+const resolvePropertyImage = (documents) => {
+  let image = null
+  documents.forEach((ele) =>{
+    if(ele.document_name === "property image"){
+      image = ele.image
+    }
+  })
+  return image
+}
+
 
 
 function propertySearchResults(){
@@ -481,15 +491,15 @@ onMounted(() => {
                 <!-- avatar -->
                 <VAvatar
                   size="32"
-                  :color="item.raw.details.property_image ? '' : 'primary'"
-                  :class="item.raw.details.property_image ? '' : 'v-avatar-light-bg primary--text'"
-                  :variant="!item.raw.details.property_image ? 'tonal' : undefined"
+                  :color="item.raw.documents ? '' : 'primary'"
+                  :class="item.raw.documents ? '' : 'v-avatar-light-bg primary--text'"
+                  :variant="!item.raw.documents ? 'tonal' : undefined"
                 >
                   <VImg
-                    v-if="item.raw.details.property_image"
-                    :src="'http://127.0.0.1:8000/media/'+item.raw.details.property_image"
+                    v-if="item.raw.documents"
+                    :src="'http://127.0.0.1:8000/media/'+resolvePropertyImage(item.raw.documents)"
                   />
-                  <span v-else>{{ avatarText(item.raw.details.property_name) }}</span>
+                  <span v-else>{{ avatarText(resolvePropertyImage(item.raw.documents)) }}</span>
                 </VAvatar>
 
                 <div class="d-flex flex-column ms-3">
@@ -507,10 +517,10 @@ onMounted(() => {
             <!-- status -->
             <template #item.details.property_status="{ item }">
               <VChip
-                :color="resolveStatusVariant(item.raw.details.property_status).color"
+                :color="resolveStatusVariant(item.raw.status).color"
                 size="small"
               >
-                {{ resolveStatusVariant(item.raw.details.property_status).text }}
+                {{ resolveStatusVariant(item.raw.status).text }}
               </VChip>
             </template>
 

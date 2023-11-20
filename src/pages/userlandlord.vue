@@ -127,6 +127,8 @@ const fillCurrentDetails = (landlord) => {
   ld.bankName = data.bank_account_details.name,
   ld.bankAccountNo = data.bank_account_details.account_no,
   ld.bankIbanNo = data.bank_account_details.iban_no,
+  ld.landlordCountry = data.country,
+  ld.zipcode = data.zipcode
   ld.vatId = data.VAT_id,
   ld.comments = data.comments,
   ld.landlordAddress = data.address
