@@ -36,10 +36,6 @@ const propertyFloors = ref(0)
 const propertyConstructionCost = ref()
 const availableFacilities = ref([])
 const propertyRentType = ref()
-// const includedCheck = ref(false)
-// const billedCheck = ref(false)
-const selectedFacilites = ref(false)
-const selectedFacilites2 = ref(false)
 const facilitiesArr = ref([])
 const countryCodeList = codes_data
 let imageFile = null
@@ -180,8 +176,7 @@ function imageUpload(e){
 
 const resetCheckboxes = () => {
   facilitiesArr.value.forEach((ele) => {
-    ele.options[0].checked = false
-    ele.options[1].checked = false
+    ele.checked = false
   })
 }
 
@@ -256,33 +251,11 @@ const createFacItems = (fac) => {
     facilitiesArr.value.push({
       "id" : ele.facility_id,
       "name": ele.name,
-      "options": [
-      {
-        "label": "Included",
-        "checked" : false
-      },
-      {
-        "label": "Billed",
-        "checked" : false
-      },
-      ]
+      "checked" : false
     })
   })
 }
 
-const restrictChecks = (fac_id, ind) => {
-  facilitiesArr.value.forEach((ele) => {
-    if(ele.id === fac_id){
-      if(ind == 0){
-        ele.options[1].checked = false
-      }
-      else{
-        ele.options[0].checked = false
-      }
-    }
-  })
-
-}
 
 async function getFacilities(){
   let queryData = {
@@ -477,7 +450,7 @@ onMounted(() => {
               >
                 <AppTextField
                   v-model="propertyFloors"
-                  label="Nos. Of floors*"
+                  label="Total floors*"
                   :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
@@ -622,31 +595,19 @@ onMounted(() => {
                 <VRow :style="{marginTop: '10px'}">
                   <div class="demo-space-x"              
                   v-for="fac in facilitiesArr"
-                  :key="fac.id">
-                    <div :style="{marginLeft: '20px'}">
+                  :key="fac.id" :style="{marginLeft : '10px'}">
+                    <!-- <div :style="{marginLeft: '20px'}">
                     <label>{{ fac.name.toUpperCase() }}</label>
-                    <div :style="{marginLeft: '10px'}">
+                    <div :style="{marginLeft: '10px'}"> -->
 
 
                       <VCheckbox
-                        v-for="(op, index) in fac.options"
-                        :key="index"
-                        v-model="op.checked"
-                        :label="op.label"
-                        @click="restrictChecks(fac.id, index)"
+                        v-model="fac.checked"
+                        :label="fac.name.toUpperCase()"
                       />
-                      <!-- <VCheckbox
-                        v-model="selectedFacilites2"
-                        label="Billed"
-                        :value="{
-                          'id' : fac.facility_id,
-                          'value': true,
-                          'key': 'billed',
-                        }"
-                        @click="selectedFacilites = !selectedFacilites"
-                      /> -->
+<!-- 
                     </div>
-                    </div>
+                    </div> -->
                   </div>
               </VRow>
                 <!-- </div> -->

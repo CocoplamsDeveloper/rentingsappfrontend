@@ -1,12 +1,14 @@
 <script setup>
-import { refreshUserLogin } from '@/common/reusing_functions'
+import { getFacilities, refreshUserLogin } from '@/common/reusing_functions'
 
 // import PaymentModeCheckbox from '../tenant/assign/PaymentModeCheckbox.vue'
 
 // import PaymentModeCheckbox from '@/views/apps/tenant/assign/PaymentModeCheckbox.vue'
 import axios from '@axios'
 import {
-requiredValidator,
+floatValidator,
+integerValidator,
+requiredValidator
 } from '@validators'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 
@@ -17,6 +19,8 @@ const props = defineProps({
   },
   editedItemObj: Object,
 })
+const facilitiesArr = ref([])
+
 
 const emit = defineEmits([
   'update:isDrawerOpen',
@@ -95,6 +99,14 @@ function changePropertyStatusToggle(){
   else{
     propertyEditFormImage.value = null
   }
+
+  if(editedProperty.value.propertyFacilities){
+    facilitiesArr.value.forEach(ele => {
+      if (editedProperty.value.propertyFacilities.includes(ele.id)){
+        ele.checked = true
+      }
+    })
+  }
 }
 
 watchEffect(changePropertyStatusToggle)
@@ -113,10 +125,11 @@ function imageFieldChecker(){
   propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedProperty.value.propertyImage
 }
 
-function updateProperty(propertyId){
+function updateProperty(){
 
 const formData = new FormData()
 
+editedProperty.value['facilities'] = facilitiesArr.value
 formData.append('userId', sessionStorage.getItem('userId'))
 formData.append('data', JSON.stringify(editedProperty.value))
 
@@ -149,8 +162,24 @@ axios.post('http://localhost:8000/prop-app/property/update', formData, {
 })
 }
 
+function createFacCheckboxes(data){
+  data.forEach(ele => {
+    facilitiesArr.value.push({
+      "id" : ele.facility_id,
+      "name": ele.name,
+      "checked": false
+    })
+  })
+}
+
+
 
 onMounted(() => {
+  getFacilities().then((res) => {
+    if(res.status === 200){
+      createFacCheckboxes(res.data.facilities)
+    } 
+  })
 
 })
 </script>
@@ -188,7 +217,7 @@ onMounted(() => {
               <VCol cols="12">
                 <AppTextField
                   v-model="editedProperty.propertyNumber"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                   label="Propery Number"
                 />
               </VCol>
@@ -199,15 +228,13 @@ onMounted(() => {
                   label="Property Type"
                   :rules="[requiredValidator]"
                   :items="['Residential', 'Commercial']"
-                  item-title="propertyType"
-                  item-value="propertyId"
                 />
               </VCol>
 
               <VCol cols="12">
                 <AppTextField
                   v-model="editedProperty.propertySize"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, floatValidator]"
                   label="Propery Size"
                 />
               </VCol>
@@ -223,7 +250,7 @@ onMounted(() => {
               <VCol cols="12">
                 <AppTextField
                   v-model="editedProperty.propertyBuiltYear"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                   label="Propery Built Year"
                 />
               </VCol>
@@ -234,6 +261,14 @@ onMounted(() => {
                   label="Country"
                   :rules="[requiredValidator]"
                   :items="countryList"
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppTextField
+                  v-model="editedProperty.propertyZipCode"
+                  label="Zip Code"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
            
@@ -256,9 +291,9 @@ onMounted(() => {
            
               <VCol cols="12">
                 <AppTextField
-                  v-model="editedProperty.propertyCivilId"
-                  :rules="[requiredValidator]"
-                  label="Civil/Registered No"
+                  v-model="editedProperty.propertyLicenseNo"
+                  :rules="[requiredValidator,integerValidator]"
+                  label="License No"
                 />
               </VCol>
            
@@ -275,6 +310,23 @@ onMounted(() => {
                   v-model="editedProperty.propertyBuyValue"
                   :rules="[requiredValidator]"
                   label="Property Buy Value"
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppTextField
+                  v-model="editedProperty.propertyConstructionCost"
+                  :rules="[requiredValidator]"
+                  label="Construction cost(estimate)"
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppSelect
+                  v-model="editedProperty.propertyRentType"
+                  :rules="[requiredValidator]"
+                  :items="['Monthly', 'Yearly']"
+                  label="Rent type"
                 />
               </VCol>
            
@@ -297,7 +349,7 @@ onMounted(() => {
                       :src="propertyEditFormImage"
                       alt="No image"
                       cover
-                      style="width: 110px; height: 110px;"
+                      style="height: 110px;"
                     />
                   </template>
 
@@ -323,6 +375,30 @@ onMounted(() => {
                   label="Property Status"
                   @change="changePropertyStatus"
                 />
+              </VCol>
+
+              <VCol
+                cols="12"
+                >
+                <p>Facilities</p>
+                <VRow :style="{marginTop: '10px'}">
+                  <div class="demo-space-x"              
+                  v-for="fac in facilitiesArr"
+                  :key="fac.id" :style="{marginLeft: '10px'}">
+                    <!-- <div :style="{marginLeft: '20px'}">
+                    <label>{{ fac.name.toUpperCase() }}</label>
+                    <div :style="{marginLeft: '10px'}"> -->
+
+
+                      <VCheckbox
+                        v-model="fac.checked"
+                        :label="fac.name.toUpperCase()"
+                      />
+                    <!-- </div>
+                    </div> -->
+                  </div>
+              </VRow>
+                <!-- </div> -->
               </VCol>
     
               

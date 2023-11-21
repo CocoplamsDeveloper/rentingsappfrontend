@@ -98,7 +98,7 @@ const editedItemObj = ref({
   "propertyStreet": '',
   "propertyBlock": '',
   "propertyStatus": '',
-  "propertyCivilId": '',
+  "propertyLicenseNo": '',
   "propertyImage": '',
   "propertyDescription": '',
   "propertySize": '',
@@ -106,6 +106,11 @@ const editedItemObj = ref({
   "propertyBuyValue": '',
   "propertySaleValue": '',
   "propertyCountry": '',
+  "propertyZipCode": '',
+  "propertyConstructionCost": '',
+  "propertyRentType": '',
+  "propertyFacilities": '',
+
 })
  
 const editPropertyItem = item => {
@@ -123,7 +128,7 @@ const editPropertyItem = item => {
       "Authorization": sessionStorage.getItem("accessToken"),
     },
   }).then((response) => {
-    prefillPropertyEditForm(response.data.property_data[0])
+    prefillPropertyEditForm(response.data.property_data)
   }).catch((error) => {
     if (error.response.status === 401) {
       refreshUserLogin()
@@ -139,22 +144,32 @@ const editPropertyItem = item => {
 
 const prefillPropertyEditForm = property => {
   let currentProp = editedItemObj.value
-  currentProp.propertyId = property.property_id
-  currentProp.propertyName = property.property_name
-  currentProp.propertyType = property.property_type
-  currentProp.propertySize = property.area_insqmtrs
-  currentProp.propertyNumber = property.property_number
-  currentProp.propertyStatus = property.property_status
-  currentProp.propertyBuiltYear = property.built_year
-  currentProp.propertyCity = property.City
-  currentProp.propertyStreet = property.Street
-  currentProp.propertyBlock = property.Block
-  currentProp.propertyCivilId = property.property_civil_id
-  currentProp.propertyDescription = property.property_description
-  currentProp.propertyImage = property.property_image
-  currentProp.propertySaleValue = property.selling_price
-  currentProp.propertyBuyValue = property.buying_price
-  currentProp.propertyCountry = property.governate
+  let details = property.details
+  currentProp.propertyId = property.propertyId
+  currentProp.propertyName = details.property_name
+  currentProp.propertyType = details.property_type
+  currentProp.propertySize = details.area_insqmtrs
+  currentProp.propertyNumber = details.property_number
+  currentProp.propertyStatus = property.status
+  currentProp.propertyBuiltYear = details.built_year
+  currentProp.propertyCity = details.City
+  currentProp.propertyStreet = details.Street
+  currentProp.propertyBlock = details.Block
+  currentProp.propertyLicenseNo = details.property_civil_id
+  currentProp.propertyDescription = details.property_description
+  currentProp.propertySaleValue = details.selling_price
+  currentProp.propertyBuyValue = details.buying_price
+  currentProp.propertyCountry = details.governate
+  currentProp.propertyZipCode = details.zip_code
+  currentProp.propertyConstructionCost = details.construction_cost
+  currentProp.propertyRentType = details.rentType
+  currentProp.propertyFacilities = details.facilities_available
+
+  property.documents.forEach((ele)=>{
+    if(ele.document_name === "property image")
+    currentProp.propertyImage = ele.image
+  })
+
 }
 
 const deletePropertyItem = item => {

@@ -50,7 +50,22 @@ function refreshUserLogin(){
   })
 }
 
-export { populatePropertiesList, refreshUserLogin }
+function getFacilities(){
+  let queryData = {
+    "userId": sessionStorage.getItem('userId')
+  }
+
+  return axios.get("http://localhost:8000/prop-app/facility/get", {
+  params: queryData,
+  headers: {
+  'Authorization': sessionStorage.getItem("accessToken")
+  }
+  })
+
+} 
+
+
+export { getFacilities, populatePropertiesList, refreshUserLogin }
 
 
 
