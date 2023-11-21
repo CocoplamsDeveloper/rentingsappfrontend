@@ -256,6 +256,14 @@ onMounted(() => {
               </VCol>
 
               <VCol cols="12">
+                <AppTextField
+                  v-model="editedProperty.propertyFloors"
+                  :rules="[requiredValidator, integerValidator]"
+                  label="Total floors"
+                />
+              </VCol>
+
+              <VCol cols="12">
                 <AppSelect
                   v-model="editedProperty.propertyCountry"
                   label="Country"

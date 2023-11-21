@@ -110,6 +110,7 @@ const editedItemObj = ref({
   "propertyConstructionCost": '',
   "propertyRentType": '',
   "propertyFacilities": '',
+  "propertyFloors": ''
 
 })
  
@@ -164,7 +165,7 @@ const prefillPropertyEditForm = property => {
   currentProp.propertyConstructionCost = details.construction_cost
   currentProp.propertyRentType = details.rentType
   currentProp.propertyFacilities = details.facilities_available
-
+  currentProp.propertyFloors = details.floors
   property.documents.forEach((ele)=>{
     if(ele.document_name === "property image")
     currentProp.propertyImage = ele.image

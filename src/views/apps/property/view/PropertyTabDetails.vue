@@ -1,6 +1,7 @@
 <script setup>
 import { floatValidator, integerValidator, requiredValidator } from '@/@core/utils/validators'
-
+import codes_data from '@/common/codes_data'
+import axios from '@axios'
 
 
 
@@ -15,8 +16,35 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits([
+  'fetchProperty'
+]) 
+
 const editedProperty = ref(props.editedPropertyObj)
-const facilitiesArr = ref([])
+const facilitiesArr = ref(props.facilityData)
+const propertyEditFormImg = ref()
+const propertyNewImg = ref()
+const countriesList = codes_data
+const refInputEl = ref()
+
+const changeAvatar = file => {
+  propertyEditFormImg.value = URL.createObjectURL(file.target.files[0])
+  propertyNewImg.value = file.target.files[0]
+}
+
+// reset avatar image
+const resetAvatar = () => {
+
+if(editedProperty.value.propertyImage){
+  propertyEditFormImg.value = 'http://localhost:8000/media/'+editedProperty.value.propertyImage
+  propertyNewImg.value = null
+}
+else{
+  propertyEditFormImg.value = avatar1
+  propertyNewImg.value = null
+}
+
+}
 
 function updatedImageUpload(e){
 
@@ -41,20 +69,15 @@ updatedImageFile.value = e.target.files[0]
 
 
 
-function changePropertyStatusToggle(){
-  if(editedProperty.value.propertyStatus === 'Active'){
-    statusToggleSwitch.value = true
-  }
-  else{
-    statusToggleSwitch.value = false
-  }
-  if(editedProperty.value.propertyImage){
-  propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedProperty.value.propertyImage
-  }
-  else{
-    propertyEditFormImage.value = null
-  }
-}
+// function watchProp(){
+//   if(editedProperty.value.propertyStatus === 'Active'){
+//     statusToggleSwitch.value = true
+//   }
+//   else{
+//     statusToggleSwitch.value = false
+//   }
+
+// }
 
 // watchEffect(changePropertyStatusToggle)
 
@@ -72,19 +95,17 @@ function imageFieldChecker(){
   propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedProperty.value.propertyImage
 }
 
-function updateProperty(propertyId){
+function updateProperty(){
 
 const formData = new FormData()
 
 formData.append('userId', sessionStorage.getItem('userId'))
 formData.append('data', JSON.stringify(editedProperty.value))
+formData.append('facilities', JSON.stringify(props.facilityData))
 
-if(propertyEditFormImage.value){
-let imgstr = propertyEditFormImage.value.split("media/")
-imgstr = imgstr[1]
-if(imgstr !== editedProperty.value.propertyImage){
-  formData.append('updatedImage', updatedImageFile.value)
-}
+if(propertyNewImg.value !== null){
+  formData.append('updatedImage', propertyNewImg.value)
+
 }
 
 axios.post('http://localhost:8000/prop-app/property/update', formData, {
@@ -96,7 +117,6 @@ axios.post('http://localhost:8000/prop-app/property/update', formData, {
   editPropertyDrawerAlert.value.message = response.data.message
   editPropertyDrawerAlert.value.color = "success"
   editPropertyDrawerAlert.value.show = true
-  emit('getAllProperties')
 }).catch(error => {
   editPropertyDrawerAlert.value.message = error.response.data.message
   editPropertyDrawerAlert.value.color = "error"
@@ -219,6 +239,13 @@ function watchFormDetails(){
       }
     })
   }
+
+  if(editedProperty.value.propertyImage){
+  propertyEditFormImg.value = 'http://127.0.0.1:8000/media/'+editedProperty.value.propertyImage
+  }
+  else{
+    propertyEditFormImg.value = null
+  }
 }
 watchEffect(watchFormDetails)
 
@@ -231,10 +258,9 @@ watchEffect(watchFormDetails)
         <VCardText class="d-flex">
           <!-- 👉 Avatar -->
           <VAvatar
-            rounded
-            size="100"
+            size="150"
             class="me-6"
-            :image="landlordFormImage"
+            :image="propertyEditFormImg"
           >
           </VAvatar>
 
@@ -346,7 +372,7 @@ watchEffect(watchFormDetails)
               >
               <AppTextField
                   v-model="editedProperty.propertyCity"
-                  :rules="[requiredValidator, passwordValidator]"
+                  :rules="[requiredValidator]"
                   label="City*"
                 />
               </VCol>
@@ -396,7 +422,7 @@ watchEffect(watchFormDetails)
                 md="4"
               >
               <AppTextField
-                  v-model="editedProperty.nationality"
+                  v-model="editedProperty.propertyBuiltYear"
                   :rules="[requiredValidator]"
                   label="Built Year*"
                 />
@@ -407,7 +433,7 @@ watchEffect(watchFormDetails)
                 md="4"
               >
               <AppTextField
-                  v-model="editedProperty.landlordCompanyName"
+                  v-model="editedProperty.propertySize"
                   label="Property Size*"
                   :rules="[requiredValidator, floatValidator]"
                 />
@@ -419,7 +445,7 @@ watchEffect(watchFormDetails)
                 md="4"
               >
               <AppTextField
-                  v-model="editedProperty.landlordContactPerson"
+                  v-model="editedProperty.propertyFloors"
                   label="Total floors*"
                   :rules="[requiredValidator, integerValidator]"
                 />
@@ -430,7 +456,7 @@ watchEffect(watchFormDetails)
               cols="12"
               md="4">
                 <AppSelect
-                  v-model="editedProperty.status"
+                  v-model="editedProperty.propertyStatus"
                   label="Status*"
                   :rules="[requiredValidator]"
                   :items="['Active', 'Inactive']"
@@ -443,7 +469,7 @@ watchEffect(watchFormDetails)
                 md="4"
               >
               <AppTextField
-                  v-model="editedProperty.type"
+                  v-model="editedProperty.propertyLicenseNo"
                   label="License No "
                   :rules="[requiredValidator, integerValidator]"
                 />
@@ -454,7 +480,7 @@ watchEffect(watchFormDetails)
               md="4"
               >
                 <AppTextField
-                  v-model="editedProperty.bankName"
+                  v-model="editedProperty.propertySaleValue"
                   label="Property Sale Value"
                   :rules="[requiredValidator, floatValidator]"
                 />
@@ -464,7 +490,7 @@ watchEffect(watchFormDetails)
               cols="12"
               md="4">
                 <AppTextField
-                  v-model="editedProperty.bankAccountNo"
+                  v-model="editedProperty.propertyBuyValue"
                   label="Property Buy Value"
                   :rules="[requiredValidator, floatValidator]"
                 />
@@ -474,7 +500,7 @@ watchEffect(watchFormDetails)
               cols="12"
               md="4">
                 <AppTextField
-                  v-model="editedProperty.bankIbanNo"
+                  v-model="editedProperty.propertyConstructionCost"
                   label="Construction cost(estimate)"
                   :rules="[requiredValidator]"
                 />
@@ -485,7 +511,7 @@ watchEffect(watchFormDetails)
               cols="12"
               md="4">
                 <AppSelect
-                  v-model="editedProperty.vatId"
+                  v-model="editedProperty.propertyRentType"
                   label="Rent Type"
                   :items="['Monthly', 'Yearly']"
                 />
@@ -495,7 +521,7 @@ watchEffect(watchFormDetails)
               cols="12"
               md="4">
                 <AppTextField
-                  v-model="editedProperty.comments"
+                  v-model="editedProperty.propertyDescription"
                   label="Property Description"
                 />
               </VCol>
@@ -504,10 +530,10 @@ watchEffect(watchFormDetails)
                 cols="12"
                 >
                 <p>Facilities</p>
-                <VRow :style="{marginTop: '10px'}">
+                <VRow >
                   <div class="demo-space-x"              
                   v-for="fac in props.facilityData"
-                  :key="fac.id">
+                  :key="fac.id" :style="{marginLeft: '15px'}">
                     <!-- <div :style="{marginLeft: '20px'}">
                     <label>{{ fac.name.toUpperCase() }}</label>
                     <div :style="{marginLeft: '10px'}"> -->
