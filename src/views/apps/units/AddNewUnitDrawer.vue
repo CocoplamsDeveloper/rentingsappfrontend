@@ -34,8 +34,11 @@ const unitStatus = ref()
 const unitProperty = ref()
 const unitSize = ref()
 const unitFloor = ref()
+const unitCategory = ref()
 const floorList = ref([])
 const unitDrawerAlert = ref({ show: false, message: null, color: null })
+const unitTypeArr = ref([])
+const unitKitchens = ref()
 const isInputEnabled = ref(false)
 const role = ref()
 const plan = ref()
@@ -64,14 +67,16 @@ const onUnitFormSubmit = () => {
         "userId": sessionStorage.getItem("userId"),
         "propertyId": unitProperty.value,
         "unitsData": {
-          "Unit Name/Number": unitName.value,
-          "Unit Type": unitType.value,
-          "Unit Rent": unitRent.value,
-          "Unit Bedrooms": unitBedrooms.value,
-          "Unit Bathrooms": unitBathrooms.value,
-          "Unit Size": unitSize.value,
+          "Name": unitName.value,
+          "Type": unitType.value,
+          "Rent": unitRent.value,
+          "Bedrooms": unitBedrooms.value,
+          "Bathrooms": unitBathrooms.value,
+          "Size": unitSize.value,
           "Status": unitStatus.value,
-          "Unit Floor": unitFloor.value,
+          "Floor": unitFloor.value,
+          "Kitchen": unitKitchens.value,
+          "Category": unitCategory.value
         }, 
       }
 
@@ -167,6 +172,18 @@ function populateFloorsDropdown(){
       }
     })
   }
+
+  if(unitCategory.value === "Commercial"){
+    unitTypeArr.value = []
+    unitType.value = ""
+    unitTypeArr.value.push("Shop")
+    unitTypeArr.value.push("Office")
+  }
+  else{
+    unitType.value = ""
+    unitTypeArr.value = []
+    unitTypeArr.value.push("Room")
+  }
 }
 
 
@@ -230,12 +247,21 @@ onMounted(() => {
                 />
               </VCol>
 
+              <VCol cols="12">
+                <AppSelect
+                  v-model="unitCategory"
+                  :rules="[requiredValidator]"
+                  :items="['Commercial', 'Residential']"
+                  label="Category"
+                />
+              </VCol>
+
               <!-- 👉 Email -->
               <VCol cols="12">
                 <AppSelect
                   v-model="unitType"
                   :rules="[requiredValidator]"
-                  :items="['room', 'shop', 'store', 'office', 'other']"
+                  :items="unitTypeArr"
                   label="Type"
                 />
               </VCol>
@@ -272,6 +298,15 @@ onMounted(() => {
 
               <VCol cols="12">
                 <AppTextField
+                  v-model="unitKitchens"
+                  type="number"
+                  :rules="[requiredValidator]"
+                  label="Nos. of kitchens"
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppTextField
                   v-model="unitSize"
                   type="number"
                   :rules="[requiredValidator]"
@@ -288,7 +323,6 @@ onMounted(() => {
                   :items="['vacant', 'occupied']"
                 />
               </VCol>
-
 
               <!--
                 <VCol cols="12">

@@ -26,6 +26,8 @@ const propertyEditFormImg = ref()
 const propertyNewImg = ref()
 const countriesList = codes_data
 const refInputEl = ref()
+const propertyDetailsTabAlert = ref({show: false, color: null, message: null})
+const editTabPropertyRef = ref()
 
 const changeAvatar = file => {
   propertyEditFormImg.value = URL.createObjectURL(file.target.files[0])
@@ -46,27 +48,6 @@ else{
 
 }
 
-function updatedImageUpload(e){
-
-// console.log(editedItemObj.value.propertyImage, e.target.files[0])
-
-let img = e.target.files[0]
-let imgSize = img/1000
-if(imgSize > 2048){
-  propPageAlertSnackbar.value.message = "Image size should be less then 2MB"
-  propPageAlertSnackbar.value.color = "error"
-  propPageAlertSnackbar.value.show = true
-  propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedProperty.value.propertyImage
-  imageUpdateField.value?.reset()
-
-  return
-}
-propertyEditFormImage.value = URL.createObjectURL(e.target.files[0])
-updatedImageFile.value = e.target.files[0]
-}
-
-
-
 
 
 // function watchProp(){
@@ -81,29 +62,29 @@ updatedImageFile.value = e.target.files[0]
 
 // watchEffect(changePropertyStatusToggle)
 
-function changePropertyStatus(){
-  if(statusToggleSwitch.value){
-    editedProperty.value.propertyStatus = 'Active'
-  }
-  else{
-    editedProperty.value.propertyStatus = 'Inactive'  
-  }
-}
 
-
-function imageFieldChecker(){
-  propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedProperty.value.propertyImage
-}
 
 function updateProperty(){
 
+editTabPropertyRef.value?.validate().then(({ valid }) => {  
+if(valid){
+
+if(!editedProperty.value.propertyBuyValue){
+  editedProperty.value.propertyBuyValue = 0
+}
+if(!editedProperty.value.propertySaleValue){
+  editedProperty.value.propertySaleValue = 0
+}
+if(!editedProperty.value.propertyConstructionCost){
+  editedProperty.value.propertyConstructionCost = 0
+}  
 const formData = new FormData()
 
 formData.append('userId', sessionStorage.getItem('userId'))
 formData.append('data', JSON.stringify(editedProperty.value))
 formData.append('facilities', JSON.stringify(props.facilityData))
 
-if(propertyNewImg.value !== null){
+if(propertyNewImg.value !== null && propertyNewImg.value !== "undefined" && propertyNewImg.value !== undefined){
   formData.append('updatedImage', propertyNewImg.value)
 
 }
@@ -114,16 +95,26 @@ axios.post('http://localhost:8000/prop-app/property/update', formData, {
   },
 
 }).then(response => {
-  editPropertyDrawerAlert.value.message = response.data.message
-  editPropertyDrawerAlert.value.color = "success"
-  editPropertyDrawerAlert.value.show = true
+  propertyDetailsTabAlert.value.message = response.data.message
+  propertyDetailsTabAlert.value.color = "success"
+  propertyDetailsTabAlert.value.show = true
+  emit('fetchProperty')
 }).catch(error => {
-  editPropertyDrawerAlert.value.message = error.response.data.message
-  editPropertyDrawerAlert.value.color = "error"
-  editPropertyDrawerAlert.value.show = true
+  propertyDetailsTabAlert.value.message = error.response.data.message
+  propertyDetailsTabAlert.value.color = "error"
+  propertyDetailsTabAlert.value.show = true
   if(error.response.status === 403){
     refreshUserLogin()
   }
+})
+
+}
+else{
+  propertyDetailsTabAlert.value.message = "Kindly fill required details"
+  propertyDetailsTabAlert.value.color = "error"
+  propertyDetailsTabAlert.value.show = true
+}
+
 })
 }
 
@@ -311,7 +302,7 @@ watchEffect(watchFormDetails)
         <VCardText class="pt-2">
           <!-- 👉 Form -->
           <VForm
-            ref="editlandlordRefForm"
+            ref="editTabPropertyRef"
             class="mt-6"
           >
             <VRow>
@@ -471,7 +462,6 @@ watchEffect(watchFormDetails)
               <AppTextField
                   v-model="editedProperty.propertyLicenseNo"
                   label="License No "
-                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
 
@@ -482,7 +472,6 @@ watchEffect(watchFormDetails)
                 <AppTextField
                   v-model="editedProperty.propertySaleValue"
                   label="Property Sale Value"
-                  :rules="[requiredValidator, floatValidator]"
                 />
               </VCol>
 
@@ -492,7 +481,6 @@ watchEffect(watchFormDetails)
                 <AppTextField
                   v-model="editedProperty.propertyBuyValue"
                   label="Property Buy Value"
-                  :rules="[requiredValidator, floatValidator]"
                 />
               </VCol>
 
@@ -502,7 +490,6 @@ watchEffect(watchFormDetails)
                 <AppTextField
                   v-model="editedProperty.propertyConstructionCost"
                   label="Construction cost(estimate)"
-                  :rules="[requiredValidator]"
                 />
               </VCol>
 
@@ -571,13 +558,13 @@ watchEffect(watchFormDetails)
 
 
 
-  <!-- <VSnackbar
-    v-model="landlordProfileTabAlert.show"
+  <VSnackbar
+    v-model="propertyDetailsTabAlert.show"
     transition="fade-transition"
     location="botton center"
-    :color="landlordProfileTabAlert.color"
+    :color="propertyDetailsTabAlert.color"
   >
-    {{ landlordProfileTabAlert.message }}
-  </VSnackbar> -->
+    {{ propertyDetailsTabAlert.message }}
+  </VSnackbar>
 
 </template>

@@ -127,11 +127,26 @@ function imageFieldChecker(){
 
 function updateProperty(){
 
+
+refFormEditProperty.value?.validate().then(({valid}) => {
+
+if(valid){
+
+if(!editedProperty.value.propertyBuyValue){
+  editedProperty.value.propertyBuyValue = 0
+}
+if(!editedProperty.value.propertySaleValue){
+  editedProperty.value.propertySaleValue = 0
+}
+if(!editedProperty.value.propertyConstructionCost){
+  editedProperty.value.propertyConstructionCost = 0
+}  
+
 const formData = new FormData()
 
-editedProperty.value['facilities'] = facilitiesArr.value
 formData.append('userId', sessionStorage.getItem('userId'))
 formData.append('data', JSON.stringify(editedProperty.value))
+formData.append('facilities', JSON.stringify(facilitiesArr.value))
 
 if(propertyEditFormImage.value){
 let imgstr = propertyEditFormImage.value.split("media/")
@@ -159,6 +174,15 @@ axios.post('http://localhost:8000/prop-app/property/update', formData, {
   if(error.response.status === 403){
     refreshUserLogin()
   }
+})
+
+}
+else{
+  editPropertyDrawerAlert.value.message = "Kindly fill required details"
+  editPropertyDrawerAlert.value.color = "error"
+  editPropertyDrawerAlert.value.show = true
+}
+
 })
 }
 
@@ -300,7 +324,6 @@ onMounted(() => {
               <VCol cols="12">
                 <AppTextField
                   v-model="editedProperty.propertyLicenseNo"
-                  :rules="[requiredValidator,integerValidator]"
                   label="License No"
                 />
               </VCol>
@@ -308,7 +331,6 @@ onMounted(() => {
               <VCol cols="12">
                 <AppTextField
                   v-model="editedProperty.propertySaleValue"
-                  :rules="[requiredValidator]"
                   label="Property Sale Value"
                 />
               </VCol>
@@ -316,7 +338,6 @@ onMounted(() => {
               <VCol cols="12">
                 <AppTextField
                   v-model="editedProperty.propertyBuyValue"
-                  :rules="[requiredValidator]"
                   label="Property Buy Value"
                 />
               </VCol>
@@ -324,7 +345,6 @@ onMounted(() => {
               <VCol cols="12">
                 <AppTextField
                   v-model="editedProperty.propertyConstructionCost"
-                  :rules="[requiredValidator]"
                   label="Construction cost(estimate)"
                 />
               </VCol>
@@ -332,7 +352,6 @@ onMounted(() => {
               <VCol cols="12">
                 <AppSelect
                   v-model="editedProperty.propertyRentType"
-                  :rules="[requiredValidator]"
                   :items="['Monthly', 'Yearly']"
                   label="Rent type"
                 />
@@ -341,7 +360,6 @@ onMounted(() => {
               <VCol cols="12">
                 <AppTextField
                   v-model="editedProperty.propertyDescription"
-                  :rules="[requiredValidator]"
                   label="Property Description"
                 />
               </VCol>

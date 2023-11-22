@@ -2,8 +2,8 @@
 import { refreshUserLogin } from '@/common/reusing_functions'
 import LandlordTabDocuments from '@/views/apps/landlord_user/view/LandlordTabDocuments.vue'
 import LandlordTabProfile from '@/views/apps/landlord_user/view/LandlordTabProfile.vue'
-import PropertyTabBillingsPlans from '@/views/apps/property/view/PropertyTabBillingsPlans.vue'
-import PropertyTabNotifications from '@/views/apps/property/view/PropertyTabNotifications.vue'
+// import PropertyTabBillingsPlans from '@/views/apps/property/view/PropertyTabBillingsPlans.vue'
+// import PropertyTabNotifications from '@/views/apps/property/view/PropertyTabNotifications.vue'
 import axios from "@axios"
 import { avatarText } from '@core/utils/formatters'
 import { onMounted } from 'vue'
@@ -539,15 +539,15 @@ onMounted(() => {
         </VWindowItem>
 
         
-        <VWindowItem>
+        <!-- <VWindowItem>
           <PropertyTabBillingsPlans />
-        </VWindowItem> 
+        </VWindowItem>  -->
        
 
         
-        <VWindowItem>
+        <!-- <VWindowItem>
           <PropertyTabNotifications />
-        </VWindowItem>
+        </VWindowItem> -->
       </VWindow>
     </VCol>
   </VRow>

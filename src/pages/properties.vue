@@ -24,11 +24,9 @@ const totalPage = ref(1)
 const totalUsers = ref(0)
 const fetchedPropertiesList = ref([])
 const propPageAlertSnackbar = ref({ show: false, message: null, color: null })
-const propertyEditDialog = ref(false)
-const statusToggleSwitch = ref(true)
-const propertyEditFormImage = ref()
-const updatedImageFile = ref()
-const imageUpdateField = ref()
+const totalProperties = ref()
+const totalUnits = ref()
+const totalTenants = ref()
 const selectedItem = ref("one data")
 const isEditPropertyDrawerVisible = ref(false)
 const deletePropertyConfirm = ref(false)
@@ -240,7 +238,7 @@ const userListMeta = [
     color: 'primary',
 
     // title: 'Properties',
-    stats: '10',
+    stats: totalProperties,
     subtitle: 'Properties',
   },
   {
@@ -248,8 +246,8 @@ const userListMeta = [
     color: 'primary',
 
     // title: 'Properties',
-    stats: '89',
-    subtitle: 'Total Units',
+    stats: totalUnits,
+    subtitle: 'Units',
   },
   {
     icon: 'tabler-user-check',
@@ -308,7 +306,6 @@ function getAllProperties(){
       'Authorization': sessionStorage.getItem("accessToken"),
     }, 
   }).then(response => {
-    console.log(response)
     fetchedPropertiesList.value = response.data.propertiesData
   }).catch(error => {
     if(error.response.status === 401){
@@ -352,10 +349,36 @@ function propertySearchResults(){
     }
 }
 
+function get_page_stats(){
+
+  let queryData = {
+    "userId" : sessionStorage.getItem("userId")
+  }
+
+  return axios.get("http://127.0.0.1:8000/prop-app/property/stats", {
+    params: queryData,
+    headers: {
+      'Authorization': sessionStorage.getItem("accessToken")
+    }
+  }).then(response => {
+    console.log(response)
+    if(response.status == 200){
+      let data = response.data
+      totalProperties.value = data.properties
+      totalUnits.value = data.units
+      totalTenants.value = data.tenants
+    }
+  }).catch(error => {
+    if(error.response.status == 403){
+          refreshUserLogin()
+        }
+  })
+}
 
 
 onMounted(() => {
   getAllProperties()
+  get_page_stats()
 })
 </script>
  
@@ -477,11 +500,10 @@ onMounted(() => {
  
               <!-- 👉 Export button -->
               <VBtn
-                variant="tonal"
-                color="secondary"
-                prepend-icon="tabler-screen-share"
+                size="38"
+                color="warning"
+                prepend-icon="tabler-download"
               >
-                Export
               </VBtn>
  
               <!-- 👉 Add user button -->

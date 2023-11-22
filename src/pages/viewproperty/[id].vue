@@ -1,18 +1,11 @@
-<!--
-  <template>
-  <div>
-  <p>This is user details page.</p>
-  <p>Current user id: {{ $route.params.id }}</p>
-  </div>
-  </template> 
--->
+
 
 <script setup>
 import { getFacilities, refreshUserLogin } from '@/common/reusing_functions'
-import PropertyTabBillingsPlans from '@/views/apps/property/view/PropertyTabBillingsPlans.vue'
 import PropertyTabDetails from '@/views/apps/property/view/PropertyTabDetails.vue'
-import PropertyTabNotifications from '@/views/apps/property/view/PropertyTabNotifications.vue'
-import PropertyTabSecurity from '@/views/apps/property/view/PropertyTabSecurity.vue'
+import PropertyTabDocuments from '@/views/apps/property/view/PropertyTabDocuments.vue'
+import PropertyTabInvoices from '@/views/apps/property/view/PropertyTabInvoices.vue'
+import PropertyTabUnits from '@/views/apps/property/view/PropertyTabUnits.vue'
 import axios from "@axios"
 import { avatarText } from '@core/utils/formatters'
 
@@ -34,18 +27,18 @@ const tabs = [
   },
 
   {
-    icon: 'tabler-lock',
+    icon: 'tabler-file',
+    title: 'Documents',
+  },
+
+  {
+    icon: 'tabler-home',
     title: 'Units',
   },
 
   {
-    icon: 'tabler-currency-dollar',
+    icon: 'tabler-receipt',
     title: 'Invoices',
-  },
-
-  {
-    icon: 'tabler-bell',
-    title: 'Maintenance',
   },
 
 ]
@@ -127,7 +120,7 @@ const prefillPropertyEditForm = property => {
 
 }
 
-const fetchProperty = async (item) => {
+const fetchProperty = async () => {
 
   if(!sessionStorage.getItem("accessToken")){
     router.push('/login')
@@ -135,7 +128,7 @@ const fetchProperty = async (item) => {
     return 
   }
   try{
-    const response = await axios.get("http://127.0.0.1:8000/prop-app/property/"+item, {
+    const response = await axios.get("http://127.0.0.1:8000/prop-app/property/"+Number(route.params.id), {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),
@@ -167,7 +160,7 @@ function createFacCheckboxes(data){
 
 
 onMounted(() => {
-  fetchProperty(Number(route.params.id))
+  fetchProperty()
   getFacilities().then((res) => {
     if(res.status === 200){
       createFacCheckboxes(res.data.facilities)
@@ -413,18 +406,17 @@ onMounted(() => {
 
         
         <VWindowItem>
-          <PropertyTabSecurity />
+          <PropertyTabDocuments />
         </VWindowItem>
 
         
         <VWindowItem>
-          <PropertyTabBillingsPlans />
+          <PropertyTabUnits />
         </VWindowItem> 
        
 
-        
         <VWindowItem>
-          <PropertyTabNotifications />
+          <PropertyTabInvoices />
         </VWindowItem>
       </VWindow>
     </VCol>
