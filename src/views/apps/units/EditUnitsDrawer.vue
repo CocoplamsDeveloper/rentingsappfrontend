@@ -1,13 +1,12 @@
 <script setup>
+
 import { refreshUserLogin } from '@/common/reusing_functions'
-
-// import PaymentModeCheckbox from '../tenant/assign/PaymentModeCheckbox.vue'
-
-// import PaymentModeCheckbox from '@/views/apps/tenant/assign/PaymentModeCheckbox.vue'
 import axios from '@axios'
 import {
+floatValidator,
 requiredValidator,
 } from '@validators'
+import { ref } from 'vue'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 
 const props = defineProps({
@@ -20,7 +19,6 @@ const props = defineProps({
 
 const emit = defineEmits([
   'update:isDrawerOpen',
-  'userData',
   'getAllUnits'
 ])
 
@@ -29,14 +27,13 @@ const emit = defineEmits([
 
 const isFormValid = ref(false)
 const refForm = ref()
-const editPropertyDrawerAlert = ref({ show: false, message: null, color: null })
+const editUnitDrawerAlert = ref({ show: false, message: null, color: null })
 const isInputEnabled = ref(false)
 const role = ref()
 const plan = ref()
 const status = ref()
-const propertyEditFormImage = ref()
-const refFormEditProperty = ref()
-const imageUpdateField = ref()
+const editUnitRefForm = ref()
+const unitTypeArr = ref([])
 const countryList = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua & Deps", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Rep", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Congo {Democratic Rep}", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland {Republic}", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar, {Burma}", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
 ]
@@ -46,35 +43,16 @@ const updatedImageFile = ref()
 
 
 
-const editedProperty = ref(props.editedItemObj)
+const editedUnit = ref(props.singleUnit)
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
   emit('update:isDrawerOpen', false)
   nextTick(() => {
-    refFormEditProperty.value?.reset()
-    imageUpdateField.value?.reset()
+    editUnitRefForm.value?.reset()
   })
 }
 
-function updatedImageUpload(e){
-
-// console.log(editedItemObj.value.propertyImage, e.target.files[0])
-
-let img = e.target.files[0]
-let imgSize = img/1000
-if(imgSize > 2048){
-  propPageAlertSnackbar.value.message = "Image size should be less then 2MB"
-  propPageAlertSnackbar.value.color = "error"
-  propPageAlertSnackbar.value.show = true
-  propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedProperty.value.propertyImage
-  imageUpdateField.value?.reset()
-
-  return
-}
-propertyEditFormImage.value = URL.createObjectURL(e.target.files[0])
-updatedImageFile.value = e.target.files[0]
-}
 
 
 const handleDrawerModelValueUpdate = val => {
@@ -82,77 +60,79 @@ const handleDrawerModelValueUpdate = val => {
 }
 
 
-function changePropertyStatusToggle(){
-  if(editedProperty.value.propertyStatus === 'Active'){
-    statusToggleSwitch.value = true
+function updateUnits(){
+
+  editUnitRefForm.value?.validate().then(({ valid })=>{
+    if(valid){
+
+      if(!unitTypeArr.value.includes(editedUnit.value.type)){
+        editUnitDrawerAlert.value.message = "select proper type for unit!"
+        editUnitDrawerAlert.value.show = true
+        editUnitDrawerAlert.value.color = "error"
+        return
+      }
+      let queryData = {
+      "userId" : sessionStorage.getItem("userId"),
+      "updatedUnit": editedUnit.value
+      }
+
+  axios.post("http://127.0.0.1:8000/prop-app/units/update",queryData,{
+    headers: {
+      'Authorization': sessionStorage.getItem("accessToken")
+    }
+  }).then(response => {
+    if(response.status === 200){
+      editUnitDrawerAlert.value.message = response.data.message
+      editUnitDrawerAlert.value.color = "success"
+      editUnitDrawerAlert.value.show = true
+      emit('update:isDrawerOpen', false)
+      emit('getAllUnits')
+    }
+  }).catch(error => {
+      editUnitDrawerAlert.value.message = error.response.data.message
+      editUnitDrawerAlert.value.color = "error"
+      editUnitDrawerAlert.value.show = true
+     if(error.response.status === 403){
+      refreshUserLogin()
+     }
+  })
   }
   else{
-    statusToggleSwitch.value = false
+    editUnitDrawerAlert.value.message = "fill the required fields!"
+    editUnitDrawerAlert.value.color = "error"
+    editUnitDrawerAlert.value.show = true
   }
-  if(editedProperty.value.propertyImage){
-  propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedProperty.value.propertyImage
+
+  })
+
+}
+
+
+
+// console.log(props.singleUnit)
+function changeFloorsTypes(){
+
+  if(editedUnit.value.floor == 0){
+    editedUnit.value.floor = "ground floor"
   }
   else{
-    propertyEditFormImage.value = null
+    editedUnit.value.floor = "floor "+editedUnit.value.floor
+  }
+  if(editedUnit.value.category === "Commercial"){
+    unitTypeArr.value = []
+    unitTypeArr.value.push("Shop")
+    unitTypeArr.value.push("Office")
+  }
+  if(editedUnit.value.category === "Residential"){
+
+    unitTypeArr.value = []
+    unitTypeArr.value.push("Room")
   }
 }
 
-// watchEffect(changePropertyStatusToggle)
-
-function changePropertyStatus(){
-  if(statusToggleSwitch.value){
-    editedProperty.value.propertyStatus = 'Active'
-  }
-  else{
-    editedProperty.value.propertyStatus = 'Inactive'  
-  }
-}
+watchEffect(changeFloorsTypes)
 
 
-function imageFieldChecker(){
-  propertyEditFormImage.value = 'http://127.0.0.1:8000/media/'+editedProperty.value.propertyImage
-}
-
-function updateProperty(propertyId){
-
-const formData = new FormData()
-
-formData.append('userId', sessionStorage.getItem('userId'))
-formData.append('data', JSON.stringify(editedProperty.value))
-
-if(propertyEditFormImage.value){
-let imgstr = propertyEditFormImage.value.split("media/")
-imgstr = imgstr[1]
-if(imgstr !== editedProperty.value.propertyImage){
-  formData.append('updatedImage', updatedImageFile.value)
-}
-}
-
-axios.post('http://localhost:8000/prop-app/property/update', formData, {
-  headers: {
-    'Authorization': sessionStorage.getItem("AccessToken"),  
-  },
-
-}).then(response => {
-  editPropertyDrawerAlert.value.message = response.data.message
-  editPropertyDrawerAlert.value.color = "success"
-  editPropertyDrawerAlert.value.show = true
-  emit('getAllProperties')
-  closeNavigationDrawer()
-}).catch(error => {
-  editPropertyDrawerAlert.value.message = error.response.data.message
-  editPropertyDrawerAlert.value.color = "error"
-  editPropertyDrawerAlert.value.show = true
-  if(error.response.status === 403){
-    refreshUserLogin()
-  }
-})
-}
-
-
-onMounted(() => {
-
-})
 </script>
 
 <template>
@@ -171,165 +151,149 @@ onMounted(() => {
     />
 
     <PerfectScrollbar :options="{ wheelPropagation: false }">
-      <VCard flat>
+      <VCard flat v-if="editedUnit">
         <VCardText>
           <!-- 👉 Form -->
-          <VForm ref="refFormEditProperty">
+          <VForm ref="editUnitRefForm">
             <VRow>
               <!-- 👉 Property -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="editedProperty.propertyName"
-                  :rules="[requiredValidator]"
+                  v-model="editedUnit.propertyName"
                   label="Property"
+                  readonly
                 />
               </VCol>
 
               <VCol cols="12">
                 <AppTextField
-                  v-model="editedProperty.propertyNumber"
-                  :rules="[requiredValidator]"
-                  label="Propery Number"
+                  v-model="editedUnit.floor"
+                  label="Floor"
+                  readonly
                 />
               </VCol>
-
-              <VCol cols="12">
-                <AppSelect
-                  v-model="editedProperty.propertyType"
-                  label="Property Type"
-                  :rules="[requiredValidator]"
-                  :items="['Residential', 'Commercial']"
-                  item-title="propertyType"
-                  item-value="propertyId"
-                />
-              </VCol>
-
+              <!-- 👉 Full name -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="editedProperty.propertySize"
+                  v-model="editedUnit.name"
                   :rules="[requiredValidator]"
-                  label="Propery Size"
-                />
-              </VCol>
-
-              <VCol cols="12">
-                <AppTextField
-                  v-model="editedProperty.propertyCity"
-                  :rules="[requiredValidator]"
-                  label="Propery City"
-                />
-              </VCol>
-
-              <VCol cols="12">
-                <AppTextField
-                  v-model="editedProperty.propertyBuiltYear"
-                  :rules="[requiredValidator]"
-                  label="Propery Built Year"
+                  label="Unit Name"
                 />
               </VCol>
 
               <VCol cols="12">
                 <AppSelect
-                  v-model="editedProperty.propertyCountry"
-                  label="Country"
+                  v-model="editedUnit.category"
                   :rules="[requiredValidator]"
-                  :items="countryList"
+                  :items="['Commercial', 'Residential']"
+                  label="Category"
                 />
               </VCol>
-           
-              <VCol cols="12">
-                <AppTextField
-                  v-model="editedProperty.propertyStreet"
-                  :rules="[requiredValidator]"
-                  label="Propery Street"
 
-                />
-              </VCol>
-           
+              <!-- 👉 Email -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="editedProperty.propertyBlock"
+                <AppSelect
+                  v-model="editedUnit.type"
                   :rules="[requiredValidator]"
-                  label="Propery Block"
+                  :items="unitTypeArr"
+                  label="Type"
                 />
               </VCol>
-           
-              <VCol cols="12">
-                <AppTextField
-                  v-model="editedProperty.propertyCivilId"
-                  :rules="[requiredValidator]"
-                  label="Civil/Registered No"
-                />
-              </VCol>
-           
-              <VCol cols="12">
-                <AppTextField
-                  v-model="editedProperty.propertySaleValue"
-                  :rules="[requiredValidator]"
-                  label="Property Sale Value"
-                />
-              </VCol>
-           
-              <VCol cols="12">
-                <AppTextField
-                  v-model="editedProperty.propertyBuyValue"
-                  :rules="[requiredValidator]"
-                  label="Property Buy Value"
-                />
-              </VCol>
-           
-              <VCol cols="12">
-                <AppTextField
-                  v-model="editedProperty.propertyDescription"
-                  :rules="[requiredValidator]"
-                  label="Property Description"
-                />
-              </VCol>
-              
-              <VCol
-                cols="12"
-                sm="6"
-                md="12"
-              >
-                <VCard>
-                  <template v-if="propertyEditFormImage">
-                    <VImg
-                      :src="propertyEditFormImage"
-                      alt="No image"
-                      cover
-                      style="width: 110px; height: 110px;"
-                    />
-                  </template>
 
-                  <VCardItem>
-                    <p>Click below to change/add Image</p>
-                    <VFileInput
-                      ref="imageUpdateField"
-                      prepend-icon="tabler-camera"
-                      label="Image"
-                      accept="image/*"
-                      density="compact"
-                      clearable
-                      @click:clear="imageFieldChecker"
-                      @change="updatedImageUpload"
-                    />
-                  </VCardItem>
-                </VCard>
+              <!-- 👉 company -->
+              <VCol cols="12">
+                <AppTextField
+                  v-model="editedUnit.rent"
+                  :rules="[requiredValidator]"
+                  label="Rent"
+                />
+              </VCol>
+
+              <!-- 👉 Country -->
+              <VCol cols="12">
+                <AppTextField
+                  v-model="editedUnit.bedrooms"
+                  type="number"
+                  :min=0
+                  :rules="[requiredValidator]"
+                  label="Nos. of Bedrooms"
+                />
+              </VCol>
+
+              <!-- 👉 Contact -->
+              <VCol cols="12">
+                <AppTextField
+                  v-model="editedUnit.bathrooms"
+                  type="number"
+                  :min=0
+                  :rules="[requiredValidator]"
+                  label="Nos. of bathrooms"
+                />
               </VCol>
 
               <VCol cols="12">
-                <VSwitch
-                  v-model="statusToggleSwitch"
-                  label="Property Status"
-                  @change="changePropertyStatus"
+                <AppTextField
+                  v-model="editedUnit.kitchens"
+                  type="number"
+                  :min=0
+                  :rules="[requiredValidator]"
+                  label="Nos. of kitchens"
                 />
               </VCol>
-    
-              
+
+              <VCol cols="12">
+                <AppTextField
+                  v-model="editedUnit.size"
+                  type="number"
+                  :rules="[requiredValidator, floatValidator]"
+                  label="Unit Size"
+                />
+              </VCol>
+
+              <!-- 👉 Status -->
+              <VCol cols="12">
+                <AppSelect
+                  v-model="editedUnit.status"
+                  label="Select Status"
+                  :rules="[requiredValidator]"
+                  :items="['vacant', 'occupied']"
+                />
+              </VCol>
+
+              <!--
+                <VCol cols="12">
+                <VCheckbox
+                v-model="singleUnitsCheck"
+                label="Single Unit"
+                />
+                <VRow>
+                <VCol
+                cols="2"
+                sm="1"
+                class="d-flex align-end"
+                >
+                <VCheckbox v-model="multipleUnitsCheck" />
+                </VCol>
+
+                <VCol
+                cols="8"
+                sm="11"
+                >
+                <AppTextField
+                :disabled="!multipleUnitsCheck"
+                placeholder="Enter nos of units"
+                />
+                </VCol>
+                </VRow>
+                </VCol> 
+              -->
+
+
+              <!-- 👉 Submit and Cancel -->
               <VCol cols="12">
                 <VBtn
                   class="me-3"
-                  @click="updateProperty(editedProperty.propertyId)"
+                  @click="updateUnits"
                 >
                   Submit
                 </VBtn>
@@ -350,11 +314,13 @@ onMounted(() => {
   </VNavigationDrawer>
 
   <VSnackbar
-    v-model="editPropertyDrawerAlert.show"
+    v-model="editUnitDrawerAlert.show"
     transition="fade-transition"
     location="botton center"
-    :color="editPropertyDrawerAlert.color"
+    :color="editUnitDrawerAlert.color"
   >
-    {{ editPropertyDrawerAlert.message }}
+    {{ editUnitDrawerAlert.message }}
   </VSnackbar>
+
+
 </template>

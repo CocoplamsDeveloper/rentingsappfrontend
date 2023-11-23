@@ -75,7 +75,7 @@ const onUnitFormSubmit = () => {
           "Size": unitSize.value,
           "Status": unitStatus.value,
           "Floor": unitFloor.value,
-          "Kitchen": unitKitchens.value,
+          "Kitchens": unitKitchens.value,
           "Category": unitCategory.value
         }, 
       }

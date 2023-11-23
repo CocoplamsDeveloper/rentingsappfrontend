@@ -2,7 +2,7 @@
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import { populatePropertiesList, refreshUserLogin } from '@/common/reusing_functions'
 import AddNewUnitDrawer from '@/views/apps/units/AddNewUnitDrawer.vue'
-// import EditUnitsDrawer from '@/views/apps/units/EditUnitsDrawer.vue'
+import EditUnitsDrawer from '@/views/apps/units/EditUnitsDrawer.vue'
 import axios from '@axios'
 import { onMounted } from 'vue'
 import { VDataTable } from 'vuetify/labs/VDataTable'
@@ -23,15 +23,33 @@ const unitStatusFilter = ref(null)
 const isEditUnitDrawerVisible = ref(false)
 const unitPropertyFilter = ref(null)
 const unitRentFilter = ref(null)
+const fetchedUnitsList = ref([])
 const propertyListArr = ref()
 const isUnitsCsvDialogVisible = ref(false)
-const singleUnit = ref()
 const unitCsvFile = ref()
 const rentSliderMin = ref(0)
 const rentSliderMax = ref(1000)
 const selectedPropertyForCsv = ref()
 const unitsCsvRef = ref()
+const deleteUnitConfirm = ref(false)
 const unitPageAlert = ref({ show: false, message: null, color: null })
+const singleUnit = ref({
+  "propertyId": '',
+  "propertyName": '',
+  "unitId": '',
+  "name": '',
+  "type": '',
+  "category": '',
+  "bedrooms": '',
+  "bathrooms": '',
+  "kitchens": '',
+  "rent": '',
+  "size": '',
+  "status": '',
+  "floor": '',
+})
+const unitToDelete = ref(null)
+const deleteUnitDialogText = ref()
 
 const resolveUnitsStatusVariant = stat => {
 
@@ -70,6 +88,10 @@ const headers = [
   {
     title: 'RENT',
     key: 'unitsData.unit_rent',
+  },
+  {
+    title: 'Floor',
+    key: 'unitsData.unit_floor',
   },
   {
     title: 'ROOMS',
@@ -140,20 +162,41 @@ const userListMeta = [
   },
 ]
 
-const editUnitItem = (unitId) => {
-  isEditUnitDrawerVisible.value = true
+const editUnitItem = async (unitId) => {
 
-  let unitToEdit = null
+  let task = new Promise((resolve, reject) => {
   fetchedUnitsList.value.forEach((element)=>{
     if(element.unitId === unitId){
-      unitToEdit = element
+      fillUnitObj(element)
     }
   })
-  singleUnit.value = unitToEdit
+  resolve(true)
+  })
+  await task
+  isEditUnitDrawerVisible.value = true
+
+}
+
+function fillUnitObj(unit){
+  let obj = singleUnit.value
+  let details = unit.unitsData
+  obj.propertyId = unit.propertyId
+  obj.propertyName = unit.propertyName
+  obj.unitId = unit.unitId
+  obj.name = details.unit_name
+  obj.type = details.unit_type
+  obj.category = details.unit_category
+  obj.rent = details.unit_rent
+  obj.size = details.area_insqmts
+  obj.floor = details.unit_floor
+  obj.status = unit.status
+  obj.bedrooms = details.unit_bedrooms
+  obj.bathrooms = details.unit_bathrooms_nos
+  obj.kitchens = details.unit_kitchens
 }
 
 
-const fetchedUnitsList = ref([])
+
 
 const getFilteredUnits = () => {
 
@@ -213,6 +256,45 @@ function unitsSearchedResults(){
     }
 }
 
+function deleteUnitItem(unit){
+
+  deleteUnitDialogText.value = "Are you sure you want to delete "+unit.unitsData.unit_name+"?"
+  unitToDelete.value = unit.unitId
+  deleteUnitConfirm.value = true
+
+}
+
+function deleteUnit(){
+  if(unitToDelete.value){
+  let queryData = {
+    "userId" : sessionStorage.getItem("userId"),
+    "unitId" : unitToDelete.value
+  }
+
+  axios.delete("http://127.0.0.1:8000/prop-app/unit/delete", {
+    params: queryData,
+    headers:{
+      'Authorization' : sessionStorage.getItem("accessToken")
+    }
+  }).then(response => {
+    if(response.status == 200){
+      unitPageAlert.value.message = response.data.message
+      unitPageAlert.value.color = "success"
+      unitPageAlert.value.show = true
+      deleteUnitConfirm.value = false
+      getAllUnits()
+    }
+  }).catch(error => {
+    unitPageAlert.value.message = error.response.data.message
+    unitPageAlert.value.color = "error"
+    unitPageAlert.value.show = true
+    if(error.response.status == 403){
+      refreshUserLogin()
+    }
+  })
+  }
+}
+
 function getAllUnits(){
 
   let queryData = {
@@ -232,6 +314,7 @@ function getAllUnits(){
       'Authorization': sessionStorage.getItem("accessToken"),
     },
   }).then(response => {
+    console.log(response)
     fetchedUnitsList.value = response.data.unitsData
     rentSliderMax.value = response.data.currentMaxRent
   }).catch(error => {
@@ -446,10 +529,10 @@ onMounted(() => {
 
             <template #item.unitsData.unit_status="{ item }">
               <VChip
-                :color="resolveUnitsStatusVariant(item.raw.unitsData.unit_status).color"
+                :color="resolveUnitsStatusVariant(item.raw.status).color"
                 size="small"
               >
-                {{ resolveUnitsStatusVariant(item.raw.unitsData.unit_status).text }}
+                {{ resolveUnitsStatusVariant(item.raw.status).text }}
               </VChip>
             </template>
 
@@ -459,7 +542,7 @@ onMounted(() => {
                 <IconBtn @click="editUnitItem(item.raw.unitId)">
                   <VIcon icon="mdi-pencil-outline" />
                 </IconBtn>
-                <IconBtn @click="deleteItem(item.raw.unitId)">
+                <IconBtn @click="deleteUnitItem(item.raw)">
                   <VIcon icon="mdi-delete-outline" />
                 </IconBtn>
               </div>
@@ -489,7 +572,7 @@ onMounted(() => {
           <VCol cols="12">
             <AppSelect
               v-model="unitTypeFilter"
-              :items="['room', 'shop', 'store', 'office', 'other']"
+              :items="['Room', 'Shop', 'Office']"
               label="Type"
             />
           </VCol>
@@ -608,12 +691,35 @@ onMounted(() => {
     </VCard>
   </VDialog>
 
+  <VDialog 
+    v-model="deleteUnitConfirm" 
+    :width="500"
+  >
+    <DialogCloseBtn @click="deleteUnitConfirm = !deleteUnitConfirm" />
+    <VCard title="Delete">
+      <VCardText>
+        {{ deleteUnitDialogText }}
+      </VCardText>
 
-  <!-- <EditUnitsDrawer 
+      <VCardText class="d-flex justify-end">
+        <VBtn 
+          :style="{marginRight:'10px'}"
+          @click="deleteUnitConfirm = false"
+        >
+          No
+        </VBtn>
+        <VBtn @click="deleteUnit">
+          Yes
+        </VBtn>
+      </VCardText>
+    </VCard>
+  </VDialog>
+
+  <EditUnitsDrawer 
     v-model:isDrawerOpen="isEditUnitDrawerVisible"
     :single-unit="singleUnit"
     @get-all-units="getAllUnits"
-  /> -->
+  />
 
 
   <VSnackbar
