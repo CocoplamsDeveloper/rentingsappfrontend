@@ -50,6 +50,10 @@ const singleUnit = ref({
 })
 const unitToDelete = ref(null)
 const deleteUnitDialogText = ref()
+const totalUnits = ref()
+const vacantUnits = ref()
+const occupiedUnits = ref()
+const undermaintUnits = ref()
 
 const resolveUnitsStatusVariant = stat => {
 
@@ -63,6 +67,11 @@ const resolveUnitsStatusVariant = stat => {
     return {
       color: 'secondary',
       text: 'Occupied',
+    }
+  if (statLowerCase === 'under maintenance')
+    return {
+      color: 'warning',
+      text: 'Under Maintenance',
     }
  
   return {
@@ -125,7 +134,7 @@ const userListMeta = [
     color: 'primary',
 
     // title: 'Total Units',
-    stats: '376',
+    stats: totalUnits,
 
     // percentage: +29,
     subtitle: 'Total Units',
@@ -135,7 +144,7 @@ const userListMeta = [
     color: 'secondary',
 
     // title: 'Occupied',
-    stats: '100',
+    stats: occupiedUnits,
 
     // percentage: +18,
     subtitle: 'Occupied',
@@ -145,7 +154,7 @@ const userListMeta = [
     color: 'info',
 
     // title: 'Vacant',
-    stats: '276',
+    stats: vacantUnits,
 
     // percentage: -14,
     subtitle: 'Vacant',
@@ -155,7 +164,7 @@ const userListMeta = [
     color: 'warning',
 
     // title: 'Under Maintenance',
-    stats: '237',
+    stats: undermaintUnits,
 
     // percentage: +42,
     subtitle: 'Under Maintenance',
@@ -370,6 +379,31 @@ const clearSelectedFilterOptions = () => {
   isUnitsFilterDialogVisible.value = false
 }
 
+function getUnitsStats(){
+
+  let queryData = {
+    "userId" :  sessionStorage.getItem("userId")
+  }
+
+  axios.get("http://127.0.0.1:8000/prop-app/unit/stats", {
+    params: queryData,
+    headers: {
+      'Authorization': sessionStorage.getItem('accessToken')
+    }
+  }).then(response => {
+    if(response.status == 200){
+      let data = response.data
+      totalUnits.value = data.totalUnits
+      occupiedUnits.value = data.occupiedUnits
+      vacantUnits.value = data.vacantUnits
+      undermaintUnits.value = data.underMaintenanceUnits
+    }
+  }).catch((error) => {
+    if(error.response.status == 403){
+      refreshUserLogin()
+    }
+  })
+}
 
 onMounted(() => {
   getAllUnits()
@@ -378,6 +412,7 @@ onMounted(() => {
   }).catch(err => {
     console.log(err)
   })
+  getUnitsStats()
 
 })
 </script>
@@ -579,7 +614,7 @@ onMounted(() => {
           <VCol cols="12">
             <AppSelect
               v-model="unitStatusFilter"
-              :items="['vacant', 'occupied']"
+              :items="['vacant', 'occupied', 'under maintenance']"
               label="Status"
             />
           </VCol>

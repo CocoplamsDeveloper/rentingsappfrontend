@@ -320,7 +320,7 @@ onMounted(() => {
                   v-model="unitStatus"
                   label="Select Status"
                   :rules="[requiredValidator]"
-                  :items="['vacant', 'occupied']"
+                  :items="['vacant', 'occupied', 'under maintenance']"
                 />
               </VCol>
 

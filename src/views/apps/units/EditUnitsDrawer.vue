@@ -256,7 +256,7 @@ watchEffect(changeFloorsTypes)
                   v-model="editedUnit.status"
                   label="Select Status"
                   :rules="[requiredValidator]"
-                  :items="['vacant', 'occupied']"
+                  :items="['vacant', 'occupied', 'under maintenance']"
                 />
               </VCol>
 
