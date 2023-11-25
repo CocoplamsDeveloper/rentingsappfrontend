@@ -40,7 +40,7 @@ const singleUnit = ref({
   "name": '',
   "type": '',
   "category": '',
-  "bedrooms": '',
+  "rooms": '',
   "bathrooms": '',
   "kitchens": '',
   "rent": '',
@@ -104,7 +104,7 @@ const headers = [
   },
   {
     title: 'ROOMS',
-    key: 'unitsData.unit_bedrooms',
+    key: 'unitsData.unit_rooms',
   },
   {
     title: 'RESTROOMS',
@@ -199,7 +199,7 @@ function fillUnitObj(unit){
   obj.size = details.area_insqmts
   obj.floor = details.unit_floor
   obj.status = unit.status
-  obj.bedrooms = details.unit_bedrooms
+  obj.rooms = details.unit_rooms
   obj.bathrooms = details.unit_bathrooms_nos
   obj.kitchens = details.unit_kitchens
 }
@@ -334,13 +334,20 @@ function getAllUnits(){
 
 }
 
+const afterCsvSuccess = () => {
+  getAllUnits()
+  getUnitsStats()
+  isUnitsCsvDialogVisible.value = false
+}
+
+
 function uploadCsvUnits(){
 
 
   if(!selectedPropertyForCsv.value){
-    unitPageAlert.message = "Kindly select property first"
-    unitPageAlert.color = "warning"
-    unitPageAlert.show = true
+    unitPageAlert.value.message = "Kindly select property first"
+    unitPageAlert.value.color = "warning"
+    unitPageAlert.value.show = true
     return
   }
 
@@ -358,9 +365,10 @@ function uploadCsvUnits(){
     }
   }).then((response) => {
     if(response.status == 200){
-      unitPageAlert.message = response.data.message
-      unitPageAlert.color = "success"
-      unitPageAlert.show = true
+      unitPageAlert.value.message = response.data.message
+      unitPageAlert.value.color = "success"
+      unitPageAlert.value.show = true
+      afterCsvSuccess()
     }
   }).catch((error) => {
     if(error.response.status == 403){
@@ -369,6 +377,40 @@ function uploadCsvUnits(){
   })
 }
 
+function downloadSampleCsv(){
+
+  let queryData = {
+    "userId" : sessionStorage.getItem("userId")
+  }
+
+  axios.get("http://127.0.0.1:8000/prop-app/unitcsvsample/download", {
+    params: queryData,
+    responseType: 'blob',
+    headers: {
+      'Authorization' : sessionStorage.getItem("accessToken")
+    }
+  }).then((response) => {
+    let fileType = response.data.type
+    const downloadUrl = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    let current = new Date()
+    let docName = "sample_units_file.csv"
+    link.setAttribute('download', docName)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  }).catch((error)=>{
+    if(error.response.status === 403){
+      refreshUserLogin()
+    }
+    else{
+      unitPageAlert.value.message = error.response.data.message
+      unitPageAlert.value.color = "error"
+      unitPageAlert.value.show = true
+    }
+  })
+}
 
 const clearSelectedFilterOptions = () => {
   unitTypeFilter.value = ""
@@ -607,7 +649,7 @@ onMounted(() => {
           <VCol cols="12">
             <AppSelect
               v-model="unitTypeFilter"
-              :items="['Room', 'Shop', 'Office']"
+              :items="['room', 'shop', 'office']"
               label="Type"
             />
           </VCol>
@@ -681,6 +723,7 @@ onMounted(() => {
             size="28"
             color="info"
             prepend-icon="tabler-download"
+            @click="downloadSampleCsv"
           />
         </p>
       </VCardText>

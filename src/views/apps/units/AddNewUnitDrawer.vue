@@ -28,7 +28,7 @@ const refForm = ref()
 const unitName = ref()
 const unitType = ref()
 const unitRent = ref()
-const unitBedrooms = ref()
+const unitRooms = ref()
 const unitBathrooms = ref()
 const unitStatus = ref()
 const unitProperty = ref()
@@ -70,7 +70,7 @@ const onUnitFormSubmit = () => {
           "Name": unitName.value,
           "Type": unitType.value,
           "Rent": unitRent.value,
-          "Bedrooms": unitBedrooms.value,
+          "Rooms": unitRooms.value,
           "Bathrooms": unitBathrooms.value,
           "Size": unitSize.value,
           "Status": unitStatus.value,
@@ -176,13 +176,13 @@ function populateFloorsDropdown(){
   if(unitCategory.value === "Commercial"){
     unitTypeArr.value = []
     unitType.value = ""
-    unitTypeArr.value.push("Shop")
-    unitTypeArr.value.push("Office")
+    unitTypeArr.value.push("shop")
+    unitTypeArr.value.push("office")
   }
   else{
     unitType.value = ""
     unitTypeArr.value = []
-    unitTypeArr.value.push("Room")
+    unitTypeArr.value.push("room")
   }
 }
 
@@ -279,10 +279,10 @@ onMounted(() => {
               <!-- 👉 Country -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="unitBedrooms"
+                  v-model="unitRooms"
                   type="number"
                   :rules="[requiredValidator]"
-                  label="Nos. of Bedrooms"
+                  label="Nos. of Rooms"
                 />
               </VCol>
 

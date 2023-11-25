@@ -1,28 +1,59 @@
 <script setup>
-import { VDataTable } from 'vuetify/labs/VDataTable';
-
 import { ref } from 'vue';
+import { VDataTable } from 'vuetify/labs/VDataTable';
 
 const propertyUnitsList = ref([])
 
+const props = defineProps({
+  unitsList: {
+    type: Array,
+    required: true
+  }
+})
+
 const headers = [
-{
+  {
     title: 'NAME',
-    key: 'unit_name',
+    key: 'unit.unit_name',
   },
   {
     title: 'type',
-    key: 'unit_type',
+    key: 'unit.unit_type',
   },
   {
     title: 'Floor',
-    key: 'unit_floor'
+    key: 'unit.unit_floor'
   },
   {
     title: 'Status',
     key: 'status',
   },
 ]
+
+const resolveUnitsStatusVariant = stat => {
+
+const statLowerCase = stat.toLowerCase()
+if (statLowerCase === 'vacant')
+  return {
+    color: 'success',
+    text: 'Vacant',
+  }
+if (statLowerCase === 'occupied')
+  return {
+    color: 'secondary',
+    text: 'Occupied',
+  }
+if (statLowerCase === 'under maintenance')
+  return {
+    color: 'warning',
+    text: 'Under Maintenance',
+  }
+
+return {
+  color: 'primary',
+  text: 'No Status',
+}
+}
 
 
 
@@ -32,37 +63,23 @@ const headers = [
   <VRow>
     <!-- 👉 Current Plan -->
     <VCol cols="12">
-      <VCard title="Units">
+      <VCard title="Units" v-if="props.unitsList">
         <VDivider />
         <VDataTable
-          :items="propertyUnitsList"
+          :items="props.unitsList"
           :headers="headers"
           :items-per-page="10"
 
         >
-          <template #item.document_type="{ item }">
-            <div class="d-flex">
-              <span>{{resolveDocType(item.raw)}}</span>
-            </div>
-          </template>
+        <template #item.status="{ item }">
+              <VChip
+                :color="resolveUnitsStatusVariant(item.raw.status).color"
+                size="small"
+              >
+                {{ resolveUnitsStatusVariant(item.raw.status).text }}
+              </VChip>
+        </template>
 
-          <template #item.actions="{ item }">
-              <div class="d-flex gap-1">
-                <!--
-                  <IconBtn @click="isEditPropertyDrawerVisible = true">
-                  <VIcon icon="mdi-pencil-outline" />
-                  </IconBtn>  
-                -->
-               
-                <!-- <IconBtn @click="editPropertyItem(item.raw.propertyId)"> -->
-                <IconBtn @click="downloadPropertyDocument(item.raw.document_id)">
-                  <VIcon icon="tabler-download" />
-                </IconBtn>
-                <!-- <IconBtn @click="deleteDocument(item.raw.document_id)">
-                  <VIcon icon="mdi-delete-outline" />
-                </IconBtn> -->
-              </div>
-          </template>
         </VDataTable>
       </VCard>
     </VCol>

@@ -120,13 +120,13 @@ function changeFloorsTypes(){
   }
   if(editedUnit.value.category === "Commercial"){
     unitTypeArr.value = []
-    unitTypeArr.value.push("Shop")
-    unitTypeArr.value.push("Office")
+    unitTypeArr.value.push("shop")
+    unitTypeArr.value.push("office")
   }
   if(editedUnit.value.category === "Residential"){
 
     unitTypeArr.value = []
-    unitTypeArr.value.push("Room")
+    unitTypeArr.value.push("room")
   }
 }
 
@@ -212,11 +212,11 @@ watchEffect(changeFloorsTypes)
               <!-- 👉 Country -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="editedUnit.bedrooms"
+                  v-model="editedUnit.rooms"
                   type="number"
                   :min=0
                   :rules="[requiredValidator]"
-                  label="Nos. of Bedrooms"
+                  label="Nos. of Rooms"
                 />
               </VCol>
 

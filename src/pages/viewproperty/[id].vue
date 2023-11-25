@@ -19,6 +19,7 @@ const propertyData = ref({})
 const propertyDetails = ref({})
 const userTab = ref(null)
 const facilityData = ref([])
+const unitsList = ref([])
 
 const tabs = [
   {
@@ -138,6 +139,7 @@ const fetchProperty = async () => {
     console.log(response)
     propertyData.value = response.data.property_data
     propertyDetails.value = response.data.property_data.details
+    unitsList.value = response.data.property_data.units
     prefillPropertyEditForm(response.data.property_data)
     }
   }
@@ -411,7 +413,7 @@ onMounted(() => {
 
         
         <VWindowItem>
-          <PropertyTabUnits />
+          <PropertyTabUnits :units-list="unitsList"/>
         </VWindowItem> 
        
 

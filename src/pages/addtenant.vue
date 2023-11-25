@@ -412,7 +412,7 @@ const getTenantDoc = e =>{
             <VRow>
               <!-- 👉 First Name -->
               <VCol
-                md="6"
+                md="4"
                 cols="12"
               >
                 <AppTextField
@@ -424,7 +424,7 @@ const getTenantDoc = e =>{
 
               <!-- 👉 Last Name -->
               <VCol
-                md="6"
+                md="4"
                 cols="12"
               >
                 <AppTextField
@@ -437,7 +437,7 @@ const getTenantDoc = e =>{
               <!-- 👉 Email -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="tenantEmail"
@@ -449,7 +449,7 @@ const getTenantDoc = e =>{
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="tenantPassword"
@@ -461,7 +461,7 @@ const getTenantDoc = e =>{
               <!-- 👉 Organization -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppSelect
                   v-model="tenantNationality"
@@ -474,7 +474,7 @@ const getTenantDoc = e =>{
               <!-- 👉 Phone -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="tenantContactNumber"
@@ -486,7 +486,7 @@ const getTenantDoc = e =>{
               <!-- 👉 Address -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="tenantIdNo"
@@ -498,7 +498,7 @@ const getTenantDoc = e =>{
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppSelect
                   v-model="tenantStatus"
@@ -510,7 +510,7 @@ const getTenantDoc = e =>{
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <label>Doc</label>
                 <VFileInput
