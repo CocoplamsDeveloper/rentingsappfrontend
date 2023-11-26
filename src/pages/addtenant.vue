@@ -26,6 +26,7 @@ const addTenantFormImg = ref(avatar1)
 const refInputEl = ref()
 const addTenantAlertSnackbar = ref({ show: false, message: null, color: null })
 const accordCheck = ref(true)
+const memberType = ref(null)
 const tenantFamilyMembers = ref([])
 const accordianModel = ref([])
 const tenantDetails = ref({
@@ -289,14 +290,23 @@ const nationalityList = [
 ]
 
 const addMembers = () => {
-  tenantFamilyMembers.value.push({
-    "type": '',
+  if(memberType.value){
+    tenantFamilyMembers.value.push({
+    "type": memberType,
     "name" : '',
     "nationality": '',
     "passportNo": '',
-    "documentName": '',
+    "documentName": null,
     "document": null,
   })
+    memberType.value = null
+  }
+  else{
+    addTenantAlertSnackbar.value.message = "Kindly select member type first!"
+    addTenantAlertSnackbar.value.color = 'warning'
+    addTenantAlertSnackbar.value.show = true
+  }
+
 }
 
 const deleteMember = (index) => {
@@ -327,9 +337,6 @@ const createTenant = () => {
   
     if (valid) {
 
-      familyMemberFormRef.value?.validate().then(({valid}) => {
-
-        if(valid) {
 
         if(!sessionStorage.getItem("accessToken")){
         router.push('/login')
@@ -377,11 +384,7 @@ const createTenant = () => {
         }
       })
           
-        }
-        
 
-
-      })
 
 
 
@@ -624,25 +627,30 @@ const getTenantDoc = e =>{
                   <VExpansionPanelText>
                     <VSpacer/>
                     <VRow>
-                      <VSpacer/>
-                        <VBtn
-                        prepend-icon="tabler-plus"
-                        @click="addMembers"
-                        :style="{marginRight: '20px', marginTop: '5px'}"
-                        >Add
-                        </VBtn>
-                    </VRow>
-                    <VRow v-for="(row, rowIndex) in tenantFamilyMembers" :key="rowIndex" ref="familyMemberFormRef">
                       <VCol
                         cols="12"
-                        md="2">
+                        md="4"
+                        >
                         <AppSelect
-                          v-model="row.type"
+                          v-model="memberType"
                           label="Member Type"
-                          :rules="[requiredValidator]"
                           :items="['Spouse', 'Child']"
                       />
                       </VCol>
+                      <VCol
+                      cols="12"
+                      md="4">
+                        <VBtn
+                          prepend-icon="tabler-plus"
+                          @click="addMembers"
+                          :style="{marginTop: '27px'}"
+                          >Add
+                        </VBtn>
+                      </VCol>
+
+                    </VRow>
+                    <VRow v-for="(row, rowIndex) in tenantFamilyMembers" :key="rowIndex" ref="familyMemberFormRef">
+
                       <VCol
                         cols="12"
                         md="2">
@@ -656,6 +664,15 @@ const getTenantDoc = e =>{
                         cols="12"
                         md="2">
                         <AppTextField
+                          v-model="row.passportNo"
+                          label="Passport No."
+                          :rules="[requiredValidator]"
+                      />
+                      </VCol>
+                      <VCol
+                        cols="12"
+                        md="2">
+                        <AppSelect
                           v-model="row.nationality"
                           :items="nationalityList"
                           label="Nationality"
@@ -686,7 +703,7 @@ const getTenantDoc = e =>{
                         md="2"
                       >
                         <VBtn
-                        size="36"
+                        size="20"
                         color="warning"
                         prepend-icon="tabler-trash"
                         @click="deleteMember(rowIndex)"
