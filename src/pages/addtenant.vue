@@ -1,6 +1,6 @@
 <script setup>
-import { requiredValidator } from '@/@core/utils/validators'
-import { refreshUserLogin } from '@/common/reusing_functions'
+import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
+import { emailValidator, integerValidator, requiredValidator } from '@/@core/utils/validators'
 import axios from '@axios'
 import avatar1 from '@images/avatars/avatar-14.png'
 
@@ -21,19 +21,28 @@ const accountData = {
 }
 
 const tenantRefForm = ref()
-const tenantFirstName = ref()
-const tenantLastName = ref()
-const tenantEmail = ref()
-const tenantContactNumber = ref()
-const tenantNationality = ref()
-const tenantPassword = ref()
-const tenantIdNo = ref()
-const tenantImage = ref()
-const tenantDoc = ref(null)
-const tenantStatus = ref()
+const familyMemberFormRef = ref()
 const addTenantFormImg = ref(avatar1)
 const refInputEl = ref()
 const addTenantAlertSnackbar = ref({ show: false, message: null, color: null })
+const accordCheck = ref(true)
+const tenantFamilyMembers = ref([])
+const accordianModel = ref([])
+const tenantDetails = ref({
+  "firstName": '',
+  "lastName": '',
+  "email": '',
+  "contactNumber": '',
+  "nationalId": '',
+  "nationalIdExpire": '',
+  "passportNo": '',
+  "passportExpireDate": '',
+  "workAddress": '',
+  "maritalStatus": '',
+  "tenantImage": null,
+  "tenantIdDocument": null,
+  "status": ''
+})
 
 const resetForm = () => {
   addTenantFormImg.value = avatar1
@@ -43,7 +52,7 @@ const resetForm = () => {
 const changeAvatar = file => {
 
   addTenantFormImg.value = URL.createObjectURL(file.target.files[0])
-  tenantImage.value = file.target.files[0]
+  tenantDetails.value.tenantImage = file.target.files[0]
 }
 
 // reset avatar image
@@ -279,42 +288,76 @@ const nationalityList = [
   'Zimbabwean',		
 ]
 
+const addMembers = () => {
+  tenantFamilyMembers.value.push({
+    "type": '',
+    "name" : '',
+    "nationality": '',
+    "passportNo": '',
+    "documentName": '',
+    "document": null,
+  })
+}
+
+const deleteMember = (index) => {
+  tenantFamilyMembers.value.splice(index, 1)
+}
+
+const openMemberPanel = () => {
+  if(tenantDetails.value.maritalStatus === "Married"){
+    accordCheck.value = false
+    accordianModel.value.push("member")
+  }
+  else{
+    accordCheck.value = true
+    accordianModel.value.splice(0, 1)
+  }
+}
+
+const addFamilyDocs = (e, index) => {
+  let record = tenantFamilyMembers.value[index]
+  record.document = e.target.files[0]
+}
+
+watchEffect(openMemberPanel)
 
 const createTenant = () => {
+
   tenantRefForm.value?.validate().then(({ valid }) => {
+  
     if (valid) {
 
-      if(!sessionStorage.getItem("accessToken")){
+      familyMemberFormRef.value?.validate().then(({valid}) => {
+
+        if(valid) {
+
+        if(!sessionStorage.getItem("accessToken")){
         router.push('/login')
 
         return 
       }
 
       let tenantData = {
-        "userFirstname": tenantFirstName.value,
-        "userLastname": tenantLastName.value,
-        "contactNumber": tenantContactNumber.value,
-        "userNationality": tenantNationality.value,
-        "userStatus": tenantStatus.value,
-        "userEmail": tenantEmail.value,
-        "userPassword": tenantPassword.value,
-        "userIdNumber": tenantIdNo.value,
+        "tenant" : tenantDetails.value,
+        "tenantFamily" : tenantFamilyMembers.value
       }
 
       const formData = new FormData()
 
       formData.append('userId', sessionStorage.getItem("userId"))
-      formData.append('userData', JSON.stringify(tenantData))
-      formData.append('userRole', "tenant")
-
+      formData.append('tenantData', JSON.stringify(tenantData))
+      
+      tenantFamilyMembers.value.forEach((ele)=>{
+        formData.append(ele.documentName, ele.document)
+      })
       if(addTenantFormImg.value !== avatar1){
-        formData.append('userImage', tenantImage.value)
+        formData.append('tenantImage', tenantDetails.value.tenantImage)
       }
-      if(tenantDoc.value !== null){
-        formData.append('userDocument', tenantDoc.value)
+      if(tenantDetails.value.tenantIdDocument !== null){
+        formData.append('tenantDocument', tenantDetails.value.tenantIdDocument)
       }
 
-      axios.post("http://127.0.0.1:8000/prop-app/users/create", formData, {
+      axios.post("http://127.0.0.1:8000/prop-app/tenant/create", formData, {
         headers: {
           'Authorization': sessionStorage.getItem('accessToken'),
         },
@@ -332,7 +375,14 @@ const createTenant = () => {
         if(error.response.status === 401){
           refreshUserLogin()
         }
-      }) 
+      })
+          
+        }
+        
+
+
+      })
+
 
 
     }
@@ -341,7 +391,7 @@ const createTenant = () => {
 
 
 const getTenantDoc = e =>{
-  tenantDoc.value = e.target.files[0]
+  tenantDetails.value.tenantIdDocument = e.target.files[0]
 }
 </script>
 
@@ -416,7 +466,7 @@ const getTenantDoc = e =>{
                 cols="12"
               >
                 <AppTextField
-                  v-model="tenantFirstName"
+                  v-model="tenantDetails.firstName"
                   label="First Name"
                   :rules="[requiredValidator]"
                 />
@@ -428,7 +478,7 @@ const getTenantDoc = e =>{
                 cols="12"
               >
                 <AppTextField
-                  v-model="tenantLastName"
+                  v-model="tenantDetails.lastName"
                   label="Last Name"
                   :rules="[requiredValidator]"
                 />
@@ -440,21 +490,10 @@ const getTenantDoc = e =>{
                 md="4"
               >
                 <AppTextField
-                  v-model="tenantEmail"
+                  v-model="tenantDetails.email"
                   label="E-mail"
                   type="email"
-                  :rules="[requiredValidator]"
-                />
-              </VCol>
-
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppTextField
-                  v-model="tenantPassword"
-                  label="Password"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, emailValidator]"
                 />
               </VCol>
 
@@ -464,7 +503,7 @@ const getTenantDoc = e =>{
                 md="4"
               >
                 <AppSelect
-                  v-model="tenantNationality"
+                  v-model="tenantDetails.nationality"
                   label="Nationality"
                   :items="nationalityList"
                   :rules="[requiredValidator]"
@@ -477,31 +516,18 @@ const getTenantDoc = e =>{
                 md="4"
               >
                 <AppTextField
-                  v-model="tenantContactNumber"
+                  v-model="tenantDetails.contactNumber"
                   label="Phone Number"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
-
-              <!-- 👉 Address -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppTextField
-                  v-model="tenantIdNo"
-                  label="ID No."
-                  :rules="[requiredValidator]"
-                />
-              </VCol>
-
 
               <VCol
                 cols="12"
                 md="4"
               >
                 <AppSelect
-                  v-model="tenantStatus"
+                  v-model="tenantDetails.status"
                   label="Status"
                   :items="['Active', 'Inactive']"
                   :rules="[requiredValidator]"
@@ -512,13 +538,179 @@ const getTenantDoc = e =>{
                 cols="12"
                 md="4"
               >
+                <AppTextField
+                  v-model="tenantDetails.workAddress"
+                  label="Work Address"
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppTextField
+                  v-model="tenantDetails.nationalId"
+                  label="National Id No."
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppDateTimePicker
+                  v-model="tenantDetails.nationalIdExpire"
+                  label="National Id Expire Date."
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppTextField
+                  v-model="tenantDetails.passportNo"
+                  label="Passport No."
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+              
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppDateTimePicker
+                  v-model="tenantDetails.passportExpireDate"
+                  label="Passport Expire Date"
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4">
+                <label>National Id Document</label>
+                <VFileInput
+                  label="Document"
+                  @change="getTenantDoc"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppSelect
+                  v-model="tenantDetails.maritalStatus"
+                  label="Marital Status"
+                  :items="['Single', 'Married']"
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+              
+              <VCol
+                cols="12"
+              >
+                <VExpansionPanels variant="accordion" :disabled="accordCheck" v-model="accordianModel">
+                  <VExpansionPanel value="member">
+                  <VExpansionPanelTitle>
+                    Add members
+                  </VExpansionPanelTitle>
+                  <VExpansionPanelText>
+                    <VSpacer/>
+                    <VRow>
+                      <VSpacer/>
+                        <VBtn
+                        prepend-icon="tabler-plus"
+                        @click="addMembers"
+                        :style="{marginRight: '20px', marginTop: '5px'}"
+                        >Add
+                        </VBtn>
+                    </VRow>
+                    <VRow v-for="(row, rowIndex) in tenantFamilyMembers" :key="rowIndex" ref="familyMemberFormRef">
+                      <VCol
+                        cols="12"
+                        md="2">
+                        <AppSelect
+                          v-model="row.type"
+                          label="Member Type"
+                          :rules="[requiredValidator]"
+                          :items="['Spouse', 'Child']"
+                      />
+                      </VCol>
+                      <VCol
+                        cols="12"
+                        md="2">
+                        <AppTextField
+                          v-model="row.name"
+                          label="Name"
+                          :rules="[requiredValidator]"
+                      />
+                      </VCol>
+                      <VCol
+                        cols="12"
+                        md="2">
+                        <AppTextField
+                          v-model="row.nationality"
+                          :items="nationalityList"
+                          label="Nationality"
+                          :rules="[requiredValidator]"
+                      />
+                      </VCol>
+                      <VCol
+                        cols="12"
+                        md="2">
+                        <AppTextField
+                          v-model="row.documentName"
+                          label="Document Name"
+                      />
+                      </VCol>
+                      <VCol
+                        cols="12"
+                        md="2">
+                        <label fontSize="10px">Document</label>
+                        <VFileInput
+                          label="Document"
+                          @change="(e) => {
+                            row.document = e.target.files[0]
+                          }"
+                      />
+                      </VCol>
+                      <VCol
+                        cols="12"
+                        md="2"
+                      >
+                        <VBtn
+                        size="36"
+                        color="warning"
+                        prepend-icon="tabler-trash"
+                        @click="deleteMember(rowIndex)"
+                        :style="{marginTop: '24px'}"
+                        />
+                      </VCol>
+                    </VRow>
+                  </VExpansionPanelText>
+                  </VExpansionPanel>
+                </VExpansionPanels>
+              </VCol>
+
+
+              <!-- <VCol
+                cols="12"
+                md="4"
+              >
                 <label>Doc</label>
                 <VFileInput
                   label="Id Proof document"
                   density="compact"
                   @change="getTenantDoc"
                 />
-              </VCol>
+              </VCol> -->
 
 
               <!-- 👉 Form Actions -->

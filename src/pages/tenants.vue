@@ -1,12 +1,9 @@
 <script setup>
 import { avatarText } from '@/@core/utils/formatters'
-import { refreshUserLogin, populatePropertiesList } from '@/common/reusing_functions'
+import { refreshUserLogin } from '@/common/reusing_functions'
 import router from '@/router'
 import CardStatisticsGeneratedLeads from '@/views/pages/cards/card-statistics/CardStatisticsGeneratedLeads.vue'
 import axios from '@axios'
-import {
-requiredValidator,
-} from '@validators'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useTheme } from 'vuetify'
 import { VDataTable } from 'vuetify/labs/VDataTable'
@@ -570,10 +567,10 @@ function getFilteredTenants() {
 
 
 onMounted(() => {
-  getTenantsData()
-  populatePropertiesList().then((response) => {
-    fetchedPropertiesList.value = response.data.propertiesData
-  })
+  // getTenantsData()
+  // populatePropertiesList().then((response) => {
+  //   fetchedPropertiesList.value = response.data.propertiesData
+  // })
 })
 </script>
 
