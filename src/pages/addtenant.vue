@@ -21,14 +21,18 @@ const accountData = {
 }
 
 const tenantRefForm = ref()
-const familyMemberFormRef = ref()
+const nationalIdExpireRef = ref()
+const passportExpRef = ref()
 const addTenantFormImg = ref(avatar1)
+const isFamilyDocsDialogVisible = ref(false)
 const refInputEl = ref()
 const addTenantAlertSnackbar = ref({ show: false, message: null, color: null })
 const accordCheck = ref(true)
 const memberType = ref(null)
 const tenantFamilyMembers = ref([])
 const accordianModel = ref([])
+const familyMemberDocs = ref([])
+const memberIndex = ref()
 const tenantDetails = ref({
   "firstName": '',
   "lastName": '',
@@ -42,12 +46,15 @@ const tenantDetails = ref({
   "maritalStatus": '',
   "tenantImage": null,
   "tenantIdDocument": null,
+  "passportDocument": null,
   "status": ''
 })
 
 const resetForm = () => {
   addTenantFormImg.value = avatar1
   tenantRefForm?.value.reset()
+  nationalIdExpireRef?.value.reset()
+  passportExpRef?.value.reset()
 }
 
 const changeAvatar = file => {
@@ -292,12 +299,11 @@ const nationalityList = [
 const addMembers = () => {
   if(memberType.value){
     tenantFamilyMembers.value.push({
-    "type": memberType,
+    "type": memberType.value,
     "name" : '',
     "nationality": '',
     "passportNo": '',
-    "documentName": null,
-    "document": null,
+    "documents": [],
   })
     memberType.value = null
   }
@@ -324,21 +330,40 @@ const openMemberPanel = () => {
   }
 }
 
-const addFamilyDocs = (e, index) => {
-  let record = tenantFamilyMembers.value[index]
-  record.document = e.target.files[0]
+const afterTenantCreation = () => {
+  tenantFamilyMembers.value.forEach((ele, index) => {
+    tenantFamilyMembers.value.splice(index, 1)
+  })
 }
+
 
 watchEffect(openMemberPanel)
 
-const createTenant = () => {
+const checkFamilyData = () => {
+  let checkVar = false
+  tenantFamilyMembers.value.forEach((ele) => {
+    if(ele.name === "" || !ele.name || ele.name === null){
+      checkVar = true
+    }
+    if(ele.passportNo === "" || !ele.passportNo || ele.passportNo === null){
+      checkVar = true
+    }
+    if(ele.nationality === "" || !ele.nationality || ele.nationality === null){
+      checkVar = true
+    }
 
-  tenantRefForm.value?.validate().then(({ valid }) => {
-  
-    if (valid) {
+  })
 
+  if(checkVar){
+    return false
+  }
+  else{
+    return true
+  }
+}
 
-        if(!sessionStorage.getItem("accessToken")){
+const tenantApiCall = () => {
+  if(!sessionStorage.getItem("accessToken")){
         router.push('/login')
 
         return 
@@ -373,7 +398,13 @@ const createTenant = () => {
           addTenantAlertSnackbar.value.message = response.data.message
           addTenantAlertSnackbar.value.color = 'success'
           addTenantAlertSnackbar.value.show = true
-          resetForm()
+          if(tenantDetails.value.maritalStatus === "Married"){
+            afterTenantCreation()
+            resetForm()
+          }
+          else{
+            resetForm()
+          }
         }
       }).catch(error => {
         addTenantAlertSnackbar.value.message = error.response.data.message
@@ -383,17 +414,75 @@ const createTenant = () => {
           refreshUserLogin()
         }
       })
-          
-
-
-
-
-    }
-  })
 }
 
 
-const getTenantDoc = e =>{
+const createTenant = () => {
+
+
+  if(tenantDetails.value.maritalStatus === "Married"){
+
+    tenantRefForm.value?.validate().then(({ valid }) => {
+        if(valid){
+          let res = checkFamilyData()
+          if(!res){
+            addTenantAlertSnackbar.value.message = "Kindly member details!"
+            addTenantAlertSnackbar.value.color = 'warning'
+            addTenantAlertSnackbar.value.show = true
+            return
+          }
+          else{
+            tenantApiCall();
+          }
+        }
+      })
+  }
+  else{
+    tenantRefForm.value?.validate().then(({ valid }) => {  
+    if (valid) {
+      tenantApiCall()
+    }
+  })
+  }
+}
+
+const tenantFamilyDocs = (index) => {
+  isFamilyDocsDialogVisible.value = true
+  memberIndex.value = index
+}
+
+const addDocToMemberArray = () => {
+  let obj = tenantFamilyMembers.value[memberIndex.value]
+  obj.documents = familyMemberDocs.value
+  console.log(familyMemberDocs.value, obj)
+}
+
+const deleteDocRecord = (index) => {
+  familyMemberDocs.value.splice(index, 1)
+}
+
+const insertDocumentRecord = () => {
+  familyMemberDocs.value.push({
+    "name": '',
+    "document": null
+  })
+}
+
+const downloadMemberDoc = (index) => {
+  let obj = familyMemberDocs.value[index]
+  const link = document.createElement('a');
+  const downloadUrl = window.URL.createObjectURL(new Blob([obj.document]))
+  link.href = downloadUrl;
+  link.setAttribute('download', obj.document.name); //or any other extension
+  document.body.appendChild(link);
+  link.click();
+}
+
+const getNationalIdDoc = e =>{
+  tenantDetails.value.tenantIdDocument = e.target.files[0]
+}
+
+const getPassportDoc = e =>{
   tenantDetails.value.tenantIdDocument = e.target.files[0]
 }
 </script>
@@ -552,6 +641,18 @@ const getTenantDoc = e =>{
                 cols="12"
                 md="4"
               >
+                <AppSelect
+                  v-model="tenantDetails.maritalStatus"
+                  label="Marital Status"
+                  :items="['Single', 'Married']"
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4"
+              >
                 <AppTextField
                   v-model="tenantDetails.nationalId"
                   label="National Id No."
@@ -564,9 +665,20 @@ const getTenantDoc = e =>{
                 md="4"
               >
                 <AppDateTimePicker
+                  ref="nationalIdExpireRef"
                   v-model="tenantDetails.nationalIdExpire"
                   label="National Id Expire Date."
-                  :rules="[requiredValidator]"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4">
+                <label>National Id Document</label>
+                <VFileInput
+                  accept="application/*"
+                  label="Document"
+                  @change="getNationalIdDoc"
                 />
               </VCol>
 
@@ -578,7 +690,6 @@ const getTenantDoc = e =>{
                 <AppTextField
                   v-model="tenantDetails.passportNo"
                   label="Passport No."
-                  :rules="[requiredValidator]"
                 />
               </VCol>
               
@@ -587,33 +698,24 @@ const getTenantDoc = e =>{
                 md="4"
               >
                 <AppDateTimePicker
+                  ref="passportExpRef"
                   v-model="tenantDetails.passportExpireDate"
                   label="Passport Expire Date"
-                  :rules="[requiredValidator]"
                 />
               </VCol>
 
               <VCol
                 cols="12"
                 md="4">
-                <label>National Id Document</label>
+                <label>Passport Document</label>
                 <VFileInput
+                  accept="application/*"
                   label="Document"
-                  @change="getTenantDoc"
+                  @change="getPassportDoc"
                 />
               </VCol>
 
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppSelect
-                  v-model="tenantDetails.maritalStatus"
-                  label="Marital Status"
-                  :items="['Single', 'Married']"
-                  :rules="[requiredValidator]"
-                />
-              </VCol>
+
 
               
               <VCol
@@ -635,21 +737,14 @@ const getTenantDoc = e =>{
                           v-model="memberType"
                           label="Member Type"
                           :items="['Spouse', 'Child']"
+                          @change="addMembers"
                       />
                       </VCol>
-                      <VCol
-                      cols="12"
-                      md="4">
-                        <VBtn
-                          prepend-icon="tabler-plus"
-                          @click="addMembers"
-                          :style="{marginTop: '27px'}"
-                          >Add
-                        </VBtn>
-                      </VCol>
+
 
                     </VRow>
-                    <VRow v-for="(row, rowIndex) in tenantFamilyMembers" :key="rowIndex" ref="familyMemberFormRef">
+                    <VForm>
+                    <VRow v-for="(row, rowIndex) in tenantFamilyMembers" :key="rowIndex">
 
                       <VCol
                         cols="12"
@@ -658,6 +753,7 @@ const getTenantDoc = e =>{
                           v-model="row.name"
                           label="Name"
                           :rules="[requiredValidator]"
+                          required
                       />
                       </VCol>
                       <VCol
@@ -681,36 +777,25 @@ const getTenantDoc = e =>{
                       </VCol>
                       <VCol
                         cols="12"
-                        md="2">
-                        <AppTextField
-                          v-model="row.documentName"
-                          label="Document Name"
-                      />
-                      </VCol>
-                      <VCol
-                        cols="12"
-                        md="2">
-                        <label fontSize="10px">Document</label>
-                        <VFileInput
-                          label="Document"
-                          @change="(e) => {
-                            row.document = e.target.files[0]
-                          }"
-                      />
-                      </VCol>
-                      <VCol
-                        cols="12"
                         md="2"
                       >
                         <VBtn
-                        size="20"
+                        size="36"
+                        color="primary"
+                        prepend-icon="tabler-files"
+                        @click="tenantFamilyDocs(rowIndex)"
+                        :style="{marginTop: '24px'}"
+                        />
+                        <VBtn
+                        size="36"
                         color="warning"
                         prepend-icon="tabler-trash"
                         @click="deleteMember(rowIndex)"
-                        :style="{marginTop: '24px'}"
+                        :style="{marginTop: '24px', marginLeft: '10px'}"
                         />
                       </VCol>
                     </VRow>
+                  </VForm>
                   </VExpansionPanelText>
                   </VExpansionPanel>
                 </VExpansionPanels>
@@ -754,6 +839,84 @@ const getTenantDoc = e =>{
       </VCard>
     </VCol>
   </VRow>
+  
+  <VDialog
+    v-model="isFamilyDocsDialogVisible"
+    max-width="600"
+  >
+
+    <!-- Dialog close btn -->
+    <DialogCloseBtn @click="isFamilyDocsDialogVisible = !isFamilyDocsDialogVisible" />
+
+    <!-- Dialog Content -->
+    <VCard title="Member documents">
+        <VBtn
+        size="28"
+        color="success"
+        prepend-icon="tabler-plus"
+        :style="{marginLeft: 'auto', marginTop:'-10px', marginRight:'35px'}"
+        @click="insertDocumentRecord">
+        </VBtn>
+      <VCardText>
+        <VRow v-for="(doc, index) in familyMemberDocs" :key="index">
+          <VCol
+            cols="12"
+            sm="6"
+            md="4"
+          >
+            <AppTextField
+              v-model="doc.name"
+              label="Document Name"
+            />
+          </VCol>
+          <VCol
+            cols="12"
+            sm="6"
+            md="4"
+          >
+          <label>Document</label>
+            <VFileInput
+              label="select"
+              accept="application/*"
+              @change="(e) => {
+                doc.document = e.target.files[0]
+              }"
+            />
+          </VCol>
+
+          <VCol
+          cols="12"
+          md="4"
+          sm="6"
+          >
+          <VBtn
+          size="36"
+          color="success"
+          prepend-icon="tabler-download"
+          @click="downloadMemberDoc(index)"
+          :style="{marginTop: '24px'}"
+          >
+          </VBtn>
+          <VBtn
+          size="36"
+          color="warning"
+          prepend-icon="tabler-trash"
+          @click="deleteDocRecord(index)"
+          :style="{marginTop: '24px', marginLeft: '10px'}"
+          />
+        </VCol>
+        </VRow>
+      </VCardText>
+
+      <VCardText class="d-flex justify-end flex-wrap gap-3">
+        <VBtn
+        @click="addDocToMemberArray">
+          Add
+        </VBtn>
+      </VCardText>
+    </VCard>
+  </VDialog>
+
 
   <VSnackbar
     v-model="addTenantAlertSnackbar.show"
