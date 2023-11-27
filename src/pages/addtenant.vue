@@ -307,13 +307,11 @@ const addMembers = () => {
   })
     memberType.value = null
   }
-  else{
-    addTenantAlertSnackbar.value.message = "Kindly select member type first!"
-    addTenantAlertSnackbar.value.color = 'warning'
-    addTenantAlertSnackbar.value.show = true
-  }
 
 }
+
+watchEffect(addMembers)
+
 
 const deleteMember = (index) => {
   tenantFamilyMembers.value.splice(index, 1)
@@ -380,7 +378,9 @@ const tenantApiCall = () => {
       formData.append('tenantData', JSON.stringify(tenantData))
       
       tenantFamilyMembers.value.forEach((ele)=>{
-        formData.append(ele.documentName, ele.document)
+        ele.documents.forEach((doc) => {
+          formData.append(doc.name, doc.document)
+        })
       })
       if(addTenantFormImg.value !== avatar1){
         formData.append('tenantImage', tenantDetails.value.tenantImage)
@@ -449,12 +449,19 @@ const createTenant = () => {
 const tenantFamilyDocs = (index) => {
   isFamilyDocsDialogVisible.value = true
   memberIndex.value = index
+  familyMemberDocs.value = tenantFamilyMembers.value[index].documents
 }
 
-const addDocToMemberArray = () => {
-  let obj = tenantFamilyMembers.value[memberIndex.value]
-  obj.documents = familyMemberDocs.value
-  console.log(familyMemberDocs.value, obj)
+const addDocToMemberArray = async () => {
+  let task = new Promise((resolve, reject) => {
+    let obj = tenantFamilyMembers.value[memberIndex.value]
+    obj.documents = familyMemberDocs.value
+    console.log(familyMemberDocs.value, obj)
+    resolve(true)
+  })
+  await task;
+  familyMemberDocs.value = []
+  isFamilyDocsDialogVisible.value = false
 }
 
 const deleteDocRecord = (index) => {
@@ -483,7 +490,7 @@ const getNationalIdDoc = e =>{
 }
 
 const getPassportDoc = e =>{
-  tenantDetails.value.tenantIdDocument = e.target.files[0]
+  tenantDetails.value.passportDocument = e.target.files[0]
 }
 </script>
 
@@ -559,7 +566,7 @@ const getPassportDoc = e =>{
               >
                 <AppTextField
                   v-model="tenantDetails.firstName"
-                  label="First Name"
+                  label="First Name*"
                   :rules="[requiredValidator]"
                 />
               </VCol>
@@ -571,7 +578,7 @@ const getPassportDoc = e =>{
               >
                 <AppTextField
                   v-model="tenantDetails.lastName"
-                  label="Last Name"
+                  label="Last Name*"
                   :rules="[requiredValidator]"
                 />
               </VCol>
@@ -583,7 +590,7 @@ const getPassportDoc = e =>{
               >
                 <AppTextField
                   v-model="tenantDetails.email"
-                  label="E-mail"
+                  label="E-mail*"
                   type="email"
                   :rules="[requiredValidator, emailValidator]"
                 />
@@ -596,7 +603,7 @@ const getPassportDoc = e =>{
               >
                 <AppSelect
                   v-model="tenantDetails.nationality"
-                  label="Nationality"
+                  label="Nationality*"
                   :items="nationalityList"
                   :rules="[requiredValidator]"
                 />
@@ -609,7 +616,7 @@ const getPassportDoc = e =>{
               >
                 <AppTextField
                   v-model="tenantDetails.contactNumber"
-                  label="Phone Number"
+                  label="Phone Number*"
                   :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
@@ -620,7 +627,7 @@ const getPassportDoc = e =>{
               >
                 <AppSelect
                   v-model="tenantDetails.status"
-                  label="Status"
+                  label="Status*"
                   :items="['Active', 'Inactive']"
                   :rules="[requiredValidator]"
                 />
@@ -632,7 +639,7 @@ const getPassportDoc = e =>{
               >
                 <AppTextField
                   v-model="tenantDetails.workAddress"
-                  label="Work Address"
+                  label="Work Address*"
                   :rules="[requiredValidator]"
                 />
               </VCol>
@@ -643,7 +650,7 @@ const getPassportDoc = e =>{
               >
                 <AppSelect
                   v-model="tenantDetails.maritalStatus"
-                  label="Marital Status"
+                  label="Marital Status*"
                   :items="['Single', 'Married']"
                   :rules="[requiredValidator]"
                 />
@@ -656,7 +663,6 @@ const getPassportDoc = e =>{
                 <AppTextField
                   v-model="tenantDetails.nationalId"
                   label="National Id No."
-                  :rules="[requiredValidator]"
                 />
               </VCol>
 
@@ -737,7 +743,6 @@ const getPassportDoc = e =>{
                           v-model="memberType"
                           label="Member Type"
                           :items="['Spouse', 'Child']"
-                          @change="addMembers"
                       />
                       </VCol>
 
