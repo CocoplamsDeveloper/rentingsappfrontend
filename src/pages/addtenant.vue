@@ -33,6 +33,7 @@ const tenantFamilyMembers = ref([])
 const accordianModel = ref([])
 const familyMemberDocs = ref([])
 const memberIndex = ref()
+const tenantFamilyRequiredDoc = ref([])
 const tenantDetails = ref({
   "firstName": '',
   "lastName": '',
@@ -53,8 +54,8 @@ const tenantDetails = ref({
 const resetForm = () => {
   addTenantFormImg.value = avatar1
   tenantRefForm?.value.reset()
-  nationalIdExpireRef?.value.reset()
-  passportExpRef?.value.reset()
+  tenantDetails.value.nationalIdExpire = ''
+  tenantDetails.value.passportExpireDate = ''
 }
 
 const changeAvatar = file => {
@@ -303,7 +304,13 @@ const addMembers = () => {
     "name" : '',
     "nationality": '',
     "passportNo": '',
-    "documents": [],
+    "documents": [
+    {
+      "name": '',
+      "document": null,
+      "expireDate": null
+    }
+    ],
   })
     memberType.value = null
   }
@@ -386,7 +393,10 @@ const tenantApiCall = () => {
         formData.append('tenantImage', tenantDetails.value.tenantImage)
       }
       if(tenantDetails.value.tenantIdDocument !== null){
-        formData.append('tenantDocument', tenantDetails.value.tenantIdDocument)
+        formData.append('tenantIdDocument', tenantDetails.value.tenantIdDocument)
+      }
+      if(tenantDetails.value.passportDocument !== null){
+        formData.append('passportDocument', tenantDetails.value.passportDocument)
       }
 
       axios.post("http://127.0.0.1:8000/prop-app/tenant/create", formData, {
@@ -419,7 +429,7 @@ const tenantApiCall = () => {
 
 const createTenant = () => {
 
-
+  console.log(tenantDetails.value, tenantFamilyMembers.value)
   if(tenantDetails.value.maritalStatus === "Married"){
 
     tenantRefForm.value?.validate().then(({ valid }) => {
@@ -449,7 +459,9 @@ const createTenant = () => {
 const tenantFamilyDocs = (index) => {
   isFamilyDocsDialogVisible.value = true
   memberIndex.value = index
-  familyMemberDocs.value = tenantFamilyMembers.value[index].documents
+  if(tenantFamilyMembers.value[index].documents.length > 0){
+    familyMemberDocs.value = tenantFamilyMembers.value[index].documents
+  }
 }
 
 const addDocToMemberArray = async () => {
@@ -471,7 +483,8 @@ const deleteDocRecord = (index) => {
 const insertDocumentRecord = () => {
   familyMemberDocs.value.push({
     "name": '',
-    "document": null
+    "document": null,
+    "expireDate": null
   })
 }
 
@@ -485,6 +498,24 @@ const downloadMemberDoc = (index) => {
   link.click();
 }
 
+const getRequiredDocs = () => {
+
+  let queryData = {
+    "userId" : sessionStorage.getItem("userId")
+  }
+
+  axios.get("http://127.0.0.1:8000/prop-app/required-doc/get", {
+    params: queryData,
+    headers: {
+      'Authorization': sessionStorage.getItem("accessToken")
+    }
+  }).then(response => {
+    if(response.status == 200){
+      tenantFamilyRequiredDoc.value = response.data.requiredDocs
+    }
+  })
+}
+
 const getNationalIdDoc = e =>{
   tenantDetails.value.tenantIdDocument = e.target.files[0]
 }
@@ -492,6 +523,10 @@ const getNationalIdDoc = e =>{
 const getPassportDoc = e =>{
   tenantDetails.value.passportDocument = e.target.files[0]
 }
+
+onMounted(()=>{
+  getRequiredDocs()
+})
 </script>
 
 <template>
@@ -847,14 +882,15 @@ const getPassportDoc = e =>{
   
   <VDialog
     v-model="isFamilyDocsDialogVisible"
-    max-width="600"
+    max-width="800"
+    persistent
   >
 
     <!-- Dialog close btn -->
     <DialogCloseBtn @click="isFamilyDocsDialogVisible = !isFamilyDocsDialogVisible" />
 
     <!-- Dialog Content -->
-    <VCard title="Member documents">
+    <VCard title="Members Documents">
         <VBtn
         size="28"
         color="success"
@@ -863,54 +899,76 @@ const getPassportDoc = e =>{
         @click="insertDocumentRecord">
         </VBtn>
       <VCardText>
-        <VRow v-for="(doc, index) in familyMemberDocs" :key="index">
-          <VCol
-            cols="12"
-            sm="6"
-            md="4"
-          >
-            <AppTextField
-              v-model="doc.name"
-              label="Document Name"
-            />
-          </VCol>
-          <VCol
-            cols="12"
-            sm="6"
-            md="4"
-          >
-          <label>Document</label>
-            <VFileInput
-              label="select"
-              accept="application/*"
-              @change="(e) => {
-                doc.document = e.target.files[0]
-              }"
-            />
-          </VCol>
+        <VExpansionPanels>
+          <VExpansionPanel
+          v-for="(doc, index) in familyMemberDocs" :key="index">
+          <VExpansionPanelTitle>
+          Document {{ index+1 }}
+          </VExpansionPanelTitle>
+          <VExpansionPanelText>
+            <VForm>
+            <VRow>
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppSelect
+                  v-model="doc.name"
+                  label="Document Name"
+                  :items="tenantFamilyRequiredDoc"
+                  item-title="name"
+                  item-value="name"
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppDateTimePicker
+                  v-model="doc.expireDate"
+                  label="Expire Date"
+                  :style="{position: 'fixed'}"
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="4"
+              >
+              <label>Document</label>
+                <VFileInput
+                  label="select"
+                  accept="application/*"
+                  @change="(e) => {
+                    doc.document = e.target.files[0]
+                  }"
+                />
+              </VCol>
 
-          <VCol
-          cols="12"
-          md="4"
-          sm="6"
-          >
-          <VBtn
-          size="36"
-          color="success"
-          prepend-icon="tabler-download"
-          @click="downloadMemberDoc(index)"
-          :style="{marginTop: '24px'}"
-          >
-          </VBtn>
-          <VBtn
-          size="36"
-          color="warning"
-          prepend-icon="tabler-trash"
-          @click="deleteDocRecord(index)"
-          :style="{marginTop: '24px', marginLeft: '10px'}"
-          />
-        </VCol>
-        </VRow>
+              <VCol
+              cols="12"
+              md="2"
+              >
+              <VBtn
+              size="36"
+              color="success"
+              prepend-icon="tabler-download"
+              @click="downloadMemberDoc(index)"
+              :style="{marginTop: '24px'}"
+              >
+              </VBtn>
+              <VBtn
+              size="36"
+              color="warning"
+              prepend-icon="tabler-trash"
+              @click="deleteDocRecord(index)"
+              :style="{marginTop: '24px', marginLeft: '10px'}"
+              />
+            </VCol>
+            </VRow>
+          </VForm>
+      </VExpansionPanelText>
+      </VExpansionPanel>
+    </VExpansionPanels>
       </VCardText>
 
       <VCardText class="d-flex justify-end flex-wrap gap-3">
