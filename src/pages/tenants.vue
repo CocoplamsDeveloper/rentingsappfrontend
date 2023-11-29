@@ -1,6 +1,6 @@
 <script setup>
 import { avatarText } from '@/@core/utils/formatters'
-import { refreshUserLogin } from '@/common/reusing_functions'
+import { populatePropertiesList, refreshUserLogin } from '@/common/reusing_functions'
 import router from '@/router'
 import CardStatisticsGeneratedLeads from '@/views/pages/cards/card-statistics/CardStatisticsGeneratedLeads.vue'
 import axios from '@axios'
@@ -341,35 +341,35 @@ const simpleStatisticsDemoCards = [
 const headers = [
   {
     title: 'NAME',
-    key: 'tenant.user_fullname',
+    key: 'tenant.name',
   },
   {
     title: 'Phone',
-    key: 'tenant.user_contact_number',
+    key: 'tenant.contact_number',
   },
   {
     title: 'Unit',
-    key: 'tenancy.unitName',
+    key: 'unit.unit_name',
   },
   {
     title: 'Unit Floor',
-    key: 'tenancy.unitFloor',
+    key: 'unit.unit_floor',
   },
   {
     title: 'Start Date',
-    key: 'tenancy.details.tenancy_start_date',
+    key: 'tenant.tenancy_start',
   },
   {
     title: 'End Date',
-    key: 'tenancy.details.tenancy_end_date',
+    key: 'tenant.tenancy_end',
   },
   {
     title: 'Rent',
-    key: 'tenancy.details.monthly_rent',
+    key: 'tenant.rent',
   },
   {
     title: 'STATUS',
-    key: 'tenant.user_status',
+    key: 'status',
   },
   {
     title: 'ACTIONS',
@@ -564,13 +564,24 @@ function getFilteredTenants() {
 
 }
 
+const resolveTenantImage = (documents) => {
+  let image = null
+  documents.forEach((ele) => {
+    if(ele.document_name == "tenant image"){
+      image = ele.image
+    }
+  })
+
+  return image
+}
+
 
 
 onMounted(() => {
-  // getTenantsData()
-  // populatePropertiesList().then((response) => {
-  //   fetchedPropertiesList.value = response.data.propertiesData
-  // })
+  getTenantsData()
+  populatePropertiesList().then((response) => {
+    fetchedPropertiesList.value = response.data.propertiesData
+  })
 })
 </script>
 
@@ -707,22 +718,22 @@ onMounted(() => {
             :items="fetchedTenantsList"
             :items-per-page="10"
           >
-            <template #item.tenant.user_fullname="{ item }">
+            <template #item.tenant.name="{ item }">
               <div class="d-flex align-center">
                 <!-- avatar -->
                 
                 
                 <VAvatar
                   size="32"
-                  :color="item.raw.tenant.user_image ? '' : 'primary'"
-                  :class="item.raw.tenant.user_image ? '' : 'v-avatar-light-bg primary--text'"
-                  :variant="!item.raw.tenant.user_image ? 'tonal' : undefined"
+                  :color="item.raw.documents ? '' : 'primary'"
+                  :class="item.raw.documents ? '' : 'v-avatar-light-bg primary--text'"
+                  :variant="!item.raw.tenant.name ? 'tonal' : undefined"
                 >
                   <VImg
-                    v-if="item.raw.tenant.user_image"
-                    :src="'http://127.0.0.1:8000/media/'+item.raw.tenant.user_image"
+                    v-if="item.raw.documents"
+                    :src="'http://127.0.0.1:8000/media/'+resolveTenantImage(item.raw.documents)"
                   />
-                  <span v-else>{{ avatarText(item.raw.tenant.user_fullname) }}</span>
+                  <span v-else>{{ avatarText(item.raw.tenant.name) }}</span>
                 </VAvatar>  
                
                
@@ -730,9 +741,9 @@ onMounted(() => {
                 <div class="d-flex flex-column ms-3">
                   <RouterLink 
                     class="d-block font-weight-medium text--primary text-truncate"
-                    :to="{ name: 'viewtenant-id', params: { id: item.raw.tenant.user_id } }"
+                    :to="{ name: 'viewtenant-id', params: { id: item.raw.tenant.tenant_id } }"
                   >
-                    {{ item.raw.tenant.user_fullname }}
+                    {{ item.raw.tenant.name }}
                   </RouterLink>
                   <!-- <small>{{ item.raw.post }}</small> -->
                 </div>
