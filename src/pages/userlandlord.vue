@@ -212,7 +212,8 @@ axios.get("http://localhost:8000/prop-app/landlord-page/stats", {
   params: queryData,
   headers: {
     'Authorization' : sessionStorage.getItem('accessToken')
-  }
+  },
+  withCredentials:true
 }).then((response) => {
   if(response.status == 200){
     let data = response.data.pageData

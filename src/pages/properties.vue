@@ -359,7 +359,8 @@ function get_page_stats(){
     params: queryData,
     headers: {
       'Authorization': sessionStorage.getItem("accessToken")
-    }
+    },
+    withCredentials: true
   }).then(response => {
     console.log(response)
     if(response.status == 200){
