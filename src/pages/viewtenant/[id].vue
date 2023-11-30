@@ -1,6 +1,5 @@
 
 <script setup>
-import { refreshUserLogin } from '@/common/reusing_functions'
 import TenantBioPanel from '@/views/apps/tenant/view/TenantBioPanel.vue'
 import TenantTabBillingsPlans from '@/views/apps/tenant/view/TenantTabBillingsPlans.vue'
 import TenantTabNotifications from '@/views/apps/tenant/view/TenantTabNotifications.vue'
@@ -47,7 +46,8 @@ const fetchTenant = item => {
 
     return 
   }
-  axios.get("https://api.rentings.me/prop-app/tenant/"+item, {
+  console.log(item)
+  axios.get("http://127.0.0.1:8000/prop-app/tenant/"+item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),

@@ -146,10 +146,10 @@ const chartOptions = computed(() => {
       <div class="d-flex flex-column">
         <div class="mb-auto">
           <h5 class="text-h5 text-no-wrap mb-2">
-            Revenue Growth
+            Payments
           </h5>
           <p class="mb-0 text-sm">
-            Weekly Report
+            Last 2 Months
           </p>
         </div>
 

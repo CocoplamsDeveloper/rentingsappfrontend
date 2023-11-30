@@ -3,12 +3,11 @@
 
 <script setup>
 import { avatarText } from '@/@core/utils/formatters'
-import { integerValidator, requiredValidator } from '@/@core/utils/validators'
 import { refreshUserLogin } from '@/common/reusing_functions'
 
 import router from '@/router'
 
-// import AddNewPropertyDrawer from '@/views/apps/user/list/AddNewPropertyDrawer.vue'
+import PropertyEditDrawer from '@/views/apps/property/PropertyEditDrawer.vue'
 import { useUserListStore } from '@/views/apps/user/useUserListStore'
 import CardStatisticsSalesOverview from '@/views/pages/cards/card-statistics/CardStatisticsSalesOverview.vue'
 import axios from '@axios'
@@ -17,7 +16,7 @@ import { VDataTable } from 'vuetify/labs/VDataTable'
  
 
 const userListStore = useUserListStore()
-const searchQuery = ref('')
+const propertySearchQuery = ref()
 const selectedRole = ref()
 const selectedPlan = ref()
 const selectedStatus = ref()
@@ -25,11 +24,14 @@ const totalPage = ref(1)
 const totalUsers = ref(0)
 const fetchedPropertiesList = ref([])
 const propPageAlertSnackbar = ref({ show: false, message: null, color: null })
-const propertyEditDialog = ref(false)
-const statusToggleSwitch = ref(true)
-const propertyEditFormImage = ref()
-const updatedImageFile = ref()
-const imageUpdateField = ref()
+const totalProperties = ref()
+const totalUnits = ref()
+const totalTenants = ref()
+const selectedItem = ref("one data")
+const isEditPropertyDrawerVisible = ref(false)
+const deletePropertyConfirm = ref(false)
+const deletePropertyDialogText = ref()
+const propertyToBeDeleted = ref()
 
 const countryList = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua & Deps", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Rep", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Congo {Democratic Rep}", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland {Republic}", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar, {Burma}", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
@@ -94,7 +96,7 @@ const editedItemObj = ref({
   "propertyStreet": '',
   "propertyBlock": '',
   "propertyStatus": '',
-  "propertyCivilId": '',
+  "propertyLicenseNo": '',
   "propertyImage": '',
   "propertyDescription": '',
   "propertySize": '',
@@ -102,64 +104,109 @@ const editedItemObj = ref({
   "propertyBuyValue": '',
   "propertySaleValue": '',
   "propertyCountry": '',
+  "propertyZipCode": '',
+  "propertyConstructionCost": '',
+  "propertyRentType": '',
+  "propertyFacilities": '',
+  "propertyFloors": ''
+
 })
  
 const editPropertyItem = item => {
-  if(!sessionStorage.getItem("accessToken")){
+  isEditPropertyDrawerVisible.value = true 
+  selectedItem.value = item
+  
+  if (!sessionStorage.getItem("accessToken")) {
     router.push('/login')
-
-    return 
+    
+    return
   }
-  axios.get("https://api.rentings.me/prop-app/property/"+item, {
+  axios.get("http://127.0.0.1:8000/prop-app/property/" + item, {
     params: { "userId": sessionStorage.getItem('userId') },
     headers: {
       "Authorization": sessionStorage.getItem("accessToken"),
     },
-  }).then(response => {
-    prefillPropertyEditForm(response.data.property_data[0])
-  }).catch(error => {
-    if(error.response.status === 401){
+  }).then((response) => {
+    prefillPropertyEditForm(response.data.property_data)
+  }).catch((error) => {
+    if (error.response.status === 401) {
       refreshUserLogin()
     }
   })
 
-  // editedIndex.value = userList.value.indexOf(item)
-  // editedItem.value = { ...item }
-  propertyEditDialog.value = true
+  // propertyEditDialog.value = true
 }
+
+// watch(selectedItem, (newValue, oldValue) => {
+//   console.log({ selectedItem: newValue })
+// })
 
 const prefillPropertyEditForm = property => {
   let currentProp = editedItemObj.value
-  currentProp.propertyId = property.property_id
-  currentProp.propertyName = property.property_name
-  currentProp.propertyType = property.property_type
-  currentProp.propertySize = property.area_insqmtrs
-  currentProp.propertyNumber = property.property_number
-  currentProp.propertyStatus = property.property_status
-  currentProp.propertyBuiltYear = property.built_year
-  currentProp.propertyCity = property.City
-  currentProp.propertyStreet = property.Street
-  currentProp.propertyBlock = property.Block
-  currentProp.propertyCivilId = property.property_civil_id
-  currentProp.propertyDescription = property.property_description
-  currentProp.propertyImage = property.property_image
-  currentProp.propertySaleValue = property.selling_price
-  currentProp.propertyBuyValue = property.buying_price
-  currentProp.propertyCountry = property.governate
+  let details = property.details
+  currentProp.propertyId = property.propertyId
+  currentProp.propertyName = details.property_name
+  currentProp.propertyType = details.property_type
+  currentProp.propertySize = details.area_insqmtrs
+  currentProp.propertyNumber = details.property_number
+  currentProp.propertyStatus = property.status
+  currentProp.propertyBuiltYear = details.built_year
+  currentProp.propertyCity = details.City
+  currentProp.propertyStreet = details.Street
+  currentProp.propertyBlock = details.Block
+  currentProp.propertyLicenseNo = details.property_civil_id
+  currentProp.propertyDescription = details.property_description
+  currentProp.propertySaleValue = details.selling_price
+  currentProp.propertyBuyValue = details.buying_price
+  currentProp.propertyCountry = details.governate
+  currentProp.propertyZipCode = details.zip_code
+  currentProp.propertyConstructionCost = details.construction_cost
+  currentProp.propertyRentType = details.rentType
+  currentProp.propertyFacilities = details.facilities_available
+  currentProp.propertyFloors = details.floors
+  property.documents.forEach((ele)=>{
+    if(ele.document_name === "property image")
+    currentProp.propertyImage = ele.image
+  })
 
-  if(property.property_status === "Inactive"){
-    statusToggleSwitch.value = false
-  }
-  else{
-    statusToggleSwitch.value = true
-  }
-  propertyEditFormImage.value ='https://api.rentings.me/media/'+property.property_image
 }
 
-const deleteItem = item => {
-  editedIndex.value = userList.value.indexOf(item)
-  editedItem.value = { ...item }
-  deleteDialog.value = true
+const deletePropertyItem = item => {
+
+  fetchedPropertiesList.value.forEach((ele) => {
+    if(ele.propertyId == item){
+      deletePropertyDialogText.value = "Are you sure you want to delete "+ele.details.property_name+ " Property"
+    }
+  })
+  propertyToBeDeleted.value = item
+  deletePropertyConfirm.value = true
+}
+
+const deletePropertyApi = () => {
+
+  let queryData = {
+    "userId" : sessionStorage.getItem("userId"),
+    "propertyId": propertyToBeDeleted.value
+  }
+  axios.delete("http://localhost:8000/prop-app/property/delete", {
+    params: queryData,
+    headers: {
+      'Authorization' : sessionStorage.getItem("accessToken")
+    }
+  }).then((response) => {
+    if(response.status == 200){
+      deletePropertyConfirm.value = false
+      propPageAlertSnackbar.message = response.data.message
+      propPageAlertSnackbar.color = "success"
+      propPageAlertSnackbar.show = true
+      getAllProperties()
+    }
+  }).catch((error) => {
+    if(error.response.status == 403){
+      refreshUserLogin()
+    }
+  })
+
 }
  
 const resolveStatusVariant = stat => {
@@ -191,7 +238,7 @@ const userListMeta = [
     color: 'primary',
 
     // title: 'Properties',
-    stats: '10',
+    stats: totalProperties,
     subtitle: 'Properties',
   },
   {
@@ -199,8 +246,8 @@ const userListMeta = [
     color: 'primary',
 
     // title: 'Properties',
-    stats: '89',
-    subtitle: 'Total Units',
+    stats: totalUnits,
+    subtitle: 'Units',
   },
   {
     icon: 'tabler-user-check',
@@ -235,29 +282,8 @@ const userListMeta = [
   // },
 ]
 
-function updatedImageUpload(e){
-
-  // console.log(editedItemObj.value.propertyImage, e.target.files[0])
-
-  let img = e.target.files[0]
-  let imgSize = img/1000
-  if(imgSize > 2048){
-    propPageAlertSnackbar.value.message = "Image size should be less then 2MB"
-    propPageAlertSnackbar.value.color = "error"
-    propPageAlertSnackbar.value.show = true
-    propertyEditFormImage.value = 'https://api.rentings.me/media/'+editedItemObj.value.propertyImage
-    imageUpdateField.value?.reset()
-
-    return
-  }
-  propertyEditFormImage.value = URL.createObjectURL(e.target.files[0])
-  updatedImageFile.value = e.target.files[0]
-}
 
 
-function imageFieldChecker(){
-  propertyEditFormImage.value = 'https://api.rentings.me/media/'+editedItemObj.value.propertyImage
-}
 
 function goToAddPage(){
   router.push("/add-property")
@@ -274,13 +300,12 @@ function getAllProperties(){
     return 
   }
 
-  axios.get("https://api.rentings.me/prop-app/alllandlord/props", {
+  axios.get("http://127.0.0.1:8000/prop-app/alllandlord/props", {
     params: queryData,
     headers: {
       'Authorization': sessionStorage.getItem("accessToken"),
     }, 
   }).then(response => {
-    console.log(response)
     fetchedPropertiesList.value = response.data.propertiesData
   }).catch(error => {
     if(error.response.status === 401){
@@ -289,69 +314,72 @@ function getAllProperties(){
   })
 }
 
-function updateProperty(property){
-
-  property = JSON.parse(property)
-  let propertyUpdatedStatus = null
-  if(statusToggleSwitch.value){
-    propertyUpdatedStatus = "Active"
-  }
-  else{
-    propertyUpdatedStatus = "Inactive"
-  }
-
-  let updatedProperty = {
-    "propertyId": property.propertyId,
-    "propertyName": property.propertyName,
-    "governateName": property.propertyCountry,
-    "propertyCity": property.propertyCity,
-    "propertyStreet": property.propertyStreet,
-    "propertyBlock": property.propertyBlock,
-    "propertyNumber": property.propertyNumber,
-    "propertyBuiltYear": property.propertyBuiltYear,
-    "propertyType": property.propertyType,
-    "propertyStatus": propertyUpdatedStatus,
-    "propertySize": property.propertySize,
-    "propertySaleValue": property.propertySaleValue,
-    "propertyBuyValue": property.propertyBuyValue,
-    "propertyCivilId": property.propertyCivilId,
-    "propertyDescription": property.propertyDescription,
-  }
-  const formData = new FormData()
-
-  formData.append('userId', sessionStorage.getItem('userId'))
-  formData.append('data', JSON.stringify(updatedProperty))
-  
-  let imgstr = propertyEditFormImage.value.split("media/")
-  imgstr = imgstr[1]
-  if(imgstr !== property.propertyImage){
-    formData.append('updatedImage', updatedImageFile.value)
-  }
-
-  axios.post('https://api.rentings.me/prop-app/property/update', formData, {
-    headers: {
-      'Authorization': sessionStorage.getItem("AccessToken"),  
-    },
-
-  }).then(response => {
-    propPageAlertSnackbar.value.message = response.data.message
-    propPageAlertSnackbar.value.color = "success"
-    propPageAlertSnackbar.value.show = true
-    propertyEditDialog.value = false
-    getAllProperties()
-  }).catch(error => {
-    propPageAlertSnackbar.value.message = error.response.data.message
-    propPageAlertSnackbar.value.color = "error"
-    propPageAlertSnackbar.value.show = true
-    if(error.response.status === 401){
-      refreshUserLogin()
+const resolvePropertyImage = (documents) => {
+  let image = null
+  documents.forEach((ele) =>{
+    if(ele.document_name === "property image"){
+      image = ele.image
     }
+  })
+  return image
+}
+
+
+
+function propertySearchResults(){
+    if(propertySearchQuery.value !== null || propertySearchQuery.value !== ''){
+
+      let queryData = {
+        "userId": sessionStorage.getItem("userId"),
+        "searchParam" : propertySearchQuery.value
+      }
+
+      axios.get("http://127.0.0.1:8000/prop-app/property/search", {
+        params: queryData,
+        headers: {
+          'Authorization' : sessionStorage.getItem("accessToken")
+        }
+      }).then((response) => {
+        fetchedPropertiesList.value = response.data.result
+      }).catch((error) => {
+        if(error.response.status == 403){
+          refreshUserLogin()
+        }
+      })
+    }
+}
+
+function get_page_stats(){
+
+  let queryData = {
+    "userId" : sessionStorage.getItem("userId")
+  }
+
+  return axios.get("http://127.0.0.1:8000/prop-app/property/stats", {
+    params: queryData,
+    headers: {
+      'Authorization': sessionStorage.getItem("accessToken")
+    },
+    withCredentials: true
+  }).then(response => {
+    console.log(response)
+    if(response.status == 200){
+      let data = response.data
+      totalProperties.value = data.properties
+      totalUnits.value = data.units
+      totalTenants.value = data.tenants
+    }
+  }).catch(error => {
+    if(error.response.status == 403){
+          refreshUserLogin()
+        }
   })
 }
 
 
 onMounted(() => {
   getAllProperties()
+  get_page_stats()
 })
 </script>
  
@@ -391,12 +419,12 @@ onMounted(() => {
         <CardStatisticsSalesOverview />
       </VCol>
       <VCol cols="12">
-        <VCard title="Search Filter">
+        <VCard title="Properties">
           <!-- 👉 Filters -->
-          <VCardText>
-            <VRow>
+          <!-- <VCardText>
+            <VRow> -->
               <!-- 👉 Select Role -->
-              <VCol
+              <!-- <VCol
                 cols="12"
                 sm="4"
               >
@@ -407,9 +435,9 @@ onMounted(() => {
                   clearable
                   clear-icon="tabler-x"
                 />
-              </VCol>
+              </VCol> -->
               <!-- 👉 Select Plan -->
-              <VCol
+              <!-- <VCol
                 cols="12"
                 sm="4"
               >
@@ -420,9 +448,9 @@ onMounted(() => {
                   clearable
                   clear-icon="tabler-x"
                 />
-              </VCol>
+              </VCol> -->
               <!-- 👉 Select Status -->
-              <VCol
+              <!-- <VCol
                 cols="12"
                 sm="4"
               >
@@ -433,14 +461,14 @@ onMounted(() => {
                   clearable
                   clear-icon="tabler-x"
                 />
-              </VCol>
-            </VRow>
-          </VCardText>
+              </VCol> -->
+            <!-- </VRow>
+          </VCardText> -->
  
           <VDivider />
  
           <VCardText class="d-flex flex-wrap py-4 gap-4">
-            <div class="me-3 d-flex gap-3">
+            <!-- <div class="me-3 d-flex gap-3">
               <AppSelect
                 :model-value="options.itemsPerPage"
                 :items="[
@@ -453,26 +481,30 @@ onMounted(() => {
                 style="width: 6.25rem;"
                 @update:model-value="options.itemsPerPage = parseInt($event, 10)"
               />
-            </div>
-            <VSpacer />
- 
-            <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
-              <!-- 👉 Search  -->
-              <div style="inline-size: 10rem;">
+            </div> -->
+
+            <div style="inline-size: 15rem;">
                 <AppTextField
-                  v-model="searchQuery"
+                  v-model="propertySearchQuery"
                   placeholder="Search"
                   density="compact"
+                  append-inner-icon="tabler-search"
+                  @keyup.enter="propertySearchResults"
                 />
               </div>
+
+            <VSpacer />
+ 
+            <div class="d-flex align-center flex-wrap gap-4">
+              <!-- 👉 Search  -->
+
  
               <!-- 👉 Export button -->
               <VBtn
-                variant="tonal"
-                color="secondary"
-                prepend-icon="tabler-screen-share"
+                size="38"
+                color="warning"
+                prepend-icon="tabler-download"
               >
-                Export
               </VBtn>
  
               <!-- 👉 Add user button -->
@@ -498,15 +530,15 @@ onMounted(() => {
                 <!-- avatar -->
                 <VAvatar
                   size="32"
-                  :color="item.raw.details.property_image ? '' : 'primary'"
-                  :class="item.raw.details.property_image ? '' : 'v-avatar-light-bg primary--text'"
-                  :variant="!item.raw.details.property_image ? 'tonal' : undefined"
+                  :color="item.raw.documents ? '' : 'primary'"
+                  :class="item.raw.documents ? '' : 'v-avatar-light-bg primary--text'"
+                  :variant="!item.raw.documents ? 'tonal' : undefined"
                 >
                   <VImg
-                    v-if="item.raw.details.property_image"
-                    :src="'https://api.rentings.me/media/'+item.raw.details.property_image"
+                    v-if="item.raw.documents"
+                    :src="'http://127.0.0.1:8000/media/'+resolvePropertyImage(item.raw.documents)"
                   />
-                  <span v-else>{{ avatarText(item.raw.details.property_name) }}</span>
+                  <span v-else>{{ avatarText(resolvePropertyImage(item.raw.documents)) }}</span>
                 </VAvatar>
 
                 <div class="d-flex flex-column ms-3">
@@ -524,20 +556,27 @@ onMounted(() => {
             <!-- status -->
             <template #item.details.property_status="{ item }">
               <VChip
-                :color="resolveStatusVariant(item.raw.details.property_status).color"
+                :color="resolveStatusVariant(item.raw.status).color"
                 size="small"
               >
-                {{ resolveStatusVariant(item.raw.details.property_status).text }}
+                {{ resolveStatusVariant(item.raw.status).text }}
               </VChip>
             </template>
 
             <!-- Actions -->
             <template #item.actions="{ item }">
               <div class="d-flex gap-1">
+                <!--
+                  <IconBtn @click="isEditPropertyDrawerVisible = true">
+                  <VIcon icon="mdi-pencil-outline" />
+                  </IconBtn>  
+                -->
+               
+                <!-- <IconBtn @click="editPropertyItem(item.raw.propertyId)"> -->
                 <IconBtn @click="editPropertyItem(item.raw.propertyId)">
                   <VIcon icon="mdi-pencil-outline" />
                 </IconBtn>
-                <IconBtn @click="deleteItem(item.raw.propertyId)">
+                <IconBtn @click="deletePropertyItem(item.raw.propertyId)">
                   <VIcon icon="mdi-delete-outline" />
                 </IconBtn>
               </div>
@@ -549,244 +588,28 @@ onMounted(() => {
     </vrow>
   </section>
 
-  <VDialog
-    v-model="propertyEditDialog"
-    max-width="600px"
+
+  <VDialog 
+    v-model="deletePropertyConfirm" 
+    :width="500"
   >
-    <VCard>
-      <VCardTitle>
-        <span :style="{marginTop:'5px'}">Edit Property</span>
-      </VCardTitle>
-
-      <VCol
-        cols="12"
-        sm="6"
-        md="8"
-      >
-        <VCard
-          width="490px"
-          :style="{marginLeft:'40px', marginRight:'15px' , marginTop:'-5px'}"
-        >
-          <VImg
-            :src="propertyEditFormImage"
-            alt="No image"
-            cover
-          />
-
-          <VCardItem>
-            <p>Click below to change/add Image</p>
-            <VFileInput
-              ref="imageUpdateField"
-              prepend-icon="tabler-camera"
-              label="Image"
-              accept="image/*"
-              density="compact"
-              clearable
-              @click:clear="imageFieldChecker"
-              @change="updatedImageUpload"
-            />
-          </VCardItem>
-        </VCard>
-      </VCol>
-
+    <DialogCloseBtn @click="deletePropertyConfirm = !deletePropertyConfirm" />
+    <VCard title="Delete">
       <VCardText>
-        {{ editedItemObj.property_name }}
-        <VContainer>
-          <VRow>
-            <!-- full_name -->
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertyName"
-                label="Property Name"
-                :rules="[requiredValidator]"
-              />
-            </VCol>
-
-            <!-- email -->
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertyNumber"
-                label="Property Number"
-                :rules="[requiredValidator]"
-              />
-            </VCol>
-
-            <!-- salary -->
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VSelect
-                v-model="editedItemObj.propertyType"
-                :items="propertyTypeOptions"
-                label="PropertyType"
-                :rules="[requiredValidator]"
-              />
-            </VCol>
-
-            <!-- age -->
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertySize"
-                label="Property Size"
-                :rules="[integerValidator,requiredValidator]"
-              />
-            </VCol>
-
-            <!-- start date -->
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertyCity"
-                label="PropertyCity"
-                :rules="[requiredValidator]"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertyBuiltYear"
-                label="Property Built Year"
-                :rules="[integerValidator,requiredValidator]"
-              />
-            </VCol>
-
-
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VSelect
-                v-model="editedItemObj.propertyCountry"
-                :items="countryList"
-                label="Country"
-                :rules="[requiredValidator]"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertyStreet"
-                label="Property Street"
-                :rules="[requiredValidator]"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertyBlock"
-                label="Property Block"
-                :rules="[requiredValidator]"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertyCivilId"
-                label="Civil/Registered No"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertySaleValue"
-                label="Property Sale Value"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VTextField
-                v-model="editedItemObj.propertyBuyValue"
-                label="Property Buy Value"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="6"
-              md="8"
-            >
-              <VTextField
-                v-model="editedItemObj.propertyDescription"
-                label="Property Description"
-              />
-            </VCol>
-
-            <!-- status -->
-            <VCol
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <VSwitch
-                v-model="statusToggleSwitch"
-                label="Property Status"
-              />
-            </VCol>
-          </VRow>
-        </VContainer>
+        {{ deletePropertyDialogText }}
       </VCardText>
 
-      <VCardActions>
-        <VSpacer />
-
-        <VBtn
-          color="error"
-          variant="outlined"
-          @click="propertyEditDialog=false"
+      <VCardText class="d-flex justify-end">
+        <VBtn 
+          :style="{marginRight:'10px'}"
+          @click="deletePropertyConfirm = false"
         >
-          Cancel
+          No
         </VBtn>
-
-        <VBtn
-          color="success"
-          variant="elevated"
-          @click="updateProperty(JSON.stringify(editedItemObj))"
-        >
-          Save
+        <VBtn @click="deletePropertyApi">
+          Yes
         </VBtn>
-      </VCardActions>
+      </VCardText>
     </VCard>
   </VDialog>
 
@@ -798,6 +621,11 @@ onMounted(() => {
   >
     {{ propPageAlertSnackbar.message }}
   </VSnackbar>
+  <PropertyEditDrawer
+    v-model:isDrawerOpen="isEditPropertyDrawerVisible"
+    :edited-item-obj="editedItemObj"
+    @get-all-properties="getAllProperties"
+  />
 </template>
  
  <style lang="scss">

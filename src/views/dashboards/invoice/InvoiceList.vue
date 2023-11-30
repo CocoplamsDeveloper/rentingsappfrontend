@@ -1,8 +1,6 @@
 <script setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref } from 'vue'
 
-import { paginationMeta } from '@/@fake-db/utils' // Import your paginationMeta function
-import { avatarText } from '@core/utils/formatters' // Import your avatarText function
 import { VDataTableServer } from 'vuetify/labs/VDataTable'
 
 import { useInvoiceStore } from '@/views/apps/invoice/useInvoiceStore'
@@ -12,7 +10,6 @@ const searchQuery = ref('')
 const dateRange = ref('')
 const selectedStatus = ref('')
 const totalInvoices = ref(0)
-const invoices = ref([])
 const selectedRows = ref([])
 
 const options = ref({
@@ -27,6 +24,229 @@ const isLoading = ref(false)
 const currentPage = ref(1)
 
 currentPage.value = options.value.page
+
+// Dummy data for the table
+const invoices = ref([
+  {
+    id: 5036,
+    issuedDate: '2023-11-19',
+    client: {
+      address: '78083 Laura Pines',
+      company: 'Richardson and Sons LLC',
+      companyEmail: 'pwillis@cross.org',
+      country: 'Bhutan',
+      contact: '(687) 660-2473',
+      name: 'Andrew Burns',
+    },
+    service: 'Unlimited Extended License',
+    total: 3171,
+    avatar: '/src/assets/images/avatars/avatar-3.png',
+    invoiceStatus: 'Paid',
+    balance: -205,
+    dueDate: '2023-11-25',
+  },
+  {
+    id: 5038,
+    issuedDate: '2023-11-19',
+    client: {
+      address: '123 Main Street',
+      company: 'ABC Corporation',
+      companyEmail: 'jdoe@abc.com',
+      country: 'USA',
+      contact: '(123) 456-7890',
+      name: 'John Doe',
+    },
+    service: 'Software License',
+    total: 1500,
+    avatar: '/src/assets/images/avatars/avatar-4.png',
+    invoiceStatus: 'Partial Payment',
+    balance: 750,
+    dueDate: '2023-11-30',
+  },
+  {
+    id: 5039,
+    issuedDate: '2023-11-20',
+    client: {
+      address: '456 Elm Street',
+      company: 'XYZ Ltd',
+      companyEmail: 'jsmith@xyz.com',
+      country: 'Canada',
+      contact: '(987) 654-3210',
+      name: 'Jane Smith',
+    },
+    service: 'Consulting Services',
+    total: 2000,
+    avatar: '/src/assets/images/avatars/avatar-5.png',
+    invoiceStatus: 'Draft',
+    balance: 2000,
+    dueDate: '2023-12-05',
+  },
+  {
+    id: 5040,
+    issuedDate: '2023-11-20',
+    client: {
+      address: '789 Oak Street',
+      company: 'Acme Inc',
+      companyEmail: 'rjones@acme.com',
+      country: 'USA',
+      contact: '(111) 222-3333',
+      name: 'Robert Jones',
+    },
+    service: 'Product Purchase',
+    total: 500,
+    avatar: '/src/assets/images/avatars/avatar-6.png',
+    invoiceStatus: 'Sent',
+    balance: 0,
+    dueDate: '2023-11-30',
+  },
+  {
+    id: 5041,
+    issuedDate: '2023-11-21',
+    client: {
+      address: '101 Maple Avenue',
+      company: 'Maple Enterprises',
+      companyEmail: 'jwilliams@maple.com',
+      country: 'Canada',
+      contact: '(555) 888-9999',
+      name: 'James Williams',
+    },
+    service: 'Web Design',
+    total: 1800,
+    avatar: '/src/assets/images/avatars/avatar-7.png',
+    invoiceStatus: 'Downloaded',
+    balance: 0,
+    dueDate: '2023-12-10',
+  },
+  {
+    id: 5042,
+    issuedDate: '2023-11-22',
+    client: {
+      address: '222 Pine Street',
+      company: 'Pine Corporation',
+      companyEmail: 'ksmith@pine.com',
+      country: 'USA',
+      contact: '(222) 333-4444',
+      name: 'Karen Smith',
+    },
+    service: 'Maintenance Contract',
+    total: 2500,
+    avatar: '/src/assets/images/avatars/avatar-8.png',
+    invoiceStatus: 'Past Due',
+    balance: 1000,
+    dueDate: '2023-11-15',
+  },
+  {
+    id: 5043,
+    issuedDate: '2023-11-23',
+    client: {
+      address: '333 Elm Street',
+      company: 'Elm Enterprises',
+      companyEmail: 'btaylor@elm.com',
+      country: 'Canada',
+      contact: '(888) 999-1111',
+      name: 'Barbara Taylor',
+    },
+    service: 'Software License',
+    total: 1200,
+    avatar: '/src/assets/images/avatars/avatar-9.png',
+    invoiceStatus: 'Paid',
+    balance: 0,
+    dueDate: '2023-12-03',
+  },
+  {
+    id: 5044,
+    issuedDate: '2023-11-24',
+    client: {
+      address: '444 Oak Street',
+      company: 'Oak Ltd',
+      companyEmail: 'mroberts@oak.com',
+      country: 'USA',
+      contact: '(123) 123-4567',
+      name: 'Michael Roberts',
+    },
+    service: 'Consulting Services',
+    total: 3000,
+    avatar: '/src/assets/images/avatars/avatar-10.png',
+    invoiceStatus: 'Partial Payment',
+    balance: 1500,
+    dueDate: '2023-12-07',
+  },
+  {
+    id: 5045,
+    issuedDate: '2023-11-25',
+    client: {
+      address: '555 Maple Avenue',
+      company: 'Maple Enterprises',
+      companyEmail: 'gwilson@maple.com',
+      country: 'Canada',
+      contact: '(777) 666-5555',
+      name: 'George Wilson',
+    },
+    service: 'Product Purchase',
+    total: 800,
+    avatar: '/src/assets/images/avatars/avatar-11.png',
+    invoiceStatus: 'Paid',
+    balance: 0,
+    dueDate: '2023-12-01',
+  },
+  {
+    id: 5046,
+    issuedDate: '2023-11-26',
+    client: {
+      address: '666 Pine Street',
+      company: 'Pine Corporation',
+      companyEmail: 'lcooper@pine.com',
+      country: 'USA',
+      contact: '(555) 444-3333',
+      name: 'Lisa Cooper',
+    },
+    service: 'Web Design',
+    total: 2200,
+    avatar: '/src/assets/images/avatars/avatar-12.png',
+    invoiceStatus: 'Draft',
+    balance: 2200,
+    dueDate: '2023-12-05',
+  },
+  {
+    id: 5047,
+    issuedDate: '2023-11-27',
+    client: {
+      address: '777 Elm Street',
+      company: 'Elm Enterprises',
+      companyEmail: 'jgreen@elm.com',
+      country: 'Canada',
+      contact: '(999) 888-7777',
+      name: 'John Green',
+    },
+    service: 'Maintenance Contract',
+    total: 2800,
+    avatar: '/src/assets/images/avatars/avatar-13.png',
+    invoiceStatus: 'Sent',
+    balance: 0,
+    dueDate: '2023-12-20',
+  },
+  {
+    id: 5048,
+    issuedDate: '2023-11-28',
+    client: {
+      address: '888 Oak Street',
+      company: 'Oak Ltd',
+      companyEmail: 'sbrown@oak.com',
+      country: 'USA',
+      contact: '(222) 333-4444',
+      name: 'Susan Brown',
+    },
+    service: 'Software License',
+    total: 1800,
+    avatar: '/src/assets/images/avatars/avatar-14.png',
+    invoiceStatus: 'Downloaded',
+    balance: 0,
+    dueDate: '2023-12-15',
+  },
+])
+
+
+
 
 // 👉 headers
 const headers = [
@@ -172,13 +392,15 @@ const deleteInvoice = id => {
 }
 
 // 👉 watch for data table options like itemsPerPage,page,searchQuery,sortBy etc...
-watchEffect(() => {
-  const [start, end] = dateRange.value ? dateRange.value.split('to') : ''
+// watchEffect(() => {
+//   const [start, end] = dateRange.value ? dateRange.value.split('to') : ''
 
-  fetchInvoices(searchQuery.value, selectedStatus.value, start, end, options.value)
-})
+//   fetchInvoices(searchQuery.value, selectedStatus.value, start, end, options.value)
+// })
+const logClientName = item => {
+  console.log(item)
+}
 </script>
-
 
 <template>
   <div>
@@ -241,13 +463,16 @@ watchEffect(() => {
             size="22"
             icon="tabler-trending-up"
           />
-        </template>
+        </template> 
+       
 
-        <template #item.id="{ item }">
+        <!--         
+          <template #item.id="{ item }">
           <RouterLink :to="{ name: 'apps-invoice-preview-id', params: { id: item.value } }">
-            #{{ item.raw.id }}
+          #{{ item?.raw?.id }}
           </RouterLink>
-        </template>
+          </template> 
+        -->
 
         <template #item.trending="{ item }">
           <VTooltip>
@@ -255,27 +480,29 @@ watchEffect(() => {
               <VAvatar
                 :size="30"
                 v-bind="props"
-                :color="resolveInvoiceStatusVariantAndIcon(item.raw.invoiceStatus).variant"
+                :color="resolveInvoiceStatusVariantAndIcon(item?.raw?.invoiceStatus).variant"
                 variant="tonal"
               >
                 <VIcon
                   :size="20"
-                  :icon="resolveInvoiceStatusVariantAndIcon(item.raw.invoiceStatus).icon"
+                  :icon="resolveInvoiceStatusVariantAndIcon(item?.raw?.invoiceStatus).icon"
                 />
               </VAvatar>
-            </template>
+            </template> 
+           
             <p class="mb-0">
-              {{ item.raw.invoiceStatus }}
+              {{ item?.raw?.invoiceStatus }}
             </p>
             <p class="mb-0">
-              Balance: {{ item.raw.balance }}
+              Balance: {{ item?.raw?.balance }}
             </p>
             <p class="mb-0">
-              Due date: {{ item.raw.dueDate }}
+              Due date: {{ item?.raw?.dueDate }}
             </p>
           </VTooltip>
         </template>
 
+        
         <template #item.client="{ item }">
           <div class="d-flex align-center">
             <VAvatar
@@ -299,36 +526,38 @@ watchEffect(() => {
           </div>
         </template>
 
+        
         <template #item.total="{ item }">
-          ${{ item.raw.total }}
+          ${{ item?.raw?.total }}
         </template>
 
         <template #item.date="{ item }">
-          {{ item.raw.issuedDate }}
+          {{ item?.raw?.issuedDate }}
         </template>
 
+        
         <template #item.balance="{ item }">
           <VChip
-            v-if="typeof ((resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status) === 'string'"
-            :color="resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total).chip.color"
+            v-if="typeof ((resolveInvoiceBalanceVariant(item?.raw?.balance, item?.raw?.total)).status) === 'string'"
+            :color="resolveInvoiceBalanceVariant(item?.raw?.balance, item?.raw?.total).chip.color"
             label
           >
-            {{ (resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status }}
+            {{ (resolveInvoiceBalanceVariant(item?.raw?.balance, item?.raw?.total)).status }}
           </VChip>
 
           <template v-else>
             <span class="text-base">
-              {{ Number((resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status) > 0 ? `$${(resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status}` : `-$${Math.abs(Number((resolveInvoiceBalanceVariant(item.raw.balance, item.raw.total)).status))}` }}
+              {{ Number((resolveInvoiceBalanceVariant(item?.raw?.balance, item?.raw?.total)).status) > 0 ? `$${(resolveInvoiceBalanceVariant(item?.raw?.balance, item?.raw?.total)).status}` : `-$${Math.abs(Number((resolveInvoiceBalanceVariant(item?.raw?.balance, item?.raw?.total)).status))}` }}
             </span>
           </template>
-        </template>
-
+        </template> 
+         
         <template #item.actions="{ item }">
-          <IconBtn @click="deleteInvoice(item.raw.id)">
+          <IconBtn @click="deleteInvoice(item?.raw?.id)">
             <VIcon icon="tabler-trash" />
           </IconBtn>
 
-          <IconBtn :to="{ name: 'apps-invoice-preview-id', params: { id: item.raw.id } }">
+          <IconBtn>
             <VIcon icon="tabler-eye" />
           </IconBtn>
 
@@ -337,13 +566,13 @@ watchEffect(() => {
             item-props
             color="undefined"
           />
-        </template>
-
+        </template> 
+       
         <template #bottom>
           <VDivider />
           <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3">
             <p class="text-sm text-disabled mb-0">
-              {{ paginationMeta(options, totalInvoices) }}
+              <!-- {{ paginationMeta(options, totalInvoices) }} -->
             </p>
 
             <VPagination

@@ -88,7 +88,7 @@ const resolveUserRoleVariant = role => {
           >
             <VImg
               v-if="props.tenantData.tenant.user_image"
-              :src="'https://api.rentings.me/media/'+props.tenantData.tenant.user_image"
+              :src="'http://127.0.0.1:8000/media/'+props.tenantData.tenant.user_image"
             />
             <span
               v-else

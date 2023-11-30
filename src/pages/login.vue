@@ -1,5 +1,5 @@
+// import { useAppAbility } from '@/plugins/casl/useAppAbility'
 <script setup>
-
 import axios from '@axios'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
@@ -11,6 +11,7 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import { VForm } from 'vuetify/components/VForm'
+
 // import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 
 
@@ -18,6 +19,7 @@ import { VForm } from 'vuetify/components/VForm'
 
 const route = useRoute()
 const router = useRouter()
+
 // const ability = useAppAbility()
 
 const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
@@ -40,7 +42,7 @@ function loginUsers (){
     userPassword: password.value,
   }
   axios({
-    url: "https://api.rentings.me/prop-app/user/login",
+    url: "http://127.0.0.1:8000/prop-app/user/login",
     method: "post",
     data: data,
     headers: {
@@ -63,7 +65,7 @@ function loginUsers (){
     loginScreenAlert.value = true
   })
 
-  // axios.post('https://api.rentings.me/properties/user/login', {
+  // axios.post('http://127.0.0.1:8000/properties/user/login', {
   //   email: email.value,
   //   password: password.value,
   // }).then(r => {

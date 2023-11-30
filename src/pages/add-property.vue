@@ -1,7 +1,9 @@
 <script setup>
-import { integerValidator, requiredValidator } from '@/@core/utils/validators'
+import { floatValidator, integerValidator, requiredValidator } from '@/@core/utils/validators'
+import codes_data from '@/common/codes_data'
 import { refreshUserLogin } from '@/common/reusing_functions'
 import axios from '@axios'
+import { watchEffect } from 'vue'
 
 const router = useRouter()
 
@@ -22,17 +24,25 @@ const propertyDescription = ref()
 const propertyIdNo = ref()
 const propertyImageRef = ref()
 const selectedProperty = ref(null)
+const otherDetailsPropertyName = ref()
+const otherDetailsPropertyId = ref()
+const propertyZipCode = ref()
 const propertyType = ref()
 const propDetailsForm = ref()
 const alertSnackbar = ref({ show: false, message: null, color: null })
 const otherDetailsForm = ref()
 const otherDetailsWindow = ref()
 const propertyFloors = ref(0)
+const propertyConstructionCost = ref()
+const availableFacilities = ref([])
+const propertyRentType = ref()
+const facilitiesArr = ref([])
+const countryCodeList = codes_data
 let imageFile = null
 
-const countryList = [
-  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua & Deps", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Rep", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Congo {Democratic Rep}", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland {Republic}", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar, {Burma}", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
-]
+// const countryList = [
+//   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua & Deps", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Rep", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Congo {Democratic Rep}", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland {Republic}", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar, {Burma}", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
+// ]
 
 const propertyTypeOptions = [
   'Residential',
@@ -59,6 +69,7 @@ async function addPropertyFunc(){
         "propertyStatus": propertyStatus.value,
         "propertySize": propertySize.value,
         "propertyFloor": propertyFloors.value,
+        "propertyZipCode": propertyZipCode.value
       }
 
       if(!sessionStorage.getItem("accessToken")){
@@ -67,17 +78,20 @@ async function addPropertyFunc(){
         return 
       }
 
-      axios.post('https://api.rentings.me/prop-app/add', propertywisedata, {
+      axios.post('http://localhost:8000/prop-app/add', propertywisedata, {
         headers: {
           'Authorization': sessionStorage.getItem("AccessToken"),  
         },
 
       }).then(response => {
+        console.log(response)
         if(response.status === 201){
           alertSnackbar.value.message = response.data.message
           alertSnackbar.value.color = "success"
           alertSnackbar.value.show = true
           propDetailsForm?.value.reset()
+          otherDetailsPropertyId.value = response.data.propertyId
+          otherDetailsPropertyName.value = response.data.propertyName
         }
 
       }).catch(error => {
@@ -99,12 +113,25 @@ async function addPropertyFunc(){
   })
 }
 
+// const continueButtonFunc = async () => {
+//   await addPropertyFunc()
+//   tab.value = "other-details"
+// }
+
 async function submitPropertyGoToOther(){
+
   await addPropertyFunc()
   tab.value = "other-details"
-
+  // await continueButtonFunc()
+  // selectedProperty.value = otherDetailsProperty.value
 }
 
+const watchOtherDetailsTab = () => {
+  if(tab.value === "other-details"){
+    selectedProperty.value = otherDetailsPropertyName.value
+  }
+}
+watchEffect(watchOtherDetailsTab)
 
 async function getUserPropertiesList(){
   let queryData =  {
@@ -117,7 +144,7 @@ async function getUserPropertiesList(){
   }
 
   axios({
-    url: 'https://api.rentings.me/prop-app/landlord-prop/get',
+    url: 'http://127.0.0.1:8000/prop-app/landlord-prop/get',
     params: queryData,
     method: "GET",
     headers: {
@@ -147,12 +174,18 @@ function imageUpload(e){
   }
 }
 
+const resetCheckboxes = () => {
+  facilitiesArr.value.forEach((ele) => {
+    ele.checked = false
+  })
+}
+
 
 function addPropertyAdditionalDetails(){
 
   // otherDetailsWindow.click
   if(!selectedProperty.value){
-    alertSnackbar.value.message = "Select the Property to proceed!"
+    alertSnackbar.value.message = "Kindly add property info first!"
     alertSnackbar.value.color = "error"
     alertSnackbar.value.show = true
 
@@ -171,15 +204,18 @@ function addPropertyAdditionalDetails(){
         formData.append('imageFile', imageFile)
       }
       let propertyAdditionalData = {
-        "propertyId": selectedProperty.value,
+        "propertyId": otherDetailsPropertyId.value,
         "propertySaleValue": propertySalePrice.value,
         "propertyBuyValue": propertyBoughtPrice.value,
-        "propertyCivilId": propertyIdNo.value,
+        "propertyLicenseNo": propertyIdNo.value,
         "propertyDescription": propertyDescription.value,
+        "facilities" : facilitiesArr.value,
+        "rentType" : propertyRentType.value,
+        "constructionCost" : propertyConstructionCost.value
       }
       formData.append('data', JSON.stringify(propertyAdditionalData))
       formData.append('userId', sessionStorage.getItem('userId'))
-      axios.post('https://api.rentings.me/prop-app/property-details/add', formData, {
+      axios.post('http://localhost:8000/prop-app/property-details/add', formData, {
         headers: {
           'Authorization': sessionStorage.getItem("AccessToken"),  
         },
@@ -189,25 +225,68 @@ function addPropertyAdditionalDetails(){
         alertSnackbar.value.color = "success"
         alertSnackbar.value.show = true
         otherDetailsForm?.value.reset()
+        resetCheckboxes()
 
       }).catch(error => {
         alertSnackbar.value.message = error.response.data.message
         alertSnackbar.value.color = "error"
         alertSnackbar.value.show = true
-        if(error.response.status === 401){
+        if(error.response.status === 403){
           refreshUserLogin()
         }
       })
     }
     else{
+      alertSnackbar.value.message = "Kindly Fill details to add!"
+      alertSnackbar.value.color = "error"
+      alertSnackbar.value.show = true
 
+      return 
     }
   })
 }
 
+const createFacItems = (fac) => {
+  fac.forEach((ele) => {
+    facilitiesArr.value.push({
+      "id" : ele.facility_id,
+      "name": ele.name,
+      "checked" : false
+    })
+  })
+}
+
+
+async function getFacilities(){
+  let queryData = {
+    "userId": sessionStorage.getItem('userId')
+  }
+
+  try {
+  const response = await axios.get("http://localhost:8000/prop-app/facility/get", {
+  params: queryData,
+  headers: {
+  'Authorization': sessionStorage.getItem("accessToken")
+  }
+  })
+  if(response.status == 200){
+    createFacItems(response.data.facilities)
+  }
+  } 
+  catch (error) {
+  if (error.response.status === 403) {
+  refreshUserLogin()
+  }
+  else{
+    console.log(error)
+  }
+}
+}
+
+
 
 onMounted(() => {
-  getUserPropertiesList()
+  getFacilities()
 })
 </script>
 
@@ -269,8 +348,10 @@ onMounted(() => {
               >
                 <AppSelect
                   v-model="propertyCountry"
-                  :items="countryList"
+                  :items="countryCodeList"
                   label="Country/Governate *"
+                  item-title="country"
+                  item-value="country"
                   chips
                   clearable
                   :rules="[requiredValidator]"
@@ -312,9 +393,19 @@ onMounted(() => {
                 md="4"
               >
                 <AppTextField
+                  v-model="propertyZipCode"
+                  label="Zip Code *"
+                  :rules="[requiredValidator, integerValidator]"
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppTextField
                   v-model="propertyNumber"
                   label="Property Number *"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
               <VCol
@@ -324,7 +415,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertyBuiltYear"
                   label="Built Year *"
-                  :rules="[integerValidator, requiredValidator]"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
 
@@ -348,7 +439,7 @@ onMounted(() => {
                 <AppTextField
                   v-model="propertySize"
                   label="Property Size *"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, floatValidator]"
                 />
               </VCol>
 
@@ -359,8 +450,8 @@ onMounted(() => {
               >
                 <AppTextField
                   v-model="propertyFloors"
-                  label="Nos. Of floors*"
-                  :rules="[requiredValidator]"
+                  label="Total floors*"
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
 
@@ -400,7 +491,6 @@ onMounted(() => {
         <VWindowItem
           ref="otherDetailsWindow"
           value="other-details"
-          @click="getUserPropertiesList"
         >
           <VForm
             ref="otherDetailsForm" 
@@ -409,31 +499,28 @@ onMounted(() => {
             <VRow>
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
-                <AppSelect
+                <AppTextField
                   v-model="selectedProperty"
-                  :items="availableProperties"
-                  item-title="propertyName"
-                  item-value="propertyId"
-                  label="Select Property"
+                  label="Property Name"
                 />
               </VCol>
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="propertyIdNo" 
-                  label="Property Civil Id/Registred No."
-                  :rules="[requiredValidator]"
+                  label="License No."
+                  :rules="[requiredValidator, integerValidator]"
                 />
               </VCol>
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <label>Property Image</label>
                 <VFileInput
@@ -449,25 +536,47 @@ onMounted(() => {
 
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="propertySalePrice"
                   label="Property Sale Value"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, floatValidator]"
                 />
               </VCol>
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
                   v-model="propertyBoughtPrice"
                   label="Property Bought Value"
-                  :rules="[requiredValidator]"
+                  :rules="[requiredValidator, floatValidator]"
                 />
               </VCol>
 
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppTextField
+                  v-model="propertyConstructionCost"
+                  label="Construction cost(estimate)"
+                  :rules="[requiredValidator, floatValidator]"
+                />
+              </VCol>
+
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppSelect
+                  v-model="propertyRentType"
+                  label="Rent Type"
+                  :items="['Monthly', 'Yearly']"
+                  :rules="[requiredValidator]"
+                />
+              </VCol>
               <VCol
                 cols="12"
                 md="6"
@@ -478,7 +587,31 @@ onMounted(() => {
                   :rules="[requiredValidator]"
                 />
               </VCol>
-              
+
+              <VCol
+                cols="12"
+                >
+                <p>Facilities</p>
+                <VRow :style="{marginTop: '10px'}">
+                  <div class="demo-space-x"              
+                  v-for="fac in facilitiesArr"
+                  :key="fac.id" :style="{marginLeft : '10px'}">
+                    <!-- <div :style="{marginLeft: '20px'}">
+                    <label>{{ fac.name.toUpperCase() }}</label>
+                    <div :style="{marginLeft: '10px'}"> -->
+
+
+                      <VCheckbox
+                        v-model="fac.checked"
+                        :label="fac.name.toUpperCase()"
+                      />
+<!-- 
+                    </div>
+                    </div> -->
+                  </div>
+              </VRow>
+                <!-- </div> -->
+              </VCol>
               <VCol
                 cols="18"
                 md="6"

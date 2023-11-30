@@ -22,7 +22,8 @@ function userLogout(){
   }
 
   axios({
-    url: "https://api.rentings.me/prop-app/user/logout",
+    // url: "http://backend-rentings-env.eba-bdnqs3bn.me-south-1.elasticbeanstalk.com/prop-app/user/logout",
+    url: "http://127.0.0.1:8000/prop-app/user/logout",
     method: "get",
     params: data,
   }).then(response => {

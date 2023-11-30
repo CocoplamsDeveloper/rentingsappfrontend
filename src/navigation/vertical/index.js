@@ -5,6 +5,11 @@ export default [
     icon: { icon: 'tabler-smart-home' },
   },
   {
+    title: 'Landlord',
+    icon: { icon: 'tabler-user-check' },
+    to: { name: 'userlandlord' },
+  },
+  {
     title: 'Properties',
     icon: { icon: 'tabler-building' },
     to: { name: 'properties' },
